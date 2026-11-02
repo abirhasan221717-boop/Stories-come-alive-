@@ -250,6 +250,17 @@ img { max-width: 100%; }
 .inline-add input { flex: 1; }
 .rename-form { display: flex; gap: 6px; }
 .logo-preview { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; border: 2px solid var(--gold); margin: 8px 0 14px; display: block; }
+.linkgroup { display: flex; flex-direction: column; gap: 8px; }
+.linkgroup-title { font-weight: 600; font-size: 0.95rem; }
+.linkrows { display: flex; flex-direction: column; gap: 8px; }
+.linkrow { display: grid; grid-template-columns: minmax(110px, 1fr) minmax(160px, 2fr) auto; gap: 8px; align-items: center; }
+.linkrow input { width: 100%; }
+@media (max-width: 560px) {
+  .linkrow { grid-template-columns: 1fr auto; }
+  .linkrow-label { grid-column: 1; grid-row: 1; }
+  .linkrow .btn { grid-column: 2; grid-row: 1; }
+  .linkrow-url { grid-column: 1 / -1; grid-row: 2; }
+}
 
 /* ---------- footer ---------- */
 .footer { border-top: 1px solid var(--line); background: var(--bg2); padding: 18px 16px 20px; text-align: center; margin-top: 30px; }
