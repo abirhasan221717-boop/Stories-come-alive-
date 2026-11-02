@@ -201,6 +201,15 @@ img { max-width: 100%; }
 .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .ep-badge { position: absolute; left: 8px; bottom: 8px; background: rgba(0,0,0,0.78); color: #ffe9b3; border: 1px solid var(--gold); border-radius: 6px; padding: 2px 8px; font-size: 0.78rem; font-weight: 600; }
 .rank-chip { position: absolute; top: 8px; left: 8px; background: #fff; color: var(--bg); border: 2px solid var(--gold); border-radius: 7px; padding: 1px 8px; font-size: 0.85rem; font-weight: 800; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+
+/* big Bhoot-style rank number down the left of a Top Picks card */
+.rank-big {
+  position: absolute; left: 3px; top: 50%; transform: translateY(-50%); z-index: 3;
+  font-size: 3.4rem; font-weight: 900; line-height: 0.8; letter-spacing: -2px;
+  color: rgba(8, 14, 30, 0.45); -webkit-text-stroke: 2px rgba(255, 255, 255, 0.95);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.55); pointer-events: none;
+}
+@media (max-width: 560px) { .rank-big { font-size: 2.9rem; -webkit-text-stroke-width: 1.6px; } }
 .play-badge { position: absolute; right: 8px; bottom: 8px; width: 32px; height: 32px; border-radius: 50%; background: var(--gold); color: #241a03; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; }
 .card-body { padding: 12px 14px 14px; }
 .card-body h3 { font-size: 1.02rem; line-height: 1.35; }
