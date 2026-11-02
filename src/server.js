@@ -315,14 +315,15 @@ ${followPanelHtml(ytLinks, fbLinks)}
 </html>`;
 }
 
-// Admin pages: map the page title to a nav key so the current page's pill
-// can be highlighted. Unknown titles (setup / login) simply highlight none.
+// Admin pages: map the page title to a nav key so the current page's item
+// in the hamburger menu can be highlighted. Unknown titles (setup / login)
+// simply highlight none. Labels are plain text — no emoji icons.
 const ADMIN_NAV = [
-  { key: 'dashboard', href: '/admin', label: '📊 Dashboard', titles: ['Dashboard'] },
-  { key: 'videos', href: '/admin/videos', label: '🎬 Videos', titles: ['Videos', 'Edit Video'] },
-  { key: 'categories', href: '/admin/categories', label: '📚 Categories', titles: ['Categories'] },
-  { key: 'users', href: '/admin/users', label: '👥 Users', titles: ['Users'] },
-  { key: 'settings', href: '/admin/settings', label: '⚙️ Settings', titles: ['Settings'] },
+  { key: 'dashboard', href: '/admin', label: 'Dashboard', titles: ['Dashboard'] },
+  { key: 'videos', href: '/admin/videos', label: 'Videos', titles: ['Videos', 'Edit Video'] },
+  { key: 'categories', href: '/admin/categories', label: 'Categories', titles: ['Categories'] },
+  { key: 'users', href: '/admin/users', label: 'Users', titles: ['Users'] },
+  { key: 'settings', href: '/admin/settings', label: 'Settings', titles: ['Settings'] },
 ];
 
 async function adminLayout({ title, body, bare = false }) {
@@ -330,26 +331,29 @@ async function adminLayout({ title, body, bare = false }) {
   const logo = await logoSrc();
   const activeKey = (ADMIN_NAV.find((n) => n.titles.includes(title)) || {}).key || '';
   const header = bare ? `
-<header class="topbar admin-topbar">
-  <div class="admin-toprow admin-toprow-bare">
-    <a class="brand" href="/admin">
-      <img class="brand-logo" src="${logo}" alt="">
-      <span class="brand-name">${esc(name)} — Admin</span>
-    </a>
-  </div>
+<header class="topbar admin-topbar admin-topbar-bare">
+  <a class="brand" href="/admin">
+    <img class="brand-logo" src="${logo}" alt="">
+    <span class="brand-name">${esc(name)} — Admin</span>
+  </a>
 </header>` : `
 <header class="topbar admin-topbar">
-  <div class="admin-toprow">
-    <a class="brand" href="/admin">
-      <img class="brand-logo" src="${logo}" alt="">
-      <span class="brand-name">${esc(name)} — Admin</span>
-    </a>
+  <a class="brand" href="/admin">
+    <img class="brand-logo" src="${logo}" alt="">
+    <span class="brand-name">${esc(name)} — Admin</span>
+  </a>
+  <div class="admin-headbtns">
     <form method="POST" action="/admin/logout" class="inlineform"><button class="btn btn-logout" type="submit">Logout</button></form>
+    <div class="adminmenu-wrap">
+      <button type="button" class="hambtn" data-admin-menu-btn aria-haspopup="true" aria-expanded="false" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+      <nav class="adminmenu" data-admin-menu hidden>
+        ${ADMIN_NAV.map((n) => `<a class="adminmenu-link${n.key === activeKey ? ' active' : ''}" href="${n.href}">${n.label}</a>`).join('')}
+        <a class="adminmenu-link" href="/" target="_blank">View Site</a>
+      </nav>
+    </div>
   </div>
-  <nav class="adminnav">
-    ${ADMIN_NAV.map((n) => `<a class="adminnav-link${n.key === activeKey ? ' active' : ''}" href="${n.href}">${n.label}</a>`).join('')}
-    <a class="adminnav-link" href="/" target="_blank">🌐 View Site ↗</a>
-  </nav>
 </header>`;
   return `<!DOCTYPE html>
 <html lang="en">
