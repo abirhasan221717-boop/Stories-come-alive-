@@ -364,7 +364,7 @@ async function layout(req, { title, body, user }) {
 <link rel="icon" href="/brand/logo">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=35">
+<link rel="stylesheet" href="/styles.css?v=36">
 </head>
 <body class="pubui">
 <header class="topbar">
@@ -399,7 +399,7 @@ ${body}
   <p class="footer-copy">© ${new Date().getFullYear()} ${esc(name)} — All rights reserved.</p>
 </footer>
 ${followPanelHtml(ytLinks, fbLinks)}
-<script src="/app.js?v=35"></script>
+<script src="/app.js?v=36"></script>
 </body>
 </html>`;
 }
@@ -454,14 +454,14 @@ async function adminLayout({ title, body, bare = false }) {
 <title>${esc(title)} — Admin — ${esc(name)}</title>
 <link rel="icon" href="/brand/logo">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=35">
+<link rel="stylesheet" href="/styles.css?v=36">
 </head>
 <body class="adminui">
 ${header}
 <main>
 ${body}
 </main>
-<script src="/app.js?v=35"></script>
+<script src="/app.js?v=36"></script>
 </body>
 </html>`;
 }
@@ -479,6 +479,7 @@ function videoCard(v, user, pos) {
     <div class="thumb">
       <img loading="lazy" src="${cardThumb(v)}" alt="${esc(v.title)}">
       ${pos ? `<span class="rank-chip">Top ${pos}</span>` : ''}
+      ${pos ? `<span class="rank-big" aria-hidden="true">${pos}</span>` : ''}
       ${isFreshVideo(v) ? '<span class="new-chip">NEW</span>' : ''}
       ${v.episode ? `<span class="ep-badge">${esc(v.episode)}</span>` : ''}
       <span class="play-badge">▶</span>
@@ -499,7 +500,8 @@ function grid(videos, user) {
 }
 
 // Horizontally scrollable poster-card row (bhoot-style homepage rows).
-// With ranked=true (the Top Picks row), cards get a position chip (#1, #2, …).
+// With ranked=true (the Top Picks row), cards get a "Top N" chip plus a
+// big Bhoot-style rank number, and the row auto-slides on its own.
 function posterRow({ title, videos, user, moreHref, ranked = false }) {
   if (!videos.length) return '';
   return `<section class="section rowsection">
@@ -508,7 +510,7 @@ function posterRow({ title, videos, user, moreHref, ranked = false }) {
       ${moreHref ? `<a class="rowmore" href="${moreHref}">View All →</a>` : ''}
     </div>
     <div class="rowwrap">
-      <div class="rowscroll">${videos.map((v, i) => videoCard(v, user, ranked ? i + 1 : 0)).join('')}</div>
+      <div class="rowscroll"${ranked ? ' data-autoslide' : ''}>${videos.map((v, i) => videoCard(v, user, ranked ? i + 1 : 0)).join('')}</div>
       <button class="rowbtn rowbtn-prev" type="button" data-scroll="prev" aria-label="Previous videos">‹</button>
       <button class="rowbtn rowbtn-next" type="button" data-scroll="next" aria-label="More videos">›</button>
     </div>
