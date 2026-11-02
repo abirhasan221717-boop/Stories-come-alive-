@@ -164,6 +164,7 @@ ${body}
   <div class="footer-links">
     ${yt ? `<a href="${esc(yt)}" target="_blank" rel="noopener">▶️ YouTube</a>` : ''}
     ${fb ? `<a href="${esc(fb)}" target="_blank" rel="noopener">📘 Facebook</a>` : ''}
+    <a href="/privacy-policy">Privacy Policy</a>
     <a href="/admin">Admin</a>
   </div>
   <p class="footer-copy">© ${new Date().getFullYear()} ${esc(name)} — All rights reserved.</p>
@@ -350,6 +351,31 @@ app.get('/search', async (req, res) => {
     ${q ? grid(videos, user) : '<div class="empty">Type something to search.</div>'}
   </section>`;
   res.send(await layout(req, { title: 'Search', body, user }));
+});
+
+app.get('/privacy-policy', async (req, res) => {
+  const user = await currentUser(req);
+  const body = `
+  <section class="section">
+    <h2 class="section-title">Privacy Policy</h2>
+    <p>Stories Come Alive is a free library of story videos, organized by category. All of the videos are embedded from YouTube and play in YouTube's player — we do not host the videos ourselves. This policy explains, in plain language, what information we collect when you use the site and what we do with it.</p>
+    <h3>What we collect</h3>
+    <p>When you create an account, we collect your name and email address, and your password. Your password is stored only in a scrambled (hashed) form — we never store your real password. You can also add an optional profile photo, and we keep the list of videos you save as favorites.</p>
+    <h3>Signing in with Google</h3>
+    <p>If you sign in with Google, Google shares your name, email address and profile picture with us. We use them only to create your account and sign you in — for nothing else.</p>
+    <h3>How we use your information</h3>
+    <p>We use this information only to run the site: to operate your account, keep you signed in, and remember your favorites and profile photo. We do not sell your personal information to third parties, and we do not use it for advertising.</p>
+    <h3>Cookies</h3>
+    <p>We use a session cookie to keep you signed in as you move around the site. Without it, the site could not remember your login between pages. We do not set advertising or tracking cookies of our own.</p>
+    <h3>YouTube videos</h3>
+    <p>When you watch a video, the player is loaded from YouTube, and YouTube (Google) may set its own cookies and collect information under its own privacy policy. That activity is governed by Google's policies, not by ours.</p>
+    <h3>Where your data is stored</h3>
+    <p>Your account information is stored in the site's hosted database, and it is kept for as long as your account exists.</p>
+    <h3>Your account and contact</h3>
+    <p>If you have any question about your privacy, or you would like your account and its data deleted, please email us at <a href="mailto:abirhasan221717@gmail.com">abirhasan221717@gmail.com</a> and we will take care of it.</p>
+    <p class="muted">Last updated: November 2, 2026</p>
+  </section>`;
+  res.send(await layout(req, { title: 'Privacy Policy', body, user }));
 });
 
 // ---------------- Google sign-in (optional) ----------------
