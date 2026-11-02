@@ -278,7 +278,7 @@ async function layout(req, { title, body, user }) {
 <link rel="icon" href="/brand/logo">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/styles.css?v=27">
 </head>
 <body>
 <header class="topbar">
@@ -310,7 +310,7 @@ ${body}
   <p class="footer-copy">© ${new Date().getFullYear()} ${esc(name)} — All rights reserved.</p>
 </footer>
 ${followPanelHtml(ytLinks, fbLinks)}
-<script src="/app.js"></script>
+<script src="/app.js?v=27"></script>
 </body>
 </html>`;
 }
@@ -363,14 +363,14 @@ async function adminLayout({ title, body, bare = false }) {
 <title>${esc(title)} — Admin — ${esc(name)}</title>
 <link rel="icon" href="/brand/logo">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/styles.css?v=27">
 </head>
 <body>
 ${header}
 <main>
 ${body}
 </main>
-<script src="/app.js"></script>
+<script src="/app.js?v=27"></script>
 </body>
 </html>`;
 }
