@@ -235,6 +235,39 @@ img { max-width: 100%; }
 .profile-table th { color: var(--muted); font-weight: 500; width: 40%; }
 
 /* ---------- admin ---------- */
+/* Admin header: brand row (logo + name left, Logout button right) over a
+   row of pill nav buttons. The pill row scrolls sideways on narrow screens
+   instead of wrapping into a tangle. */
+.admin-topbar { flex-direction: column; align-items: stretch; gap: 6px; padding: 10px 16px 12px; }
+.admin-toprow { display: flex; align-items: center; gap: 12px; width: 100%; }
+.admin-toprow .brand { margin-right: auto; }
+.admin-toprow-bare { justify-content: center; }
+.admin-toprow-bare .brand { margin-right: 0; }
+.btn-logout {
+  background: #3a0d12; border: 1px solid #6e1420; color: #ff9aa5;
+  border-radius: 999px; padding: 8px 20px; flex: 0 0 auto;
+}
+.btn-logout:hover { background: #4d1119; border-color: #ff9aa5; color: #ffc2c9; }
+.adminnav {
+  display: flex; gap: 8px; width: 100%;
+  overflow-x: auto; padding: 4px 2px 2px;
+  scrollbar-width: thin; scrollbar-color: var(--line) transparent;
+  -webkit-overflow-scrolling: touch;
+}
+.adminnav::-webkit-scrollbar { height: 5px; }
+.adminnav::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
+.adminnav-link {
+  flex: 0 0 auto; white-space: nowrap;
+  padding: 8px 18px; border: 1px solid var(--line); border-radius: 999px;
+  background: var(--bg2); color: var(--muted);
+  font-weight: 600; font-size: 0.95rem; line-height: 1.25;
+}
+.adminnav-link:hover { color: var(--text); border-color: var(--gold); text-decoration: none; }
+.adminnav-link.active {
+  background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+  border-color: var(--gold-dark); color: #241a03;
+}
+.adminnav-link.active:hover { color: #241a03; }
 .statgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 18px; }
 .stat { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 4px; }
 .stat strong { font-size: 1.8rem; color: var(--gold); }
