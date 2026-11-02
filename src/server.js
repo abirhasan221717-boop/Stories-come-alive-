@@ -186,6 +186,7 @@ const ICONS = {
   user: lineIcon('<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'),
   userPlus: lineIcon('<path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/>'),
   book: lineIcon('<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>'),
+  search: lineIcon('<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/>'),
   camera: lineIcon('<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>'),
   plus: lineIcon('<path d="M12 5v14M5 12h14"/>'),
   folder: lineIcon('<path d="M3 7.5A2.5 2.5 0 0 1 5.5 5h3.4L11 7.5h7.5A2.5 2.5 0 0 1 21 10v7a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17z"/>'),
@@ -284,6 +285,14 @@ function followPanelHtml(ytLinks, fbLinks) {
 }
 async function siteName() { return (await getSetting('site_name')) || 'Stories Come Alive'; }
 async function logoSrc() { return '/brand/logo?v=' + ((await getSetting('logo_version')) || '0'); }
+// Two-tone public wordmark: with three or more words the second word is
+// wrapped so it can render in gold. One- and two-word names render as-is.
+// The name itself still comes from Settings; nothing is hardcoded here.
+function brandNameHtml(name) {
+  const words = String(name || '').split(/\s+/).filter(Boolean);
+  if (words.length < 3) return esc(name);
+  return words.map((w, i) => (i === 1 ? `<span class="brand-gold">${esc(w)}</span>` : esc(w))).join(' ');
+}
 function allCategories() {
   return queryAll(`SELECT c.*, (SELECT COUNT(*) FROM videos v WHERE v.category_id = c.id) AS video_count
                      FROM categories c ORDER BY c.sort_order, c.id`);
@@ -319,13 +328,13 @@ async function layout(req, { title, body, user }) {
 <link rel="icon" href="/brand/logo">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=29">
+<link rel="stylesheet" href="/styles.css?v=30">
 </head>
-<body>
+<body class="pubui">
 <header class="topbar">
   <a class="brand" href="/">
     <img class="brand-logo" src="${logo}" alt="${esc(name)}">
-    <span class="brand-name">${esc(name)}</span>
+    <span class="brand-name">${brandNameHtml(name)}</span>
   </a>
   <div class="userbox">
     ${(ytLinks.length || fbLinks.length) ? '<button type="button" class="btn btn-main btn-follow" data-follow-open aria-haspopup="dialog" aria-controls="followPanel">' + ICONS.bell + 'Follow / Subscribe</button>' : ''}
@@ -333,14 +342,16 @@ async function layout(req, { title, body, user }) {
       ? `<a class="navlink" href="/favorites">${ICONS.heart}Favorites</a>
          <a class="navlink" href="/profile">${user.avatar ? `<img class="nav-avatar" src="${esc(user.avatar)}" alt="">` : ICONS.user} Profile</a>
          <form method="POST" action="/logout" class="inlineform"><button class="btn btn-ghost btn-sm" type="submit">Logout</button></form>`
-      : `<a class="btn btn-main signin-btn" href="/login">Sign In</a>`}
+      : `<a class="navlink" href="/register">Register</a>
+         <a class="btn btn-main signin-pill" href="/login">${ICONS.user}Sign In</a>`}
   </div>
 </header>
 <main>
 ${body}
 </main>
 <footer class="footer">
-  <div class="footer-brand"><img src="${logo}" alt=""><span>${esc(name)}</span></div>
+  <img class="footer-logo" src="${logo}" alt="">
+  <div class="hairline-row footer-brand"><span class="hairline" aria-hidden="true"></span><span>${brandNameHtml(name)}</span><span class="hairline" aria-hidden="true"></span></div>
   ${(ytLinks.length || fbLinks.length) ? '<p class="footer-follow">FOLLOW US</p>' : ''}
   <div class="footer-links">
     ${ytLinks.map((l) => `<a href="${esc(l.url)}" target="_blank" rel="noopener">${ICONS.playSm}${esc(l.label || 'YouTube')}</a>`).join('')}
@@ -351,7 +362,7 @@ ${body}
   <p class="footer-copy">© ${new Date().getFullYear()} ${esc(name)} — All rights reserved.</p>
 </footer>
 ${followPanelHtml(ytLinks, fbLinks)}
-<script src="/app.js?v=29"></script>
+<script src="/app.js?v=30"></script>
 </body>
 </html>`;
 }
@@ -405,14 +416,14 @@ async function adminLayout({ title, body, bare = false }) {
 <title>${esc(title)} — Admin — ${esc(name)}</title>
 <link rel="icon" href="/brand/logo">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=29">
+<link rel="stylesheet" href="/styles.css?v=30">
 </head>
 <body class="adminui">
 ${header}
 <main>
 ${body}
 </main>
-<script src="/app.js?v=29"></script>
+<script src="/app.js?v=30"></script>
 </body>
 </html>`;
 }
@@ -513,12 +524,12 @@ app.get('/', async (req, res) => {
     <img class="hero-art" src="/banner.jpg" alt="${esc(name)}">
     <div class="hero-overlay">
       <h1 class="sr-only">${esc(name)}</h1>
-      <p>A library of story videos, sorted by category — pick a story and start watching.</p>
+      <div class="hairline-row"><span class="hairline" aria-hidden="true"></span><p>A library of story videos, sorted by category — pick a story and start watching.</p><span class="hairline" aria-hidden="true"></span></div>
       <form class="searchbar" method="GET" action="/search">
-        <input type="text" name="q" placeholder="Search stories…">
+        <span class="searchwrap">${ICONS.search}<input type="text" name="q" placeholder="Search stories…"></span>
         <button class="btn btn-main" type="submit">Search</button>
       </form>
-      ${user ? '' : '<p class="hero-note"><a href="/login">Sign in</a> to watch, or <a href="/register">create a free account</a>.</p>'}
+      ${user ? '' : '<div class="hairline-row"><span class="hairline" aria-hidden="true"></span><p class="hero-note"><a href="/login">Sign in</a> to watch, or <a href="/register">create a free account</a>.</p><span class="hairline" aria-hidden="true"></span></div>'}
     </div>
   </section>`;
   }
@@ -533,7 +544,7 @@ app.get('/', async (req, res) => {
     rows += posterRow({ title: esc(c.name), videos: vids, user, moreHref: `/category/${c.id}` });
   }
   if (!latest.length) {
-    rows = `<section class="section"><div class="empty">No videos yet — coming soon!</div></section>`;
+    rows = `<section class="section"><div class="empty empty-home"><span class="empty-book">${ICONS.book}</span>No videos yet — coming soon!</div></section>`;
   }
   res.send(await layout(req, { title: '', body: hero + rows, user }));
 });
