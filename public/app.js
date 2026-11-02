@@ -160,3 +160,39 @@ document.addEventListener('click', (e) => {
     if (row) row.remove();
   }
 });
+
+// Admin header: hamburger menu — the toggle button opens/closes the nav
+// dropdown; it also closes on an outside click, on Escape, and once an
+// item is chosen. Items are plain links, so navigation works without JS
+// (the panel is simply hidden until the button is used).
+const adminMenuBtn = document.querySelector('[data-admin-menu-btn]');
+const adminMenu = document.querySelector('[data-admin-menu]');
+if (adminMenuBtn && adminMenu) {
+  const closeAdminMenu = () => {
+    adminMenu.hidden = true;
+    adminMenuBtn.setAttribute('aria-expanded', 'false');
+  };
+  adminMenuBtn.addEventListener('click', () => {
+    if (adminMenu.hidden) {
+      adminMenu.hidden = false;
+      adminMenuBtn.setAttribute('aria-expanded', 'true');
+    } else {
+      closeAdminMenu();
+    }
+  });
+  document.addEventListener('click', (e) => {
+    if (adminMenu.hidden) return;
+    if (!e.target || typeof e.target.closest !== 'function' || !e.target.closest('.adminmenu-wrap')) {
+      closeAdminMenu();
+    }
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !adminMenu.hidden) {
+      closeAdminMenu();
+      adminMenuBtn.focus();
+    }
+  });
+  adminMenu.addEventListener('click', (e) => {
+    if (e.target && typeof e.target.closest === 'function' && e.target.closest('a')) closeAdminMenu();
+  });
+}
