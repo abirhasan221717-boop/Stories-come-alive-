@@ -511,3 +511,102 @@ body.adminui {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 .adminui .qa-wide:hover { border-color: var(--gold); }
+
+/* ---------- public premium glow theme (owner mockup, whole public site) ---------- */
+/* Every selector in this block is scoped to the pubui body class, which
+   only the public layout emits, so admin pages are never affected. */
+body.pubui {
+  background:
+    radial-gradient(900px 480px at 88% -90px, rgba(217, 164, 65, 0.15), rgba(217, 164, 65, 0) 60%),
+    radial-gradient(820px 520px at -140px 32%, rgba(96, 66, 196, 0.17), rgba(96, 66, 196, 0) 62%),
+    radial-gradient(760px 460px at 112% 78%, rgba(64, 40, 160, 0.13), rgba(64, 40, 160, 0) 60%),
+    linear-gradient(180deg, #0a1730 0%, var(--bg) 360px);
+  background-attachment: fixed;
+}
+.pubui .topbar {
+  border-bottom: 1px solid transparent;
+  border-image: linear-gradient(90deg, rgba(217, 164, 65, 0) 0%, rgba(217, 164, 65, 0.65) 50%, rgba(217, 164, 65, 0) 100%) 1;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+}
+.pubui .brand-gold { color: var(--gold-bright); }
+.pubui .signin-pill {
+  background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+  border-color: var(--gold-dark);
+  color: #241a03;
+  border-radius: 999px;
+  padding: 9px 20px;
+  font-size: 1rem;
+  box-shadow: 0 6px 22px rgba(217, 164, 65, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+.pubui .signin-pill .ic { margin-right: 0; }
+.pubui .signin-pill:hover {
+  text-decoration: none;
+  border-color: var(--gold);
+  box-shadow: 0 9px 28px rgba(217, 164, 65, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+.pubui .hairline-row {
+  display: flex; align-items: center; justify-content: center;
+  gap: 14px; max-width: 760px; margin: 0 auto;
+}
+.pubui .hairline-row p { margin: 0; }
+.pubui .hairline {
+  flex: 1 1 48px; max-width: 110px; height: 1px;
+  background: linear-gradient(90deg, rgba(217, 164, 65, 0) 0%, rgba(217, 164, 65, 0.75) 50%, rgba(217, 164, 65, 0) 100%);
+}
+.pubui .hairline-row a { color: var(--gold-bright); }
+.pubui .searchwrap { position: relative; flex: 1; display: block; }
+.pubui .searchwrap .ic {
+  position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+  margin-right: 0; color: var(--gold); pointer-events: none; z-index: 1;
+}
+.pubui .searchwrap input { width: 100%; padding-left: 42px; }
+.pubui .panel, .pubui .auth-card, .pubui .card, .pubui .follow-sheet {
+  background: linear-gradient(180deg, rgba(23, 38, 80, 0.92), rgba(13, 25, 56, 0.94));
+  border: 1px solid rgba(217, 164, 65, 0.28);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.45), 0 0 22px rgba(217, 164, 65, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+.pubui .card:hover {
+  border-color: rgba(217, 164, 65, 0.6);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.5), 0 0 26px rgba(217, 164, 65, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+.pubui .catchip {
+  background: linear-gradient(180deg, rgba(23, 38, 80, 0.92), rgba(13, 25, 56, 0.94));
+  border: 1px solid rgba(217, 164, 65, 0.28);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+.pubui .catchip:hover {
+  border-color: rgba(217, 164, 65, 0.6);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.4), 0 0 20px rgba(217, 164, 65, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+.pubui .btn-main {
+  box-shadow: 0 6px 22px rgba(217, 164, 65, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+.pubui .btn-main:hover {
+  border-color: var(--gold);
+  box-shadow: 0 9px 28px rgba(217, 164, 65, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+.pubui .empty {
+  border: 1px solid rgba(217, 164, 65, 0.4);
+  box-shadow: 0 0 24px rgba(217, 164, 65, 0.12), 0 12px 30px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  background:
+    radial-gradient(520px 180px at 50% 108%, rgba(217, 164, 65, 0.22), rgba(217, 164, 65, 0) 65%),
+    radial-gradient(360px 200px at 0% 0%, rgba(96, 66, 196, 0.16), rgba(96, 66, 196, 0) 60%),
+    radial-gradient(360px 200px at 100% 0%, rgba(64, 40, 160, 0.14), rgba(64, 40, 160, 0) 60%),
+    linear-gradient(180deg, #101e42, #0a1730);
+}
+.pubui .empty-book { display: block; color: var(--gold-bright); margin-bottom: 12px; }
+.pubui .empty-book .ic {
+  width: 54px; height: 54px; margin-right: 0;
+  filter: drop-shadow(0 0 10px rgba(217, 164, 65, 0.55));
+}
+.pubui .fhero {
+  border-bottom: 1px solid transparent;
+  border-image: linear-gradient(90deg, rgba(217, 164, 65, 0) 0%, rgba(217, 164, 65, 0.65) 50%, rgba(217, 164, 65, 0) 100%) 1;
+}
+.pubui .footer-logo {
+  width: 56px; height: 56px; border-radius: 50%; object-fit: cover;
+  border: 2px solid var(--gold); display: block; margin: 0 auto;
+  box-shadow: 0 0 16px rgba(217, 164, 65, 0.3);
+}
+.pubui .footer-brand { max-width: 520px; margin: 10px auto 0; font-size: 1.05rem; }
+.pubui .footer-links a { color: var(--gold-bright); }
