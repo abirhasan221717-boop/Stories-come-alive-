@@ -1,15 +1,83 @@
 'use strict';
 const fs = require('fs');
 const path = require('path');
-const { DatabaseSync } = require('node:sqlite');
+const { createClient } = require('@libsql/client');
+
+// ---------------------------------------------------------------------------
+// Data layer — libSQL (Turso) with a local-file fallback.
+//
+// Hosted mode: when TURSO_DATABASE_URL and TURSO_AUTH_TOKEN are both set in
+// the environment, all data lives in the hosted Turso (libSQL) database, so
+// accounts / videos / settings survive redeploys and restarts.
+//
+// Local fallback: with either variable unset, data lives in a local libSQL
+// file at DATABASE_PATH (default: ../data/stories-come-alive.db) — exactly
+// where the old node:sqlite build kept it.
+//
+// libSQL speaks the SQLite dialect, so the schema and queries below are the
+// same ones the node:sqlite version used; only the access pattern changed
+// (statements are async now).
+// ---------------------------------------------------------------------------
 
 const DB_PATH = process.env.DATABASE_PATH || path.join(__dirname, '..', 'data', 'stories-come-alive.db');
-fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
 
-const db = new DatabaseSync(DB_PATH);
-db.exec('PRAGMA journal_mode = WAL');
+const TURSO_URL = String(process.env.TURSO_DATABASE_URL || '').trim();
+const TURSO_TOKEN = String(process.env.TURSO_AUTH_TOKEN || '').trim();
+const useTurso = Boolean(TURSO_URL && TURSO_TOKEN);
 
-db.exec(`
+let client;
+let DB_TARGET;
+if (useTurso) {
+  client = createClient({ url: TURSO_URL, authToken: TURSO_TOKEN });
+  DB_TARGET = TURSO_URL;
+} else {
+  const filePath = path.resolve(DB_PATH);
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  client = createClient({ url: 'file:' + filePath });
+  DB_TARGET = filePath;
+}
+
+// ---------------- low-level query helpers (async) ----------------
+async function queryAll(sql, args = []) {
+  await ready;
+  const rs = await client.execute({ sql, args });
+  return rs.rows;
+}
+async function queryOne(sql, args = []) {
+  const rows = await queryAll(sql, args);
+  return rows.length ? rows[0] : null;
+}
+// Mirrors node:sqlite's statement.run() info shape.
+async function run(sql, args = []) {
+  await ready;
+  const rs = await client.execute({ sql, args });
+  return {
+    changes: rs.rowsAffected,
+    lastInsertRowid: rs.lastInsertRowid === null || rs.lastInsertRowid === undefined
+      ? null
+      : Number(rs.lastInsertRowid),
+  };
+}
+
+// ---------------- raw helpers (no init gate; used by init itself) ----------------
+async function rawGetSetting(key) {
+  const rs = await client.execute({ sql: 'SELECT value FROM settings WHERE key = ?', args: [key] });
+  return rs.rows.length ? rs.rows[0].value : null;
+}
+async function rawSetSetting(key, value) {
+  await client.execute({
+    sql: 'INSERT INTO settings(key, value) VALUES(?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value',
+    args: [key, value === null || value === undefined ? null : String(value)],
+  });
+}
+
+// ---------------- schema + migrations + seeds (runs once at boot) ----------------
+const ready = (async () => {
+  if (!useTurso) {
+    try { await client.execute('PRAGMA journal_mode = WAL'); } catch { /* best effort, local files only */ }
+  }
+
+  await client.executeMultiple(`
 CREATE TABLE IF NOT EXISTS users (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL DEFAULT '',
@@ -56,44 +124,72 @@ CREATE TABLE IF NOT EXISTS assets (
 );
 `);
 
-// ---- migrations (safe on databases created before these columns existed) ----
-const videoCols = db.prepare('PRAGMA table_info(videos)').all().map((r) => r.name);
-if (!videoCols.includes('synopsis')) db.exec("ALTER TABLE videos ADD COLUMN synopsis TEXT NOT NULL DEFAULT ''");
-if (!videoCols.includes('featured')) db.exec('ALTER TABLE videos ADD COLUMN featured INTEGER NOT NULL DEFAULT 0');
-const userCols = db.prepare('PRAGMA table_info(users)').all().map((r) => r.name);
-if (!userCols.includes('avatar')) db.exec('ALTER TABLE users ADD COLUMN avatar TEXT');
+  // ---- migrations (safe on databases created before these columns existed) ----
+  const videoCols = (await client.execute('PRAGMA table_info(videos)')).rows.map((r) => r.name);
+  if (!videoCols.includes('synopsis')) await client.execute("ALTER TABLE videos ADD COLUMN synopsis TEXT NOT NULL DEFAULT ''");
+  if (!videoCols.includes('featured')) await client.execute('ALTER TABLE videos ADD COLUMN featured INTEGER NOT NULL DEFAULT 0');
+  if (!videoCols.includes('rank')) await client.execute('ALTER TABLE videos ADD COLUMN rank INTEGER');
+  const userCols = (await client.execute('PRAGMA table_info(users)')).rows.map((r) => r.name);
+  if (!userCols.includes('avatar')) await client.execute('ALTER TABLE users ADD COLUMN avatar TEXT');
 
-function getSetting(key) {
-  const row = db.prepare('SELECT value FROM settings WHERE key = ?').get(key);
-  return row ? row.value : null;
-}
-function setSetting(key, value) {
-  db.prepare('INSERT INTO settings(key, value) VALUES(?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value')
-    .run(key, value === null || value === undefined ? null : String(value));
-}
+  // ---- seed defaults (first run only) ----
+  if (await rawGetSetting('site_name') === null) await rawSetSetting('site_name', 'Stories Come Alive');
+  if (await rawGetSetting('youtube_url') === null) await rawSetSetting('youtube_url', '');
+  if (await rawGetSetting('facebook_url') === null) await rawSetSetting('facebook_url', '');
+  if (await rawGetSetting('logo_version') === null) await rawSetSetting('logo_version', '0');
 
-// ---- seed defaults (first run only) ----
-if (getSetting('site_name') === null) setSetting('site_name', 'Stories Come Alive');
-if (getSetting('youtube_url') === null) setSetting('youtube_url', '');
-if (getSetting('facebook_url') === null) setSetting('facebook_url', '');
-if (getSetting('logo_version') === null) setSetting('logo_version', '0');
+  const catCount = (await client.execute('SELECT COUNT(*) AS c FROM categories')).rows[0].c;
+  if (Number(catCount) === 0) {
+    const seed = ['রোমান্স', 'রোমান্টিক কমেডি', 'হরর', 'থ্রিলার', 'মিস্ট্রি', 'ফ্যান্টাসি', 'ডার্ক ফ্যান্টাসি', 'সিরিজ'];
+    await client.batch(
+      seed.map((name, i) => ({ sql: 'INSERT INTO categories(name, sort_order) VALUES(?, ?)', args: [name, i] })),
+      'write'
+    );
+  }
+})();
 
-const catCount = db.prepare('SELECT COUNT(*) AS c FROM categories').get().c;
-if (catCount === 0) {
-  const seed = ['রোমান্স', 'রোমান্টিক কমেডি', 'হরর', 'থ্রিলার', 'মিস্ট্রি', 'ফ্যান্টাসি', 'ডার্ক ফ্যান্টাসি', 'সিরিজ'];
-  const ins = db.prepare('INSERT INTO categories(name, sort_order) VALUES(?, ?)');
-  seed.forEach((name, i) => ins.run(name, i));
+// ---------------- public helpers (same names as the node:sqlite build) ----------------
+async function getSetting(key) {
+  await ready;
+  return rawGetSetting(key);
 }
-
-function getAsset(key) {
-  return db.prepare('SELECT mime, data FROM assets WHERE key = ?').get(key) || null;
-}
-function setAsset(key, mime, data) {
-  db.prepare('INSERT INTO assets(key, mime, data) VALUES(?, ?, ?) ON CONFLICT(key) DO UPDATE SET mime = excluded.mime, data = excluded.data')
-    .run(key, mime, data);
-}
-function deleteAsset(key) {
-  db.prepare('DELETE FROM assets WHERE key = ?').run(key);
+async function setSetting(key, value) {
+  await ready;
+  return rawSetSetting(key, value);
 }
 
-module.exports = { db, getSetting, setSetting, getAsset, setAsset, deleteAsset, DB_PATH };
+async function getAsset(key) {
+  const row = await queryOne('SELECT mime, data FROM assets WHERE key = ?', [key]);
+  if (!row) return null;
+  // libSQL returns BLOB values as ArrayBuffer; node:sqlite handed callers a
+  // Uint8Array — normalize to Buffer so existing consumers keep working.
+  let data = row.data;
+  if (data instanceof ArrayBuffer) data = Buffer.from(data);
+  else if (ArrayBuffer.isView(data) && !Buffer.isBuffer(data)) {
+    data = Buffer.from(data.buffer, data.byteOffset, data.byteLength);
+  }
+  return { mime: row.mime, data };
+}
+async function setAsset(key, mime, data) {
+  await run(
+    'INSERT INTO assets(key, mime, data) VALUES(?, ?, ?) ON CONFLICT(key) DO UPDATE SET mime = excluded.mime, data = excluded.data',
+    [key, mime, data]
+  );
+}
+async function deleteAsset(key) {
+  await run('DELETE FROM assets WHERE key = ?', [key]);
+}
+
+module.exports = {
+  ready,
+  queryAll,
+  queryOne,
+  run,
+  getSetting,
+  setSetting,
+  getAsset,
+  setAsset,
+  deleteAsset,
+  DB_PATH,
+  DB_TARGET,
+};
