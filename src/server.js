@@ -190,6 +190,7 @@ const HEART_PATH = '<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06
 const PLAY_PATH = '<path d="M8 5.4v13.2c0 .8.9 1.3 1.6.9l10-6.6c.6-.4.6-1.4 0-1.8l-10-6.6c-.7-.4-1.6.1-1.6.9z"/>';
 const USERS_PATH = '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>';
 const LOCK_PATH = '<rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/>';
+const STAR_POINTS = '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>';
 const HOME_PATH = '<path d="M3 9.5L12 3l9 6.5V20a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22v-8h6v8"/>';
 const ICONS = {
   grid: lineIcon('<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>'),
@@ -208,6 +209,9 @@ const ICONS = {
   lock: lineIcon(LOCK_PATH),
   lockSm: lineIcon(LOCK_PATH, true),
   eyeSm: lineIcon('<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/>', true),
+  star: lineIcon(STAR_POINTS),
+  starSm: lineIcon(STAR_POINTS, true),
+  starFilled: `<svg class="ic" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${STAR_POINTS}</svg>`,
   bell: lineIcon('<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>'),
   heart: lineIcon(HEART_PATH),
   heartFilled: `<svg class="ic" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${HEART_PATH}</svg>`,
@@ -349,6 +353,7 @@ async function layout(req, { title, body, user }) {
   const logo = await logoSrc();
   const ytLinks = await getYoutubeLinks();
   const fbLinks = await getFacebookLinks();
+  const notifCount = user ? await unreadNotifCount(user) : 0;
   return `<!DOCTYPE html>
 <html lang="bn">
 <head>
@@ -358,7 +363,7 @@ async function layout(req, { title, body, user }) {
 <link rel="icon" href="/brand/logo">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=33">
+<link rel="stylesheet" href="/styles.css?v=34">
 </head>
 <body class="pubui">
 <header class="topbar">
@@ -369,7 +374,8 @@ async function layout(req, { title, body, user }) {
   <div class="userbox">
     ${(ytLinks.length || fbLinks.length) ? '<button type="button" class="btn btn-main btn-follow" data-follow-open aria-haspopup="dialog" aria-controls="followPanel">' + ICONS.bell + 'Follow / Subscribe</button>' : ''}
     ${user
-      ? `<a class="navlink" href="/favorites">${ICONS.heart}Favorites</a>
+      ? `<a class="navlink bell-link" href="/notifications" aria-label="Notifications">${ICONS.bell}${notifCount ? `<span class="bell-badge">${notifCount > 9 ? '9+' : notifCount}</span>` : ''}</a>
+         <a class="navlink" href="/favorites">${ICONS.heart}Favorites</a>
          <a class="navlink" href="/profile">${user.avatar ? `<img class="nav-avatar" src="${esc(user.avatar)}" alt="">` : ICONS.user} Profile</a>
          <form method="POST" action="/logout" class="inlineform"><button class="btn btn-ghost btn-sm" type="submit">Logout</button></form>`
       : `<a class="navlink" href="/register">Register</a>
@@ -392,7 +398,7 @@ ${body}
   <p class="footer-copy">© ${new Date().getFullYear()} ${esc(name)} — All rights reserved.</p>
 </footer>
 ${followPanelHtml(ytLinks, fbLinks)}
-<script src="/app.js?v=33"></script>
+<script src="/app.js?v=34"></script>
 </body>
 </html>`;
 }
@@ -403,6 +409,7 @@ ${followPanelHtml(ytLinks, fbLinks)}
 const ADMIN_NAV = [
   { key: 'dashboard', href: '/admin', label: 'Dashboard', icon: ICONS.grid, titles: ['Dashboard'] },
   { key: 'videos', href: '/admin/videos', label: 'Videos', icon: ICONS.playRect, titles: ['Videos', 'Edit Video'] },
+  { key: 'comments', href: '/admin/comments', label: 'Comments', icon: ICONS.layers, titles: ['Comments'] },
   { key: 'categories', href: '/admin/categories', label: 'Categories', icon: ICONS.layers, titles: ['Categories'] },
   { key: 'users', href: '/admin/users', label: 'Users', icon: ICONS.users, titles: ['Users'] },
   { key: 'settings', href: '/admin/settings', label: 'Settings', icon: ICONS.gear, titles: ['Settings'] },
@@ -446,14 +453,14 @@ async function adminLayout({ title, body, bare = false }) {
 <title>${esc(title)} — Admin — ${esc(name)}</title>
 <link rel="icon" href="/brand/logo">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=33">
+<link rel="stylesheet" href="/styles.css?v=34">
 </head>
 <body class="adminui">
 ${header}
 <main>
 ${body}
 </main>
-<script src="/app.js?v=33"></script>
+<script src="/app.js?v=34"></script>
 </body>
 </html>`;
 }
@@ -466,10 +473,12 @@ function cardThumb(v) {
 }
 
 function videoCard(v, user, pos) {
+  const totalViews = Number(v.views || 0) + Number(v.yt_views || 0);
   return `<a class="card" href="/watch/${v.id}">
     <div class="thumb">
       <img loading="lazy" src="${cardThumb(v)}" alt="${esc(v.title)}">
       ${pos ? `<span class="rank-chip">Top ${pos}</span>` : ''}
+      ${isFreshVideo(v) ? '<span class="new-chip">NEW</span>' : ''}
       ${v.episode ? `<span class="ep-badge">${esc(v.episode)}</span>` : ''}
       <span class="play-badge">▶</span>
     </div>
@@ -477,7 +486,8 @@ function videoCard(v, user, pos) {
       <h3>${esc(v.title)}</h3>
       ${v.story ? `<p class="card-story">${esc(v.story)}</p>` : ''}
       ${v.category_name ? `<p class="card-cat">${esc(v.category_name)}</p>` : ''}
-      <p class="card-views">${ICONS.eyeSm} ${Number(v.views || 0)} ${Number(v.views || 0) === 1 ? 'view' : 'views'}</p>
+      <p class="card-views">${ICONS.eyeSm} ${totalViews} ${totalViews === 1 ? 'view' : 'views'}</p>
+      ${Number(v.rating_count || 0) > 0 ? `<p class="card-views card-rating">${ICONS.starSm} ${Number(v.rating_avg || 0).toFixed(1)} (${Number(v.rating_count)})</p>` : ''}
       ${user ? '' : '<p class="card-lock">' + ICONS.lockSm + 'Sign in to watch</p>'}
     </div>
   </a>`;
@@ -507,6 +517,118 @@ function truncate(text, max) {
   const t = String(text || '').trim();
   return t.length > max ? t.slice(0, max).trimEnd() + '…' : t;
 }
+// created_at values come from SQLite datetime('now') — UTC, "YYYY-MM-DD
+// HH:MM:SS" with no zone marker. Parse them as UTC for display math.
+function parseDbTime(ts) {
+  const s = String(ts || '');
+  if (!s) return null;
+  const d = new Date(s.includes('T') ? s : s.replace(' ', 'T') + 'Z');
+  return isNaN(d.getTime()) ? null : d;
+}
+function relTime(ts) {
+  const d = parseDbTime(ts);
+  if (!d) return String(ts || '').slice(0, 10);
+  const mins = Math.floor((Date.now() - d.getTime()) / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return mins + ' min ago';
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return hrs + ' h ago';
+  const days = Math.floor(hrs / 24);
+  if (days < 7) return days + ' d ago';
+  return String(ts).slice(0, 10);
+}
+function isFreshVideo(v) {
+  const d = parseDbTime(v && v.created_at);
+  return !!d && (Date.now() - d.getTime()) < 7 * 24 * 3600 * 1000;
+}
+async function unreadNotifCount(user) {
+  if (!user) return 0;
+  const row = await queryOne('SELECT COUNT(*) AS c FROM notifications WHERE id > ?', [Number(user.last_seen_notif || 0)]);
+  return Number(row.c);
+}
+// Commenter avatar: their profile photo when set, else a gold circle with
+// the first letter of their name (same fallback idea as the header).
+function commentAvatarHtml(name, avatar) {
+  if (avatar) return `<img class="comment-avatar" src="${esc(avatar)}" alt="">`;
+  const initial = [...String(name || '?').trim()][0] || '?';
+  return `<span class="comment-avatar comment-avatar-initial" aria-hidden="true">${esc(initial.toUpperCase())}</span>`;
+}
+// Star for the rating control: filled (gold, currentColor fill) or outline.
+function starIcon(filled, small) {
+  return `<svg class="${small ? 'ic ic-sm' : 'ic'}" viewBox="0 0 24 24" fill="${filled ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${STAR_POINTS}</svg>`;
+}
+// Bulk-load rating aggregates onto an array of video rows (cards render
+// synchronously, so routes attach rating_avg / rating_count beforehand).
+async function attachRatings(videos) {
+  if (!videos || !videos.length) return videos;
+  const ids = [...new Set(videos.map((v) => Number(v.id)).filter(Boolean))];
+  if (!ids.length) return videos;
+  const rows = await queryAll(`SELECT video_id, AVG(stars) AS a, COUNT(*) AS c FROM ratings
+    WHERE video_id IN (${ids.map(() => '?').join(',')}) GROUP BY video_id`, ids);
+  const byId = new Map(rows.map((r) => [Number(r.video_id), r]));
+  for (const v of videos) {
+    const r = byId.get(Number(v.id));
+    v.rating_avg = r ? Number(r.a) : null;
+    v.rating_count = r ? Number(r.c) : 0;
+  }
+  return videos;
+}
+
+// ---------------- YouTube view counts ----------------
+// Real YouTube view counts are cached in videos.yt_views and refreshed
+// from the YouTube Data API when YOUTUBE_API_KEY is configured: lazily
+// from the homepage once the cache is over 6 hours old, or on demand via
+// the admin Videos page. Facebook videos always keep yt_views = 0. Any
+// API/network failure is fail-soft — the previous counts stay in place.
+function ytApiBase() {
+  return String(process.env.YT_API_BASE_URL || 'https://www.googleapis.com/youtube/v3').replace(/\/+$/, '');
+}
+let ytRefreshInFlight = false;
+async function refreshYtViews() {
+  const key = String(process.env.YOUTUBE_API_KEY || '').trim();
+  if (!key || ytRefreshInFlight) return false;
+  ytRefreshInFlight = true;
+  try {
+    const vids = await queryAll("SELECT id, youtube_id FROM videos WHERE source = 'youtube' AND youtube_id != ''");
+    for (let i = 0; i < vids.length; i += 50) {
+      const batch = vids.slice(i, i + 50);
+      const url = `${ytApiBase()}/videos?part=statistics&id=${encodeURIComponent(batch.map((v) => v.youtube_id).join(','))}&key=${encodeURIComponent(key)}`;
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 3000);
+      let data;
+      try {
+        const resp = await fetch(url, { signal: ctrl.signal });
+        if (!resp.ok) throw new Error('YouTube API HTTP ' + resp.status);
+        data = await resp.json();
+      } finally { clearTimeout(timer); }
+      const byYtId = new Map(batch.map((v) => [String(v.youtube_id), Number(v.id)]));
+      for (const item of (data && data.items) || []) {
+        const vid = byYtId.get(String(item && item.id));
+        const count = Number(item && item.statistics && item.statistics.viewCount);
+        if (vid !== undefined && Number.isFinite(count)) {
+          await run('UPDATE videos SET yt_views = ? WHERE id = ?', [count, vid]);
+        }
+      }
+    }
+    await setSetting('yt_refreshed_at', String(Date.now()));
+    return true;
+  } catch {
+    return false; // fail-soft: keep the old counts
+  } finally {
+    ytRefreshInFlight = false;
+  }
+}
+// Fire-and-forget homepage trigger: never awaited, so a slow or failing
+// API can never delay a page render; fresh numbers appear on later loads.
+function maybeRefreshYtViews() {
+  (async () => {
+    try {
+      if (!String(process.env.YOUTUBE_API_KEY || '').trim()) return;
+      const last = Number((await getSetting('yt_refreshed_at')) || 0);
+      if (!last || Date.now() - last > 6 * 3600 * 1000) refreshYtViews().catch(() => {});
+    } catch { /* a refresh check must never break the homepage */ }
+  })();
+}
 
 // ---------------- brand logo ----------------
 app.get('/brand/logo', async (req, res) => {
@@ -521,23 +643,42 @@ app.get('/brand/logo', async (req, res) => {
 
 // ---------------- public pages ----------------
 app.get('/', async (req, res) => {
+  maybeRefreshYtViews(); // fire-and-forget: fresh YouTube counts land on later loads
   const user = await currentUser(req);
   const name = await siteName();
   const featured = await queryOne(`SELECT v.*, c.name AS category_name FROM videos v
     LEFT JOIN categories c ON c.id = v.category_id WHERE v.featured = 1 ORDER BY v.id DESC LIMIT 1`);
-  // Top Picks is automatic: most-viewed first (newest wins ties), only
-  // videos somebody has actually watched, at most 10.
-  const topPicks = await queryAll(`SELECT v.*, c.name AS category_name FROM videos v
-    LEFT JOIN categories c ON c.id = v.category_id WHERE v.views > 0 ORDER BY v.views DESC, v.id DESC LIMIT 10`);
+  // Top Picks is automatic: a combined score of total views (site views +
+  // real YouTube views) plus fan ratings (average stars × 100), so a
+  // much-loved video can outrank a merely much-watched one. Only videos
+  // with some signal (views or ratings) appear; newest wins ties.
+  const topPicks = await queryAll(`SELECT v.*, c.name AS category_name,
+      COALESCE(r.a, 0) AS rating_avg, COALESCE(r.c, 0) AS rating_count
+    FROM videos v
+    LEFT JOIN categories c ON c.id = v.category_id
+    LEFT JOIN (SELECT video_id, AVG(stars) AS a, COUNT(*) AS c FROM ratings GROUP BY video_id) r ON r.video_id = v.id
+    WHERE (v.views + v.yt_views) + COALESCE(r.a, 0) * 100 > 0
+    ORDER BY (v.views + v.yt_views) + COALESCE(r.a, 0) * 100 DESC, v.id DESC LIMIT 10`);
   // The featured video's own position in that same ordering (for its badge).
   let featuredTopPos = 0;
-  if (featured && Number(featured.views) > 0) {
-    const ahead = await queryOne('SELECT COUNT(*) AS c FROM videos WHERE views > ? OR (views = ? AND id > ?)',
-      [Number(featured.views), Number(featured.views), featured.id]);
-    featuredTopPos = Number(ahead.c) + 1;
+  if (featured) {
+    const fRow = await queryOne(`SELECT (v.views + v.yt_views) + COALESCE(r.a, 0) * 100 AS score FROM videos v
+      LEFT JOIN (SELECT video_id, AVG(stars) AS a FROM ratings GROUP BY video_id) r ON r.video_id = v.id
+      WHERE v.id = ?`, [featured.id]);
+    const fScore = fRow ? Number(fRow.score) : 0;
+    if (fScore > 0) {
+      const ahead = await queryOne(`SELECT COUNT(*) AS c FROM videos v
+        LEFT JOIN (SELECT video_id, AVG(stars) AS a FROM ratings GROUP BY video_id) r ON r.video_id = v.id
+        WHERE (v.views + v.yt_views) + COALESCE(r.a, 0) * 100 > ?
+           OR ((v.views + v.yt_views) + COALESCE(r.a, 0) * 100 = ? AND v.id > ?)`,
+        [fScore, fScore, featured.id]);
+      featuredTopPos = Number(ahead.c) + 1;
+    }
   }
   const latest = await queryAll(`SELECT v.*, c.name AS category_name FROM videos v
     LEFT JOIN categories c ON c.id = v.category_id ORDER BY v.id DESC LIMIT 12`);
+  await attachRatings(topPicks);
+  await attachRatings(latest);
 
   let hero;
   if (featured) {
@@ -581,6 +722,7 @@ app.get('/', async (req, res) => {
     if (!c.video_count) continue;
     const vids = await queryAll(`SELECT v.*, c.name AS category_name FROM videos v
       LEFT JOIN categories c ON c.id = v.category_id WHERE v.category_id = ? ORDER BY v.id DESC LIMIT 12`, [c.id]);
+    await attachRatings(vids);
     rows += posterRow({ title: esc(c.name), videos: vids, user, moreHref: `/category/${c.id}` });
   }
   if (!latest.length) {
@@ -595,6 +737,7 @@ app.get('/category/:id', async (req, res) => {
   if (!cat) return res.status(404).send(await layout(req, { title: 'Not Found', user, body: '<div class="empty">This category could not be found.</div>' }));
   const videos = await queryAll(`SELECT v.*, c.name AS category_name FROM videos v
     LEFT JOIN categories c ON c.id = v.category_id WHERE v.category_id = ? ORDER BY v.id DESC`, [cat.id]);
+  await attachRatings(videos);
   const body = `
   <section class="section">
     <h2 class="section-title">${esc(cat.name)}</h2>
@@ -611,6 +754,7 @@ app.get('/search', async (req, res) => {
   const videos = q ? await queryAll(`SELECT v.*, c.name AS category_name FROM videos v
     LEFT JOIN categories c ON c.id = v.category_id
     WHERE v.title LIKE ? OR v.story LIKE ? ORDER BY v.id DESC`, [like, like]) : [];
+  await attachRatings(videos);
   const body = `
   <section class="section">
     <h2 class="section-title">Search results</h2>
@@ -880,6 +1024,45 @@ app.get('/watch/:id', async (req, res) => {
   const related = await queryAll(`SELECT v.*, c.name AS category_name FROM videos v
     LEFT JOIN categories c ON c.id = v.category_id
     WHERE v.category_id IS ? AND v.id != ? ORDER BY v.id DESC LIMIT 6`, [v.category_id, v.id]);
+  const comments = await queryAll(`SELECT cm.*, u.name AS user_name, u.avatar AS user_avatar FROM comments cm
+    JOIN users u ON u.id = cm.user_id WHERE cm.video_id = ? ORDER BY cm.id DESC`, [v.id]);
+  await attachRatings(related);
+  const ratingRow = await queryOne('SELECT AVG(stars) AS a, COUNT(*) AS c FROM ratings WHERE video_id = ?', [v.id]);
+  const ratingCount = Number(ratingRow.c);
+  const ratingAvg = ratingCount ? Number(ratingRow.a) : 0;
+  const myRatingRow = await queryOne('SELECT stars FROM ratings WHERE video_id = ? AND user_id = ?', [v.id, user.id]);
+  const myRating = myRatingRow ? Number(myRatingRow.stars) : 0;
+  // Buttons light up to the viewer's own rating once they have one;
+  // before that they preview the rounded average.
+  const fillUpTo = myRating || Math.round(ratingAvg);
+  const ratingHtml = `
+      <div class="rate-block">
+        <p class="rate-summary">${ICONS.starSm}<span>${ratingCount ? `${ratingAvg.toFixed(1)} (${ratingCount} rating${ratingCount === 1 ? '' : 's'})` : 'No ratings yet'}</span></p>
+        <form method="POST" action="/watch/${v.id}/rate" class="rate-form">
+          ${[1, 2, 3, 4, 5].map((n) => `<button class="star-btn${n <= fillUpTo ? ' star-on' : ''}" type="submit" name="stars" value="${n}" title="Rate ${n} star${n === 1 ? '' : 's'}" aria-label="Rate ${n} star${n === 1 ? '' : 's'}">${starIcon(n <= fillUpTo)}</button>`).join('')}
+          <span class="rate-hint">${myRating ? `Your rating: ${myRating}/5 — tap a star to change it` : 'Tap a star to rate this video'}</span>
+        </form>
+      </div>`;
+  const commentErr = req.query.err ? `<div class="alert alert-error">${esc(String(req.query.err).slice(0, 200))}</div>` : '';
+  const commentsHtml = `
+  <section class="section watch-section" id="comments">
+    <h2 class="section-title">Comments (${comments.length})</h2>
+    ${commentErr}
+    <form method="POST" action="/watch/${v.id}/comments" class="form comment-form">
+      <textarea name="body" rows="3" maxlength="500" placeholder="Write a comment…" required></textarea>
+      <div><button class="btn btn-main" type="submit">Post Comment</button></div>
+    </form>
+    ${comments.length ? `<div class="comments-list">
+      ${comments.map((cm) => `<div class="comment">
+        ${commentAvatarHtml(cm.user_name, cm.user_avatar)}
+        <div class="comment-main">
+          <p class="comment-head"><span class="comment-name">${esc(cm.user_name)}</span><span class="comment-time">${relTime(cm.created_at)}</span></p>
+          <p class="comment-body">${esc(cm.body).replace(/\r?\n/g, '<br>')}</p>
+          ${Number(cm.user_id) === Number(user.id) ? `<form method="POST" action="/comments/${cm.id}/delete" class="inlineform"><button class="comment-del" type="submit">Delete</button></form>` : ''}
+        </div>
+      </div>`).join('')}
+    </div>` : '<p class="muted">No comments yet — be the first to share what you think.</p>'}
+  </section>`;
   const body = `
   <section class="section watch-section">
     ${backBar()}
@@ -894,6 +1077,7 @@ app.get('/watch/:id', async (req, res) => {
       <div>
         <h1>${esc(v.title)}</h1>
         <p class="muted">${v.story ? esc(v.story) + ' • ' : ''}${v.episode ? esc(v.episode) + ' • ' : ''}${v.category_name ? esc(v.category_name) : ''}</p>
+        ${ratingHtml}
       </div>
       <form method="POST" action="/favorites/toggle">
         <input type="hidden" name="video_id" value="${v.id}">
@@ -902,8 +1086,88 @@ app.get('/watch/:id', async (req, res) => {
       </form>
     </div>
   </section>
+  ${commentsHtml}
   ${related.length ? `<section class="section"><h2 class="section-title">More from this category</h2>${grid(related, user)}</section>` : ''}`;
   res.send(await layout(req, { title: v.title, body, user }));
+});
+
+// ---------------- ratings ----------------
+app.post('/watch/:id/rate', async (req, res) => {
+  const user = await currentUser(req);
+  const v = await videoRow(Number(req.params.id));
+  if (!v) return res.redirect('/');
+  if (!user) return res.redirect('/login?next=' + encodeURIComponent('/watch/' + v.id));
+  const stars = Number(req.body.stars);
+  if (!Number.isInteger(stars) || stars < 1 || stars > 5) {
+    return res.redirect(`/watch/${v.id}?err=` + encodeURIComponent('Please pick a rating from 1 to 5 stars.'));
+  }
+  await run(`INSERT INTO ratings(video_id, user_id, stars) VALUES(?, ?, ?)
+    ON CONFLICT(video_id, user_id) DO UPDATE SET stars = excluded.stars`, [v.id, user.id, stars]);
+  res.redirect(`/watch/${v.id}`);
+});
+
+// ---------------- comments ----------------
+app.post('/watch/:id/comments', async (req, res) => {
+  const user = await currentUser(req);
+  const v = await videoRow(Number(req.params.id));
+  if (!v) return res.redirect('/');
+  if (!user) return res.redirect('/login?next=' + encodeURIComponent('/watch/' + v.id));
+  const text = String(req.body.body || '').trim();
+  const back = (msg) => res.redirect(`/watch/${v.id}?err=` + encodeURIComponent(msg) + '#comments');
+  if (!text) return back('Please write a comment first.');
+  if (text.length > 500) return back('Comments can be at most 500 characters long.');
+  await run('INSERT INTO comments(video_id, user_id, body) VALUES(?, ?, ?)', [v.id, user.id, text]);
+  res.redirect(`/watch/${v.id}#comments`);
+});
+
+// Only the comment's own author may delete it (checked server-side).
+app.post('/comments/:id/delete', async (req, res) => {
+  const user = await currentUser(req);
+  if (!user) return res.redirect('/login');
+  const cm = await queryOne('SELECT * FROM comments WHERE id = ?', [Number(req.params.id)]);
+  if (!cm) return res.redirect('/');
+  if (Number(cm.user_id) === Number(user.id)) {
+    await run('DELETE FROM comments WHERE id = ?', [cm.id]);
+  }
+  res.redirect(`/watch/${cm.video_id}#comments`);
+});
+
+// ---------------- notifications ----------------
+app.get('/notifications', async (req, res) => {
+  const user = await currentUser(req);
+  if (!user) return res.redirect('/login?next=' + encodeURIComponent('/notifications'));
+  const watermark = Number(user.last_seen_notif || 0);
+  const notifs = await queryAll(`SELECT n.id AS notif_id, n.created_at AS notif_at, v.id AS video_id,
+      v.title, v.story, v.episode, v.source, v.youtube_id, v.source_url
+    FROM notifications n JOIN videos v ON v.id = n.video_id
+    ORDER BY n.id DESC LIMIT 30`);
+  const maxRow = await queryOne('SELECT COALESCE(MAX(id), 0) AS m FROM notifications');
+  const body = `
+  <section class="section">
+    ${backBar()}
+    <h2 class="section-title">${ICONS.bell}Notifications</h2>
+    ${notifs.length ? `<div class="notif-list">
+      ${notifs.map((n) => {
+        const fresh = Number(n.notif_id) > watermark;
+        return `<a class="notif-row${fresh ? ' notif-unread' : ''}" href="/watch/${n.video_id}">
+        <img class="notif-thumb" src="${cardThumb(n)}" alt="">
+        <span class="notif-main">
+          <span class="notif-label">New video added${fresh ? ' <span class="notif-pill">New</span>' : ''}</span>
+          <span class="notif-title">${esc(n.title)}</span>
+          ${n.story || n.episode ? `<span class="notif-sub">${esc([n.story, n.episode].filter(Boolean).join(' • '))}</span>` : ''}
+        </span>
+        <span class="notif-time">${relTime(n.notif_at)}</span>
+      </a>`;
+      }).join('')}
+    </div>` : `<div class="empty"><span class="empty-book">${ICONS.bell}</span>No notifications yet — new videos will appear here.</div>`}
+  </section>`;
+  res.send(await layout(req, { title: 'Notifications', body, user }));
+  // Mark all as read only AFTER the page above was rendered from the old
+  // watermark, so the New pills show on this visit and the header badge
+  // clears from the next page load onwards.
+  if (Number(maxRow.m) > watermark) {
+    await run('UPDATE users SET last_seen_notif = ? WHERE id = ?', [Number(maxRow.m), user.id]);
+  }
 });
 
 // ---------------- user pages ----------------
@@ -925,6 +1189,7 @@ app.get('/favorites', async (req, res) => {
   const videos = await queryAll(`SELECT v.*, c.name AS category_name FROM favorites f
     JOIN videos v ON v.id = f.video_id LEFT JOIN categories c ON c.id = v.category_id
     WHERE f.user_id = ? ORDER BY f.created_at DESC`, [user.id]);
+  await attachRatings(videos);
   const body = `
   <section class="section">
     ${backBar()}
@@ -1069,6 +1334,7 @@ app.post('/admin/logout', async (req, res) => {
 app.get('/admin/videos', async (req, res) => {
   if (!(await requireAdminPage(req, res))) return;
   const err = req.query.err ? `<div class="alert alert-error">${esc(req.query.err)}</div>` : '';
+  const ytKeySet = !!String(process.env.YOUTUBE_API_KEY || '').trim();
   const cats = await allCategories();
   const videos = await queryAll(`SELECT v.*, c.name AS category_name FROM videos v
     LEFT JOIN categories c ON c.id = v.category_id ORDER BY v.id DESC`);
@@ -1088,6 +1354,9 @@ app.get('/admin/videos', async (req, res) => {
       <label class="checklabel"><input type="checkbox" name="featured" value="1"> Featured — this video shows in the big hero banner on the homepage (only one can be featured at a time)</label>
       <button class="btn btn-main" type="submit">Add Video</button>
     </form>
+    ${ytKeySet
+      ? '<form method="POST" action="/admin/refresh-yt-views" class="yt-refresh"><button class="btn btn-ghost" type="submit">Refresh YouTube views</button></form>'
+      : '<p class="muted yt-refresh">YouTube API key not set</p>'}
     <h2 class="section-title">${ICONS.playRect}All Videos (${videos.length})</h2>
     ${videos.length ? `<div class="tablewrap"><table class="admintable">
       <tr><th>Thumbnail</th><th>Title</th><th>Story / Episode</th><th>Category</th><th>Views</th><th></th></tr>
@@ -1096,7 +1365,7 @@ app.get('/admin/videos', async (req, res) => {
         <td>${esc(v.title)}${v.featured ? ' <span class="feat-badge">Featured</span>' : ''} <span class="src-badge">${v.source === 'facebook' ? 'Facebook' : 'YouTube'}</span></td>
         <td>${esc(v.story)} ${v.episode ? '• ' + esc(v.episode) : ''}</td>
         <td>${esc(v.category_name || '—')}</td>
-        <td>${Number(v.views || 0)}</td>
+        <td>${Number(v.views || 0) + Number(v.yt_views || 0)}</td>
         <td class="rowbtns">
           <a class="btn btn-ghost btn-sm" href="/admin/videos/${v.id}/edit">Edit</a>
           <form method="POST" action="/admin/videos/${v.id}/delete" data-confirm="Delete this video?"><button class="btn btn-danger btn-sm" type="submit">Delete</button></form>
@@ -1111,10 +1380,19 @@ app.post('/admin/videos', async (req, res) => {
   if (!parsed) return res.redirect('/admin/videos?err=' + encodeURIComponent(VIDEO_LINK_ERROR));
   const featured = req.body.featured ? 1 : 0;
   if (featured) await run('UPDATE videos SET featured = 0');
-  await run('INSERT INTO videos(youtube_id, title, story, episode, synopsis, featured, category_id, source, source_url) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)',
+  const info = await run('INSERT INTO videos(youtube_id, title, story, episode, synopsis, featured, category_id, source, source_url) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)',
     [parsed.youtubeId, String(req.body.title || '').trim() || 'Untitled', String(req.body.story || '').trim(),
       String(req.body.episode || '').trim(), String(req.body.synopsis || '').trim(), featured,
       Number(req.body.category_id) || null, parsed.source, parsed.url]);
+  // A brand-new upload notifies every user (badge + /notifications page).
+  // Edits deliberately do not create a notification.
+  if (info.lastInsertRowid) await run('INSERT INTO notifications(video_id) VALUES(?)', [Number(info.lastInsertRowid)]);
+  res.redirect('/admin/videos');
+});
+
+app.post('/admin/refresh-yt-views', async (req, res) => {
+  if (!(await requireAdminPage(req, res))) return;
+  await refreshYtViews(); // fail-soft: old counts stay when the API is unreachable
   res.redirect('/admin/videos');
 });
 
@@ -1161,6 +1439,9 @@ app.post('/admin/videos/:id/delete', async (req, res) => {
   if (!(await requireAdminPage(req, res))) return;
   const id = Number(req.params.id);
   await run('DELETE FROM favorites WHERE video_id = ?', [id]);
+  await run('DELETE FROM comments WHERE video_id = ?', [id]);
+  await run('DELETE FROM notifications WHERE video_id = ?', [id]);
+  await run('DELETE FROM ratings WHERE video_id = ?', [id]);
   await run('DELETE FROM videos WHERE id = ?', [id]);
   res.redirect('/admin/videos');
 });
@@ -1228,6 +1509,33 @@ app.get('/admin/users', async (req, res) => {
       ${users.map((u) => `<tr><td>${Number(u.id)}</td><td>${esc(u.name)}</td><td>${esc(u.email)}</td><td>${esc(String(u.created_at).slice(0, 10))}</td></tr>`).join('')}
     </table></div>` : '<div class="empty">No one has created an account yet.</div>'}
   </section>` }));
+});
+
+app.get('/admin/comments', async (req, res) => {
+  if (!(await requireAdminPage(req, res))) return;
+  const comments = await queryAll(`SELECT cm.*, u.name AS user_name, v.title AS video_title FROM comments cm
+    JOIN users u ON u.id = cm.user_id JOIN videos v ON v.id = cm.video_id
+    ORDER BY cm.id DESC LIMIT 100`);
+  res.send(await adminLayout({ title: 'Comments', body: `
+  <section class="section">
+    <h2 class="section-title">${ICONS.layers}Comments — ${comments.length} latest</h2>
+    ${comments.length ? `<div class="tablewrap"><table class="admintable">
+      <tr><th>Commenter</th><th>Video</th><th>Comment</th><th>Date</th><th></th></tr>
+      ${comments.map((cm) => `<tr>
+        <td>${esc(cm.user_name)}</td>
+        <td><a href="/watch/${cm.video_id}" target="_blank" rel="noopener">${esc(cm.video_title)}</a></td>
+        <td>${esc(truncate(cm.body, 120))}</td>
+        <td>${esc(String(cm.created_at).slice(0, 10))}</td>
+        <td><form method="POST" action="/admin/comments/${cm.id}/delete" data-confirm="Delete this comment?"><button class="btn btn-danger btn-sm" type="submit">Delete</button></form></td>
+      </tr>`).join('')}
+    </table></div>` : '<div class="empty">No comments yet.</div>'}
+  </section>` }));
+});
+
+app.post('/admin/comments/:id/delete', async (req, res) => {
+  if (!(await requireAdminPage(req, res))) return;
+  await run('DELETE FROM comments WHERE id = ?', [Number(req.params.id)]);
+  res.redirect('/admin/comments');
 });
 
 app.get('/admin/settings', async (req, res) => {
