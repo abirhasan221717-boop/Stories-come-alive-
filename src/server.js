@@ -162,6 +162,85 @@ function socialBtnText(kind, links, link, index) {
   if (link.label) return `${base} — ${esc(link.label)}`;
   return links.length > 1 ? `${base} on ${platform} ${index + 1}` : `${base} on ${platform}`;
 }
+// Display names for the Follow / Subscribe panel: the admin's label when
+// present, otherwise a name derived from the URL itself.
+function parseSocialUrl(raw) {
+  let url = String(raw || '').trim();
+  if (!url) return null;
+  if (!/^[A-Za-z][A-Za-z0-9+.-]*:/.test(url)) url = 'https://' + url;
+  try { return new URL(url); } catch { return null; }
+}
+function prettifySlug(slug) {
+  let s = String(slug || '');
+  try { s = decodeURIComponent(s); } catch { /* keep the raw slug */ }
+  return s.replace(/[-_]+/g, ' ').replace(/\s+/g, ' ').trim();
+}
+function deriveSocialName(kind, url) {
+  const fallback = kind === 'youtube' ? 'YouTube Channel' : 'Facebook Page';
+  const parsed = parseSocialUrl(url);
+  if (!parsed) return fallback;
+  const segments = parsed.pathname.split('/').filter(Boolean);
+  if (!segments.length) return fallback;
+  if (kind === 'youtube') {
+    if (segments[0].startsWith('@')) {
+      return prettifySlug(segments[0].slice(1)) || fallback;
+    }
+    return fallback; // /channel/UC…, /c/…, /user/… and anything else
+  }
+  // Facebook: the first path segment is normally the page slug; a few
+  // reserved shapes (profile.php?id=…, groups/…, watch/…) carry no name.
+  const first = segments[0];
+  if (/^(profile\.php|groups|watch|events|pages)$/i.test(first) || /^\d+$/.test(first)) return fallback;
+  return prettifySlug(first) || fallback;
+}
+function socialDisplayNames(kind, links) {
+  const seen = new Map();
+  return links.map((link) => {
+    const base = String(link.label || '').trim() || deriveSocialName(kind, link.url);
+    const key = base.toLowerCase();
+    const count = (seen.get(key) || 0) + 1;
+    seen.set(key, count);
+    return count > 1 ? `${base} ${count}` : base;
+  });
+}
+function followPanelHtml(ytLinks, fbLinks) {
+  const ytNames = socialDisplayNames('youtube', ytLinks);
+  const fbNames = socialDisplayNames('facebook', fbLinks);
+  const ytGroup = ytLinks.length ? `
+      <div class="follow-group">
+        <h3 class="follow-group-title">YouTube Channels</h3>
+        <div class="follow-rows">
+          ${ytLinks.map((l, i) => `<div class="follow-row">
+            <span class="follow-avatar follow-avatar-youtube" aria-hidden="true">▶</span>
+            <span class="follow-name">${esc(ytNames[i])}</span>
+            <a class="btn btn-youtube btn-sm follow-action" href="${esc(subscribeUrl(l.url))}" target="_blank" rel="noopener">Subscribe</a>
+          </div>`).join('')}
+        </div>
+      </div>` : '';
+  const fbGroup = fbLinks.length ? `
+      <div class="follow-group">
+        <h3 class="follow-group-title">Facebook Pages</h3>
+        <div class="follow-rows">
+          ${fbLinks.map((l, i) => `<div class="follow-row">
+            <span class="follow-avatar follow-avatar-facebook" aria-hidden="true">f</span>
+            <span class="follow-name">${esc(fbNames[i])}</span>
+            <a class="btn btn-facebook btn-sm follow-action" href="${esc(l.url)}" target="_blank" rel="noopener">Follow</a>
+          </div>`).join('')}
+        </div>
+      </div>` : '';
+  if (!ytGroup && !fbGroup) return '';
+  return `
+<div class="follow-overlay" id="followPanel" data-follow-panel hidden role="dialog" aria-modal="true" aria-labelledby="followPanelTitle">
+  <section class="follow-sheet">
+    <div class="follow-head">
+      <h2 id="followPanelTitle">Follow &amp; Subscribe</h2>
+      <button type="button" class="follow-close" data-follow-close aria-label="Close">✕</button>
+    </div>
+    <div class="follow-list">${ytGroup}${fbGroup}
+    </div>
+  </section>
+</div>`;
+}
 async function siteName() { return (await getSetting('site_name')) || 'Stories Come Alive'; }
 async function logoSrc() { return '/brand/logo?v=' + ((await getSetting('logo_version')) || '0'); }
 function allCategories() {
@@ -208,6 +287,7 @@ async function layout(req, { title, body, user }) {
     <span class="brand-name">${esc(name)}</span>
   </a>
   <div class="userbox">
+    ${(ytLinks.length || fbLinks.length) ? '<button type="button" class="btn btn-main btn-follow" data-follow-open aria-haspopup="dialog" aria-controls="followPanel">🔔 Follow / Subscribe</button>' : ''}
     ${user
       ? `<a class="navlink" href="/favorites">❤️ Favorites</a>
          <a class="navlink" href="/profile">${user.avatar ? `<img class="nav-avatar" src="${esc(user.avatar)}" alt="">` : '👤'} Profile</a>
@@ -229,6 +309,7 @@ ${body}
   </div>
   <p class="footer-copy">© ${new Date().getFullYear()} ${esc(name)} — All rights reserved.</p>
 </footer>
+${followPanelHtml(ytLinks, fbLinks)}
 <script src="/app.js"></script>
 </body>
 </html>`;
