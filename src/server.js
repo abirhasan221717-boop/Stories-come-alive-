@@ -221,6 +221,7 @@ const ICONS = {
   userPlus: lineIcon('<path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/>'),
   book: lineIcon('<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>'),
   search: lineIcon('<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/>'),
+  info: lineIcon('<circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.8h.01"/>'),
   camera: lineIcon('<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>'),
   plus: lineIcon('<path d="M12 5v14M5 12h14"/>'),
   folder: lineIcon('<path d="M3 7.5A2.5 2.5 0 0 1 5.5 5h3.4L11 7.5h7.5A2.5 2.5 0 0 1 21 10v7a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17z"/>'),
@@ -363,7 +364,7 @@ async function layout(req, { title, body, user }) {
 <link rel="icon" href="/brand/logo">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=34">
+<link rel="stylesheet" href="/styles.css?v=35">
 </head>
 <body class="pubui">
 <header class="topbar">
@@ -398,7 +399,7 @@ ${body}
   <p class="footer-copy">© ${new Date().getFullYear()} ${esc(name)} — All rights reserved.</p>
 </footer>
 ${followPanelHtml(ytLinks, fbLinks)}
-<script src="/app.js?v=34"></script>
+<script src="/app.js?v=35"></script>
 </body>
 </html>`;
 }
@@ -453,14 +454,14 @@ async function adminLayout({ title, body, bare = false }) {
 <title>${esc(title)} — Admin — ${esc(name)}</title>
 <link rel="icon" href="/brand/logo">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=34">
+<link rel="stylesheet" href="/styles.css?v=35">
 </head>
 <body class="adminui">
 ${header}
 <main>
 ${body}
 </main>
-<script src="/app.js?v=34"></script>
+<script src="/app.js?v=35"></script>
 </body>
 </html>`;
 }
@@ -680,24 +681,39 @@ app.get('/', async (req, res) => {
   await attachRatings(topPicks);
   await attachRatings(latest);
 
+  // Big homepage hero: a manually featured video wins; otherwise the hero
+  // automatically showcases the current Top 1 video (Bhoot-style), so the
+  // top story is always big on the homepage with no admin work needed.
+  const heroVideo = featured || (topPicks.length ? topPicks[0] : null);
+  const heroTopPos = featured ? featuredTopPos : (heroVideo ? 1 : 0);
+
   let hero;
-  if (featured) {
+  if (heroVideo) {
     hero = `
   <section class="fhero">
-    ${featured.source === 'facebook'
-      ? `<img class="fhero-img" src="/banner.jpg" alt="${esc(featured.title)}">`
-      : `<img class="fhero-img" src="https://i.ytimg.com/vi/${esc(featured.youtube_id)}/maxresdefault.jpg"
-      onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/${esc(featured.youtube_id)}/hqdefault.jpg'" alt="${esc(featured.title)}">`}
+    ${heroVideo.source === 'facebook'
+      ? `<img class="fhero-img" src="/banner.jpg" alt="${esc(heroVideo.title)}">`
+      : `<img class="fhero-img" src="https://i.ytimg.com/vi/${esc(heroVideo.youtube_id)}/maxresdefault.jpg"
+      onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/${esc(heroVideo.youtube_id)}/hqdefault.jpg'" alt="${esc(heroVideo.title)}">`}
     <div class="fhero-shade"></div>
     <div class="fhero-content">
-      ${featuredTopPos ? `<span class="fhero-topbadge">Top ${featuredTopPos}</span>` : ''}
-      ${featured.category_name ? `<span class="fhero-badge">${esc(featured.category_name)}</span>` : ''}
-      <h1 class="fhero-title">${esc(featured.title)}</h1>
-      ${featured.story ? `<p class="fhero-story">${esc(featured.story)}${featured.episode ? ' • ' + esc(featured.episode) : ''}</p>` : ''}
-      ${featured.synopsis ? `<p class="fhero-syn" data-syn>${esc(featured.synopsis)}</p>${String(featured.synopsis).trim().length > 160 ? '<button type="button" class="syn-toggle" data-syn-toggle>Read More</button>' : ''}` : ''}
-      <a class="btn btn-main fhero-btn" href="/watch/${featured.id}">▶ Watch Now</a>
+      ${heroTopPos ? `<span class="fhero-topbadge">Top ${heroTopPos}</span>` : ''}
+      ${heroVideo.category_name ? `<span class="fhero-badge">${esc(heroVideo.category_name)}</span>` : ''}
+      <h1 class="fhero-title">${esc(heroVideo.title)}</h1>
+      ${heroVideo.story ? `<p class="fhero-story">${esc(heroVideo.story)}${heroVideo.episode ? ' • ' + esc(heroVideo.episode) : ''}</p>` : ''}
+      ${heroVideo.synopsis ? `<p class="fhero-syn" data-syn>${esc(heroVideo.synopsis)}</p>${String(heroVideo.synopsis).trim().length > 160 ? '<button type="button" class="syn-toggle" data-syn-toggle>Read More</button>' : ''}` : ''}
+      <div class="fhero-btns">
+        <a class="btn btn-main fhero-btn" href="/watch/${heroVideo.id}">▶ Watch Now</a>
+        <a class="btn fhero-btn fhero-btn-info" href="/watch/${heroVideo.id}">${ICONS.info} More Info</a>
+      </div>
       ${user ? '' : '<p class="fhero-note">Sign in to watch — new here? Create a free account.</p>'}
     </div>
+  </section>
+  <section class="hero-search">
+    <form class="searchbar" method="GET" action="/search">
+      <span class="searchwrap">${ICONS.search}<input type="text" name="q" placeholder="Search stories…"></span>
+      <button class="btn btn-main" type="submit">Search</button>
+    </form>
   </section>`;
   } else {
     hero = `
@@ -1044,24 +1060,39 @@ app.get('/watch/:id', async (req, res) => {
         </form>
       </div>`;
   const commentErr = req.query.err ? `<div class="alert alert-error">${esc(String(req.query.err).slice(0, 200))}</div>` : '';
+  // Threaded comments: top-level newest first, each with its replies
+  // oldest first so a conversation reads top to bottom. Every signed-in
+  // viewer sees the whole thread and can reply (one level deep).
+  const topComments = comments.filter((cm) => !cm.parent_id);
+  const repliesOf = (pid) => comments.filter((cm) => Number(cm.parent_id) === Number(pid));
+  const commentHtml = (cm, isReply) => `<div class="comment${isReply ? ' comment-reply' : ''}">
+        ${commentAvatarHtml(cm.user_name, cm.user_avatar)}
+        <div class="comment-main">
+          <p class="comment-head"><span class="comment-name">${esc(cm.user_name)}</span><span class="comment-time">${relTime(cm.created_at)}</span></p>
+          <p class="comment-body">${esc(cm.body).replace(/\r?\n/g, '<br>')}</p>
+          <div class="comment-actions">
+            ${isReply ? '' : `<button type="button" class="comment-act" data-reply-toggle="${cm.id}">Reply</button>`}
+            ${Number(cm.user_id) === Number(user.id) ? `<form method="POST" action="/comments/${cm.id}/delete" class="inlineform"><button class="comment-del" type="submit">Delete</button></form>` : ''}
+          </div>
+          ${isReply ? '' : `<form method="POST" action="/watch/${v.id}/comments" class="form reply-form" data-reply-form="${cm.id}" hidden>
+            <input type="hidden" name="parent_id" value="${cm.id}">
+            <textarea name="body" rows="2" maxlength="500" placeholder="Write a reply\u2026" required></textarea>
+            <div><button class="btn btn-main btn-sm" type="submit">Post Reply</button></div>
+          </form>`}
+          ${!isReply && repliesOf(cm.id).length ? `<div class="replies">${repliesOf(cm.id).map((rp) => commentHtml(rp, true)).join('')}</div>` : ''}
+        </div>
+      </div>`;
   const commentsHtml = `
   <section class="section watch-section" id="comments">
     <h2 class="section-title">Comments (${comments.length})</h2>
     ${commentErr}
     <form method="POST" action="/watch/${v.id}/comments" class="form comment-form">
-      <textarea name="body" rows="3" maxlength="500" placeholder="Write a comment…" required></textarea>
+      <textarea name="body" rows="3" maxlength="500" placeholder="Write a comment\u2026" required></textarea>
       <div><button class="btn btn-main" type="submit">Post Comment</button></div>
     </form>
-    ${comments.length ? `<div class="comments-list">
-      ${comments.map((cm) => `<div class="comment">
-        ${commentAvatarHtml(cm.user_name, cm.user_avatar)}
-        <div class="comment-main">
-          <p class="comment-head"><span class="comment-name">${esc(cm.user_name)}</span><span class="comment-time">${relTime(cm.created_at)}</span></p>
-          <p class="comment-body">${esc(cm.body).replace(/\r?\n/g, '<br>')}</p>
-          ${Number(cm.user_id) === Number(user.id) ? `<form method="POST" action="/comments/${cm.id}/delete" class="inlineform"><button class="comment-del" type="submit">Delete</button></form>` : ''}
-        </div>
-      </div>`).join('')}
-    </div>` : '<p class="muted">No comments yet — be the first to share what you think.</p>'}
+    ${topComments.length ? `<div class="comments-list">
+      ${topComments.map((cm) => commentHtml(cm, false)).join('')}
+    </div>` : '<p class="muted">No comments yet \u2014 be the first to share what you think.</p>'}
   </section>`;
   const body = `
   <section class="section watch-section">
@@ -1116,7 +1147,16 @@ app.post('/watch/:id/comments', async (req, res) => {
   const back = (msg) => res.redirect(`/watch/${v.id}?err=` + encodeURIComponent(msg) + '#comments');
   if (!text) return back('Please write a comment first.');
   if (text.length > 500) return back('Comments can be at most 500 characters long.');
-  await run('INSERT INTO comments(video_id, user_id, body) VALUES(?, ?, ?)', [v.id, user.id, text]);
+  // A reply must point at a top-level comment on this same video.
+  let parentId = null;
+  if (req.body.parent_id) {
+    const parent = await queryOne('SELECT * FROM comments WHERE id = ?', [Number(req.body.parent_id)]);
+    if (!parent || Number(parent.video_id) !== Number(v.id) || parent.parent_id) {
+      return back('That comment is no longer available to reply to.');
+    }
+    parentId = parent.id;
+  }
+  await run('INSERT INTO comments(video_id, user_id, body, parent_id) VALUES(?, ?, ?, ?)', [v.id, user.id, text, parentId]);
   res.redirect(`/watch/${v.id}#comments`);
 });
 
@@ -1127,7 +1167,7 @@ app.post('/comments/:id/delete', async (req, res) => {
   const cm = await queryOne('SELECT * FROM comments WHERE id = ?', [Number(req.params.id)]);
   if (!cm) return res.redirect('/');
   if (Number(cm.user_id) === Number(user.id)) {
-    await run('DELETE FROM comments WHERE id = ?', [cm.id]);
+    await run('DELETE FROM comments WHERE id = ? OR parent_id = ?', [cm.id, cm.id]);
   }
   res.redirect(`/watch/${cm.video_id}#comments`);
 });
@@ -1351,7 +1391,7 @@ app.get('/admin/videos', async (req, res) => {
       <label>Episode<input type="text" name="episode" placeholder="e.g. Season 1 • Chapter 01"></label>
       <label>Synopsis (a short summary)<textarea name="synopsis" rows="3" placeholder="Two or three lines about the story — if this video is featured, it shows in the homepage hero banner"></textarea></label>
       <label>Category<select name="category_id">${catOptions('')}</select></label>
-      <label class="checklabel"><input type="checkbox" name="featured" value="1"> Featured — this video shows in the big hero banner on the homepage (only one can be featured at a time)</label>
+      <label class="checklabel"><input type="checkbox" name="featured" value="1"> Featured — pin this video in the big hero banner on the homepage (only one at a time). If none is featured, the hero automatically shows the Top 1 video</label>
       <button class="btn btn-main" type="submit">Add Video</button>
     </form>
     ${ytKeySet
@@ -1414,7 +1454,7 @@ app.get('/admin/videos/:id/edit', async (req, res) => {
       <label>Episode<input type="text" name="episode" value="${esc(v.episode)}"></label>
       <label>Synopsis (a short summary)<textarea name="synopsis" rows="3" placeholder="Two or three lines about the story…">${esc(v.synopsis || '')}</textarea></label>
       <label>Category<select name="category_id">${cats.map((c) => `<option value="${c.id}" ${v.category_id === c.id ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select></label>
-      <label class="checklabel"><input type="checkbox" name="featured" value="1" ${v.featured ? 'checked' : ''}> Featured — this video shows in the big hero banner on the homepage (only one can be featured at a time)</label>
+      <label class="checklabel"><input type="checkbox" name="featured" value="1" ${v.featured ? 'checked' : ''}> Featured — pin this video in the big hero banner on the homepage (only one at a time). If none is featured, the hero automatically shows the Top 1 video</label>
       <button class="btn btn-main" type="submit">Save</button>
       <a class="btn btn-ghost" href="/admin/videos">Back</a>
     </form>
@@ -1524,7 +1564,7 @@ app.get('/admin/comments', async (req, res) => {
       ${comments.map((cm) => `<tr>
         <td>${esc(cm.user_name)}</td>
         <td><a href="/watch/${cm.video_id}" target="_blank" rel="noopener">${esc(cm.video_title)}</a></td>
-        <td>${esc(truncate(cm.body, 120))}</td>
+        <td>${cm.parent_id ? '<em class="muted">(Reply) </em>' : ''}${esc(truncate(cm.body, 120))}</td>
         <td>${esc(String(cm.created_at).slice(0, 10))}</td>
         <td><form method="POST" action="/admin/comments/${cm.id}/delete" data-confirm="Delete this comment?"><button class="btn btn-danger btn-sm" type="submit">Delete</button></form></td>
       </tr>`).join('')}
@@ -1534,7 +1574,8 @@ app.get('/admin/comments', async (req, res) => {
 
 app.post('/admin/comments/:id/delete', async (req, res) => {
   if (!(await requireAdminPage(req, res))) return;
-  await run('DELETE FROM comments WHERE id = ?', [Number(req.params.id)]);
+  const cid = Number(req.params.id);
+  await run('DELETE FROM comments WHERE id = ? OR parent_id = ?', [cid, cid]);
   res.redirect('/admin/comments');
 });
 
