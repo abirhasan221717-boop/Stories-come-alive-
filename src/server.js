@@ -187,6 +187,10 @@ const ICONS = {
   userPlus: lineIcon('<path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/>'),
   book: lineIcon('<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>'),
   camera: lineIcon('<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>'),
+  plus: lineIcon('<path d="M12 5v14M5 12h14"/>'),
+  folder: lineIcon('<path d="M3 7.5A2.5 2.5 0 0 1 5.5 5h3.4L11 7.5h7.5A2.5 2.5 0 0 1 21 10v7a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17z"/>'),
+  link: lineIcon('<path d="M10 13.6a5 5 0 0 0 7.1.4l2.8-2.8a5 5 0 0 0-7-7.1L11.5 5.5"/><path d="M14 10.4a5 5 0 0 0-7.1-.4L4.1 12.8a5 5 0 0 0 7 7.1l1.4-1.4"/>'),
+  chevronRight: '<svg class="ic qa-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>',
 };
 
 // Welcome-page button caption: the label when there is one; the plain
@@ -315,7 +319,7 @@ async function layout(req, { title, body, user }) {
 <link rel="icon" href="/brand/logo">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=28">
+<link rel="stylesheet" href="/styles.css?v=29">
 </head>
 <body>
 <header class="topbar">
@@ -347,7 +351,7 @@ ${body}
   <p class="footer-copy">© ${new Date().getFullYear()} ${esc(name)} — All rights reserved.</p>
 </footer>
 ${followPanelHtml(ytLinks, fbLinks)}
-<script src="/app.js?v=28"></script>
+<script src="/app.js?v=29"></script>
 </body>
 </html>`;
 }
@@ -380,6 +384,7 @@ async function adminLayout({ title, body, bare = false }) {
     <span class="brand-name">${esc(name)} — Admin</span>
   </a>
   <div class="admin-headbtns">
+    <a class="gearbtn" href="/admin/settings" aria-label="Settings" title="Settings">${ICONS.gear}</a>
     <form method="POST" action="/admin/logout" class="inlineform"><button class="btn btn-logout" type="submit">Logout</button></form>
     <div class="adminmenu-wrap">
       <button type="button" class="hambtn" data-admin-menu-btn aria-haspopup="true" aria-expanded="false" aria-label="Menu">
@@ -400,14 +405,14 @@ async function adminLayout({ title, body, bare = false }) {
 <title>${esc(title)} — Admin — ${esc(name)}</title>
 <link rel="icon" href="/brand/logo">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=28">
+<link rel="stylesheet" href="/styles.css?v=29">
 </head>
-<body>
+<body class="adminui">
 ${header}
 <main>
 ${body}
 </main>
-<script src="/app.js?v=28"></script>
+<script src="/app.js?v=29"></script>
 </body>
 </html>`;
 }
@@ -962,14 +967,26 @@ app.get('/admin', async (req, res) => {
   <section class="section">
     <h2 class="section-title">${ICONS.grid}Dashboard</h2>
     <div class="statgrid">
-      <div class="stat"><strong>${Number(userCount)}</strong><span>Registered Users</span></div>
-      <div class="stat"><strong>${Number(videoCount)}</strong><span>Total Videos</span></div>
-      <div class="stat"><strong>${Number(catCount)}</strong><span>Categories</span></div>
+      <div class="stat stat-glow accent-gold">
+        <span class="stat-ic">${ICONS.users}</span>
+        <span class="stat-meta"><strong>${Number(userCount)}</strong><span>Registered Users</span></span>
+        <span class="stat-wm" aria-hidden="true">${ICONS.users}</span>
+      </div>
+      <div class="stat stat-glow accent-purple">
+        <span class="stat-ic">${ICONS.play}</span>
+        <span class="stat-meta"><strong>${Number(videoCount)}</strong><span>Total Videos</span></span>
+        <span class="stat-wm" aria-hidden="true">${ICONS.play}</span>
+      </div>
+      <div class="stat stat-glow accent-green">
+        <span class="stat-ic">${ICONS.layers}</span>
+        <span class="stat-meta"><strong>${Number(catCount)}</strong><span>Categories</span></span>
+        <span class="stat-wm" aria-hidden="true">${ICONS.layers}</span>
+      </div>
     </div>
     <div class="quicklinks">
-      <a class="btn btn-main" href="/admin/videos">Add a New Video</a>
-      <a class="btn btn-ghost" href="/admin/categories">Organize Categories</a>
-      <a class="btn btn-ghost" href="/admin/settings">Change Site Name / Logo / Links</a>
+      <a class="btn btn-main qa-primary" href="/admin/videos">${ICONS.plus}<span>Add a New Video</span>${ICONS.chevronRight}</a>
+      <a class="btn btn-ghost qa-purple" href="/admin/categories">${ICONS.folder}<span>Organize Categories</span>${ICONS.chevronRight}</a>
+      <a class="btn btn-ghost qa-wide" href="/admin/settings">${ICONS.link}<span>Change Site Name / Logo / Links</span>${ICONS.chevronRight}</a>
     </div>
   </section>` }));
 });
