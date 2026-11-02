@@ -94,6 +94,77 @@ function subscribeUrl(url) {
   if (/youtube\.com\/(channel\/|@|c\/|user\/)/.test(u) && !u.includes('?')) return u + '?sub_confirmation=1';
   return u;
 }
+
+// ---- social link lists (multiple YouTube channels / Facebook pages) ----
+// Stored as JSON in settings under youtube_links / facebook_links: an array
+// of { label, url }. Migration is seamless: while the new key has never been
+// saved (getSetting returns null) the legacy single youtube_url /
+// facebook_url value is used as a one-item list; once the admin saves — even
+// an empty list — the new key wins, so deleting every link really deletes
+// them (the legacy value never resurrects). Saving also rewrites the legacy
+// key to the first link's URL (or '') so anything reading the old key stays
+// roughly in sync.
+function parseLinkList(raw) {
+  if (raw === null || raw === undefined) return null; // never saved
+  let arr;
+  try { arr = JSON.parse(String(raw)); } catch { return []; }
+  if (!Array.isArray(arr)) return [];
+  const out = [];
+  for (const e of arr) {
+    if (!e || typeof e !== 'object') continue;
+    const url = String(e.url || '').trim();
+    if (!url) continue;
+    out.push({ label: String(e.label || '').trim(), url });
+  }
+  return out;
+}
+async function getLinkList(newKey, legacyKey) {
+  const saved = parseLinkList(await getSetting(newKey));
+  if (saved !== null) return saved;
+  const legacy = String((await getSetting(legacyKey)) || '').trim();
+  return legacy ? [{ label: '', url: legacy }] : [];
+}
+function getYoutubeLinks() { return getLinkList('youtube_links', 'youtube_url'); }
+function getFacebookLinks() { return getLinkList('facebook_links', 'facebook_url'); }
+// One admin-form row -> a clean { label, url } entry, or null when the row is
+// blank or the URL is not a usable http(s) link.
+function cleanLinkEntry(labelRaw, urlRaw) {
+  let url = String(urlRaw || '').trim();
+  if (!url) return null;
+  if (!/^[A-Za-z][A-Za-z0-9+.-]*:/.test(url)) url = 'https://' + url; // scheme missing
+  if (url.length > 500) return null;
+  let parsed;
+  try { parsed = new URL(url); } catch { return null; }
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return null;
+  return { label: String(labelRaw || '').trim().slice(0, 60), url };
+}
+// Repeated form fields arrive as an array, a single string (one row), or
+// undefined (no rows at all). Normalize, drop bad rows, dedupe by URL, cap.
+function linkListFromForm(labelField, urlField) {
+  const asArray = (v) => (Array.isArray(v) ? v : (v === undefined || v === null ? [] : [v]));
+  const labels = asArray(labelField);
+  const urls = asArray(urlField);
+  const out = [];
+  const seen = new Set();
+  const count = Math.max(labels.length, urls.length);
+  for (let i = 0; i < count && out.length < 20; i++) {
+    const entry = cleanLinkEntry(labels[i], urls[i]);
+    if (!entry || seen.has(entry.url)) continue;
+    seen.add(entry.url);
+    out.push(entry);
+  }
+  return out;
+}
+// Welcome-page button caption: the label when there is one; the plain
+// platform name for a single link; platform + position when several links
+// share no label, so the buttons stay distinguishable.
+function socialBtnText(kind, links, link, index) {
+  const isYt = kind === 'youtube';
+  const base = isYt ? '▶️ Subscribe' : '📘 Follow';
+  const platform = isYt ? 'YouTube' : 'Facebook';
+  if (link.label) return `${base} — ${esc(link.label)}`;
+  return links.length > 1 ? `${base} on ${platform} ${index + 1}` : `${base} on ${platform}`;
+}
 async function siteName() { return (await getSetting('site_name')) || 'Stories Come Alive'; }
 async function logoSrc() { return '/brand/logo?v=' + ((await getSetting('logo_version')) || '0'); }
 function allCategories() {
@@ -128,8 +199,8 @@ function backBar() {
 async function layout(req, { title, body, user }) {
   const name = await siteName();
   const logo = await logoSrc();
-  const yt = await getSetting('youtube_url');
-  const fb = await getSetting('facebook_url');
+  const ytLinks = await getYoutubeLinks();
+  const fbLinks = await getFacebookLinks();
   return `<!DOCTYPE html>
 <html lang="bn">
 <head>
@@ -160,10 +231,10 @@ ${body}
 </main>
 <footer class="footer">
   <div class="footer-brand"><img src="${logo}" alt=""><span>${esc(name)}</span></div>
-  ${(yt || fb) ? '<p class="footer-follow">FOLLOW US</p>' : ''}
+  ${(ytLinks.length || fbLinks.length) ? '<p class="footer-follow">FOLLOW US</p>' : ''}
   <div class="footer-links">
-    ${yt ? `<a href="${esc(yt)}" target="_blank" rel="noopener">▶️ YouTube</a>` : ''}
-    ${fb ? `<a href="${esc(fb)}" target="_blank" rel="noopener">📘 Facebook</a>` : ''}
+    ${ytLinks.map((l) => `<a href="${esc(l.url)}" target="_blank" rel="noopener">▶️ ${esc(l.label || 'YouTube')}</a>`).join('')}
+    ${fbLinks.map((l) => `<a href="${esc(l.url)}" target="_blank" rel="noopener">📘 ${esc(l.label || 'Facebook')}</a>`).join('')}
     <a href="/privacy-policy">Privacy Policy</a>
     <a href="/admin">Admin</a>
   </div>
@@ -582,8 +653,8 @@ app.get('/auth/google/callback', async (req, res) => {
 app.get('/welcome', async (req, res) => {
   const user = await currentUser(req);
   if (!user) return res.redirect('/login');
-  const yt = subscribeUrl(await getSetting('youtube_url'));
-  const fb = String((await getSetting('facebook_url')) || '').trim();
+  const ytLinks = await getYoutubeLinks();
+  const fbLinks = await getFacebookLinks();
   const logo = await logoSrc();
   const body = `
   <section class="auth-wrap">
@@ -592,8 +663,8 @@ app.get('/welcome', async (req, res) => {
       <h1>Welcome, ${esc(user.name)}! 🎉</h1>
       <p class="muted">Your account is ready — you can now watch every video. Join us on YouTube and Facebook too, so new stories reach you first.</p>
       <div class="welcome-btns">
-        ${yt ? `<a class="btn btn-youtube btn-big" href="${esc(yt)}" target="_blank" rel="noopener">▶️ Subscribe on YouTube</a>` : ''}
-        ${fb ? `<a class="btn btn-facebook btn-big" href="${esc(fb)}" target="_blank" rel="noopener">📘 Follow on Facebook</a>` : ''}
+        ${ytLinks.map((l, i) => `<a class="btn btn-youtube btn-big" href="${esc(subscribeUrl(l.url))}" target="_blank" rel="noopener">${socialBtnText('youtube', ytLinks, l, i)}</a>`).join('')}
+        ${fbLinks.map((l, i) => `<a class="btn btn-facebook btn-big" href="${esc(l.url)}" target="_blank" rel="noopener">${socialBtnText('facebook', fbLinks, l, i)}</a>`).join('')}
       </div>
       <a class="btn btn-main btn-big" href="/">📚 Start Watching</a>
     </div>
@@ -947,18 +1018,33 @@ app.get('/admin/settings', async (req, res) => {
   const err = req.query.err ? `<div class="alert alert-error">${esc(req.query.err)}</div>` : '';
   const name = await siteName();
   const logo = await logoSrc();
-  const youtubeUrl = (await getSetting('youtube_url')) || '';
-  const facebookUrl = (await getSetting('facebook_url')) || '';
+  const ytLinks = await getYoutubeLinks();
+  const fbLinks = await getFacebookLinks();
+  const linkRowHtml = (platform, item) => `
+        <div class="linkrow" data-linkrow>
+          <input type="text" class="linkrow-label" name="${platform}_label" value="${esc(item ? item.label : '')}" placeholder="নাম (ঐচ্ছিক)" maxlength="60">
+          <input type="text" class="linkrow-url" name="${platform}_url" value="${esc(item ? item.url : '')}" placeholder="${platform === 'youtube' ? 'https://www.youtube.com/@YourChannel' : 'https://www.facebook.com/YourPage'}">
+          <button type="button" class="btn btn-danger btn-sm" data-remove-link>মুছুন</button>
+        </div>`;
+  const linkGroupHtml = (platform, title, addText, links) => `
+      <div class="linkgroup">
+        <span class="linkgroup-title">${title}</span>
+        <div class="linkrows" data-linkrows="${platform}">
+          ${links.map((l) => linkRowHtml(platform, l)).join('')}
+        </div>
+        <template data-linktemplate="${platform}">${linkRowHtml(platform, null)}</template>
+        <div><button type="button" class="btn btn-ghost btn-sm" data-add-link="${platform}">${addText}</button></div>
+      </div>`;
   res.send(await adminLayout({ title: 'সেটিংস', body: `
   <section class="section">
     <h2 class="section-title">⚙️ সেটিংস</h2>
     ${msg}${err}
     <form method="POST" action="/admin/settings" class="form panel">
       <label>সাইটের নাম<input type="text" name="site_name" value="${esc(name)}" required></label>
-      <label>YouTube চ্যানেলের লিংক<input type="text" name="youtube_url" value="${esc(youtubeUrl)}" placeholder="https://www.youtube.com/@YourChannel"></label>
-      <label>Facebook পেজের লিংক<input type="text" name="facebook_url" value="${esc(facebookUrl)}" placeholder="https://www.facebook.com/YourPage"></label>
+      ${linkGroupHtml('youtube', 'YouTube চ্যানেলের লিংক', '+ আরও YouTube চ্যানেল যোগ করুন', ytLinks)}
+      ${linkGroupHtml('facebook', 'Facebook পেজের লিংক', '+ আরও Facebook পেজ যোগ করুন', fbLinks)}
       <button class="btn btn-main" type="submit">সেভ করুন</button>
-      <p class="muted">YouTube/Facebook লিংক খালি থাকলে নতুন ব্যবহারকারীর স্বাগত পেজে ওই বাটনটা দেখাবে না।</p>
+      <p class="muted">প্রতি সারিতে একটা করে লিংক; নাম দিলে বাটনে সেই নাম দেখাবে; খালি রাখলে লিংক দেখাবে না।</p>
     </form>
     <h2 class="section-title">🖼️ সাইটের লোগো</h2>
     <div class="panel">
@@ -984,8 +1070,13 @@ app.get('/admin/settings', async (req, res) => {
 app.post('/admin/settings', async (req, res) => {
   if (!(await requireAdminPage(req, res))) return;
   await setSetting('site_name', String(req.body.site_name || '').trim() || 'Stories Come Alive');
-  await setSetting('youtube_url', String(req.body.youtube_url || '').trim());
-  await setSetting('facebook_url', String(req.body.facebook_url || '').trim());
+  const ytLinks = linkListFromForm(req.body.youtube_label, req.body.youtube_url);
+  const fbLinks = linkListFromForm(req.body.facebook_label, req.body.facebook_url);
+  await setSetting('youtube_links', JSON.stringify(ytLinks));
+  await setSetting('facebook_links', JSON.stringify(fbLinks));
+  // Keep the legacy single-link keys in sync (first link wins) for consistency.
+  await setSetting('youtube_url', ytLinks.length ? ytLinks[0].url : '');
+  await setSetting('facebook_url', fbLinks.length ? fbLinks[0].url : '');
   res.redirect('/admin/settings?ok=1');
 });
 
