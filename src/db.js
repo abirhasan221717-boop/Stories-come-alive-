@@ -113,6 +113,25 @@ CREATE TABLE IF NOT EXISTS favorites (
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   PRIMARY KEY (user_id, video_id)
 );
+CREATE TABLE IF NOT EXISTS comments (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  video_id INTEGER NOT NULL REFERENCES videos(id),
+  user_id INTEGER NOT NULL REFERENCES users(id),
+  body TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE TABLE IF NOT EXISTS notifications (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  video_id INTEGER NOT NULL REFERENCES videos(id),
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE TABLE IF NOT EXISTS ratings (
+  video_id INTEGER NOT NULL REFERENCES videos(id),
+  user_id INTEGER NOT NULL REFERENCES users(id),
+  stars INTEGER NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (video_id, user_id)
+);
 CREATE TABLE IF NOT EXISTS settings (
   key TEXT PRIMARY KEY,
   value TEXT
@@ -132,8 +151,10 @@ CREATE TABLE IF NOT EXISTS assets (
   if (!videoCols.includes('views')) await client.execute('ALTER TABLE videos ADD COLUMN views INTEGER NOT NULL DEFAULT 0');
   if (!videoCols.includes('source')) await client.execute("ALTER TABLE videos ADD COLUMN source TEXT NOT NULL DEFAULT 'youtube'");
   if (!videoCols.includes('source_url')) await client.execute("ALTER TABLE videos ADD COLUMN source_url TEXT NOT NULL DEFAULT ''");
+  if (!videoCols.includes('yt_views')) await client.execute('ALTER TABLE videos ADD COLUMN yt_views INTEGER NOT NULL DEFAULT 0');
   const userCols = (await client.execute('PRAGMA table_info(users)')).rows.map((r) => r.name);
   if (!userCols.includes('avatar')) await client.execute('ALTER TABLE users ADD COLUMN avatar TEXT');
+  if (!userCols.includes('last_seen_notif')) await client.execute('ALTER TABLE users ADD COLUMN last_seen_notif INTEGER NOT NULL DEFAULT 0');
 
   // ---- seed defaults (first run only) ----
   if (await rawGetSetting('site_name') === null) await rawSetSetting('site_name', 'Stories Come Alive');
