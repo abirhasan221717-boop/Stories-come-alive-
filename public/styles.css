@@ -235,39 +235,45 @@ img { max-width: 100%; }
 .profile-table th { color: var(--muted); font-weight: 500; width: 40%; }
 
 /* ---------- admin ---------- */
-/* Admin header: brand row (logo + name left, Logout button right) over a
-   row of pill nav buttons. The pill row scrolls sideways on narrow screens
-   instead of wrapping into a tangle. */
-.admin-topbar { flex-direction: column; align-items: stretch; gap: 6px; padding: 10px 16px 12px; }
-.admin-toprow { display: flex; align-items: center; gap: 12px; width: 100%; }
-.admin-toprow .brand { margin-right: auto; }
-.admin-toprow-bare { justify-content: center; }
-.admin-toprow-bare .brand { margin-right: 0; }
+/* Admin header: one clean row — logo + name left, Logout and a hamburger
+   button right. The nav lives inside a dropdown panel under the hamburger
+   (text-only rows, current page highlighted gold). */
+.admin-topbar-bare { justify-content: center; }
+.admin-topbar-bare .brand { margin-right: 0; }
+.admin-headbtns { display: flex; align-items: center; gap: 10px; margin-left: auto; }
 .btn-logout {
   background: #3a0d12; border: 1px solid #6e1420; color: #ff9aa5;
   border-radius: 999px; padding: 8px 20px; flex: 0 0 auto;
 }
 .btn-logout:hover { background: #4d1119; border-color: #ff9aa5; color: #ffc2c9; }
-.adminnav {
-  display: flex; gap: 8px; width: 100%;
-  overflow-x: auto; padding: 4px 2px 2px;
-  scrollbar-width: thin; scrollbar-color: var(--line) transparent;
-  -webkit-overflow-scrolling: touch;
+.adminmenu-wrap { position: relative; }
+.hambtn {
+  width: 44px; height: 44px; flex: 0 0 auto; padding: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+  background: var(--bg2); border: 1px solid var(--gold-dark); border-radius: 10px;
+  cursor: pointer; font: inherit;
 }
-.adminnav::-webkit-scrollbar { height: 5px; }
-.adminnav::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
-.adminnav-link {
-  flex: 0 0 auto; white-space: nowrap;
-  padding: 8px 18px; border: 1px solid var(--line); border-radius: 999px;
-  background: var(--bg2); color: var(--muted);
-  font-weight: 600; font-size: 0.95rem; line-height: 1.25;
+.hambtn span { display: block; width: 20px; height: 2px; border-radius: 2px; background: var(--gold); }
+.hambtn:hover { border-color: var(--gold); }
+.hambtn[aria-expanded="true"] { border-color: var(--gold); background: var(--panel); }
+.adminmenu {
+  position: absolute; top: calc(100% + 8px); right: 0; z-index: 60;
+  min-width: 224px; padding: 6px;
+  display: flex; flex-direction: column;
+  background: var(--panel); border: 1px solid var(--gold-dark); border-radius: 12px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5);
 }
-.adminnav-link:hover { color: var(--text); border-color: var(--gold); text-decoration: none; }
-.adminnav-link.active {
+.adminmenu[hidden] { display: none; }
+.adminmenu-link {
+  display: block; padding: 12px 14px; border-radius: 8px;
+  color: var(--muted); font-weight: 600; font-size: 1rem; line-height: 1.3;
+}
+.adminmenu-link:hover { color: var(--text); background: var(--bg2); text-decoration: none; }
+.adminmenu-link.active {
   background: linear-gradient(180deg, var(--gold-bright), var(--gold));
-  border-color: var(--gold-dark); color: #241a03;
+  color: #241a03;
 }
-.adminnav-link.active:hover { color: #241a03; }
+.adminmenu-link.active:hover { color: #241a03; }
 .statgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 18px; }
 .stat { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 4px; }
 .stat strong { font-size: 1.8rem; color: var(--gold); }
