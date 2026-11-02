@@ -92,6 +92,19 @@ document.querySelectorAll('[data-syn-toggle]').forEach((btn) => {
   });
 });
 
+// Comment replies: a comment's Reply button shows/hides its reply form.
+document.querySelectorAll('[data-reply-toggle]').forEach((btn) => {
+  const form = document.querySelector('[data-reply-form="' + btn.getAttribute('data-reply-toggle') + '"]');
+  if (!form) return;
+  btn.addEventListener('click', () => {
+    form.hidden = !form.hidden;
+    if (!form.hidden) {
+      const ta = form.querySelector('textarea');
+      if (ta) ta.focus();
+    }
+  });
+});
+
 // Homepage poster rows: prev/next scroll buttons (native swipe works on touch devices).
 document.querySelectorAll('.rowwrap').forEach((wrap) => {
   const scroller = wrap.querySelector('.rowscroll');
