@@ -130,6 +130,8 @@ CREATE TABLE IF NOT EXISTS assets (
   if (!videoCols.includes('featured')) await client.execute('ALTER TABLE videos ADD COLUMN featured INTEGER NOT NULL DEFAULT 0');
   if (!videoCols.includes('rank')) await client.execute('ALTER TABLE videos ADD COLUMN rank INTEGER');
   if (!videoCols.includes('views')) await client.execute('ALTER TABLE videos ADD COLUMN views INTEGER NOT NULL DEFAULT 0');
+  if (!videoCols.includes('source')) await client.execute("ALTER TABLE videos ADD COLUMN source TEXT NOT NULL DEFAULT 'youtube'");
+  if (!videoCols.includes('source_url')) await client.execute("ALTER TABLE videos ADD COLUMN source_url TEXT NOT NULL DEFAULT ''");
   const userCols = (await client.execute('PRAGMA table_info(users)')).rows.map((r) => r.name);
   if (!userCols.includes('avatar')) await client.execute('ALTER TABLE users ADD COLUMN avatar TEXT');
 
