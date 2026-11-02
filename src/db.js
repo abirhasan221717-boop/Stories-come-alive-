@@ -154,6 +154,8 @@ CREATE TABLE IF NOT EXISTS assets (
   if (!videoCols.includes('yt_views')) await client.execute('ALTER TABLE videos ADD COLUMN yt_views INTEGER NOT NULL DEFAULT 0');
   const userCols = (await client.execute('PRAGMA table_info(users)')).rows.map((r) => r.name);
   if (!userCols.includes('avatar')) await client.execute('ALTER TABLE users ADD COLUMN avatar TEXT');
+  const commentCols = (await client.execute('PRAGMA table_info(comments)')).rows.map((r) => r.name);
+  if (!commentCols.includes('parent_id')) await client.execute('ALTER TABLE comments ADD COLUMN parent_id INTEGER');
   if (!userCols.includes('last_seen_notif')) await client.execute('ALTER TABLE users ADD COLUMN last_seen_notif INTEGER NOT NULL DEFAULT 0');
 
   // ---- seed defaults (first run only) ----
