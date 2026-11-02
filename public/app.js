@@ -104,6 +104,38 @@ document.querySelectorAll('.rowwrap').forEach((wrap) => {
   });
 });
 
+// Follow / Subscribe panel: opened from the public header button, closed
+// with the ✕ button, a backdrop click, or Escape. The panel markup is
+// server-rendered and its buttons are plain links, so this stays a pure
+// progressive enhancement.
+const followPanel = document.querySelector('[data-follow-panel]');
+if (followPanel) {
+  let followLastFocus = null;
+  const openFollowPanel = () => {
+    followLastFocus = document.activeElement;
+    followPanel.hidden = false;
+    document.body.style.overflow = 'hidden';
+    const closeBtn = followPanel.querySelector('[data-follow-close]');
+    if (closeBtn) closeBtn.focus();
+  };
+  const closeFollowPanel = () => {
+    followPanel.hidden = true;
+    document.body.style.overflow = '';
+    if (followLastFocus && typeof followLastFocus.focus === 'function') followLastFocus.focus();
+  };
+  document.querySelectorAll('[data-follow-open]').forEach((btn) => {
+    btn.addEventListener('click', openFollowPanel);
+  });
+  followPanel.addEventListener('click', (e) => {
+    if (e.target === followPanel || (e.target && typeof e.target.closest === 'function' && e.target.closest('[data-follow-close]'))) {
+      closeFollowPanel();
+    }
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !followPanel.hidden) closeFollowPanel();
+  });
+}
+
 // Admin Settings: social-link list editor — add/remove channel/page rows.
 // Pure progressive enhancement: rows are ordinary form fields, so the form
 // still submits correctly with JS disabled (existing rows can be edited or
