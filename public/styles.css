@@ -631,3 +631,57 @@ body.adminui .gearbtn { flex: 0 0 auto; }
 /* ---------- card view count ---------- */
 .card-views { display: flex; align-items: center; gap: 5px; margin: 3px 0 0; font-size: 0.8rem; color: var(--muted); }
 .card-views .ic { color: var(--gold); }
+
+/* ---------- NEW chip on fresh video cards ---------- */
+.new-chip { position: absolute; top: 8px; right: 8px; background: linear-gradient(180deg, var(--gold-bright), var(--gold)); color: #241a03; border-radius: 6px; padding: 2px 8px; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.6px; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+
+/* ---------- notifications bell (public header) ---------- */
+.bell-link { position: relative; display: inline-flex; align-items: center; }
+.bell-badge { position: absolute; top: -2px; right: -2px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: #d92c20; color: #fff; font-size: 0.72rem; font-weight: 800; line-height: 18px; text-align: center; box-shadow: 0 1px 5px rgba(0,0,0,0.45); }
+
+/* ---------- comments (watch page) ---------- */
+.comment-form { margin-bottom: 22px; }
+.comment-form textarea { width: 100%; }
+.comments-list { display: flex; flex-direction: column; gap: 18px; margin-bottom: 8px; }
+.comment { display: flex; gap: 12px; align-items: flex-start; }
+.comment-avatar { width: 40px; height: 40px; flex: 0 0 40px; border-radius: 50%; object-fit: cover; border: 1px solid var(--gold); }
+.comment-avatar-initial { display: inline-flex; align-items: center; justify-content: center; background: var(--bg2); color: var(--gold-bright); font-weight: 800; font-size: 1.05rem; }
+.comment-main { flex: 1; min-width: 0; }
+.comment-head { display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap; margin-bottom: 3px; }
+.comment-name { font-weight: 700; }
+.comment-time { color: var(--muted); font-size: 0.82rem; }
+.comment-body { line-height: 1.55; overflow-wrap: break-word; }
+.comment-del { background: none; border: 0; padding: 2px 0 0; font: inherit; font-size: 0.82rem; font-weight: 600; color: #ff9aa5; cursor: pointer; }
+.comment-del:hover { text-decoration: underline; }
+
+/* ---------- notifications page ---------- */
+.notif-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 22px; }
+.notif-row { display: flex; gap: 14px; align-items: center; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 10px 14px 10px 10px; color: var(--text); }
+.notif-row:hover { text-decoration: none; border-color: var(--gold); }
+.notif-unread { border-color: var(--gold-dark); background: linear-gradient(180deg, rgba(217, 164, 65, 0.13), rgba(217, 164, 65, 0.04)), var(--panel); }
+.notif-thumb { width: 118px; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 9px; flex: 0 0 118px; background: #000; }
+.notif-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.notif-label { color: var(--muted); font-size: 0.82rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.notif-pill { background: linear-gradient(180deg, var(--gold-bright), var(--gold)); color: #241a03; border-radius: 999px; padding: 0 8px; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.4px; }
+.notif-title { font-weight: 700; font-size: 1.02rem; line-height: 1.3; }
+.notif-sub { color: var(--gold-bright); font-size: 0.9rem; }
+.notif-time { color: var(--muted); font-size: 0.82rem; white-space: nowrap; }
+@media (max-width: 560px) {
+  .notif-thumb { width: 92px; flex-basis: 92px; }
+  .notif-time { display: none; }
+}
+
+/* ---------- star rating (watch page + cards) ---------- */
+.rate-block { margin-top: 10px; }
+.rate-summary { display: flex; align-items: center; gap: 6px; font-weight: 700; }
+.rate-summary .ic { color: var(--gold); }
+.rate-form { display: flex; align-items: center; gap: 2px; margin-top: 4px; flex-wrap: wrap; }
+.star-btn { background: none; border: 0; padding: 3px; cursor: pointer; color: var(--muted); line-height: 0; border-radius: 8px; }
+.star-btn:hover { color: var(--gold-bright); }
+.star-btn.star-on { color: var(--gold); }
+.star-btn .ic { width: 26px; height: 26px; }
+.rate-hint { color: var(--muted); font-size: 0.85rem; margin-left: 8px; }
+.card-rating { color: var(--muted); }
+
+/* ---------- admin: YouTube views refresh ---------- */
+.yt-refresh { margin-bottom: 20px; }
