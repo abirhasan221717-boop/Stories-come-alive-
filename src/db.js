@@ -60,6 +60,8 @@ CREATE TABLE IF NOT EXISTS assets (
 const videoCols = db.prepare('PRAGMA table_info(videos)').all().map((r) => r.name);
 if (!videoCols.includes('synopsis')) db.exec("ALTER TABLE videos ADD COLUMN synopsis TEXT NOT NULL DEFAULT ''");
 if (!videoCols.includes('featured')) db.exec('ALTER TABLE videos ADD COLUMN featured INTEGER NOT NULL DEFAULT 0');
+const userCols = db.prepare('PRAGMA table_info(users)').all().map((r) => r.name);
+if (!userCols.includes('avatar')) db.exec('ALTER TABLE users ADD COLUMN avatar TEXT');
 
 function getSetting(key) {
   const row = db.prepare('SELECT value FROM settings WHERE key = ?').get(key);

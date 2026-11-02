@@ -9,7 +9,7 @@ const { db, getSetting, setSetting, getAsset, setAsset, deleteAsset } = require(
 const PORT = Number(process.env.PORT || 3000);
 const app = express();
 app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+app.use(express.json({ limit: '1mb' })); // profile-avatar data URLs exceed the 100 KB default
 app.use(express.static(path.join(__dirname, '..', 'public'), { maxAge: '1h' }));
 
 const upload = multer({
@@ -108,6 +108,13 @@ function safeNext(next, fallback) {
   const n = String(next || '');
   return n.startsWith('/') && !n.startsWith('//') ? n : fallback;
 }
+// Obvious way back / home for inner user pages (profile, favorites, watch).
+function backBar() {
+  return `<nav class="backbar">
+    <button type="button" class="btn btn-ghost btn-sm" data-back>← পেছনে</button>
+    <a class="btn btn-ghost btn-sm" href="/">🏠 হোমপেজ</a>
+  </nav>`;
+}
 
 // ---------------- layout ----------------
 function layout(req, { title, body, user }) {
@@ -134,7 +141,7 @@ function layout(req, { title, body, user }) {
   <div class="userbox">
     ${user
       ? `<a class="navlink" href="/favorites">❤️ পছন্দের তালিকা</a>
-         <a class="navlink" href="/profile">👤 প্রোফাইল</a>
+         <a class="navlink" href="/profile">${user.avatar ? `<img class="nav-avatar" src="${esc(user.avatar)}" alt="">` : '👤'} প্রোফাইল</a>
          <form method="POST" action="/logout" class="inlineform"><button class="btn btn-ghost btn-sm" type="submit">লগআউট</button></form>`
       : `<a class="btn btn-main signin-btn" href="/login">লগইন / Sign In</a>`}
   </div>
@@ -424,6 +431,7 @@ app.get('/watch/:id', (req, res) => {
     WHERE v.category_id IS ? AND v.id != ? ORDER BY v.id DESC LIMIT 6`).all(v.category_id, v.id);
   const body = `
   <section class="section watch-section">
+    ${backBar()}
     <div class="player">
       <iframe src="https://www.youtube.com/embed/${esc(v.youtube_id)}" title="${esc(v.title)}"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
@@ -465,6 +473,7 @@ app.get('/favorites', (req, res) => {
     WHERE f.user_id = ? ORDER BY f.created_at DESC`).all(user.id);
   const body = `
   <section class="section">
+    ${backBar()}
     <h2 class="section-title">❤️ আমার পছন্দের তালিকা</h2>
     ${videos.length ? grid(videos, user) : '<div class="empty">পছন্দের তালিকা এখনো খালি — ভিডিও দেখার সময় ❤️ চাপলেই এখানে জমা হবে।</div>'}
   </section>`;
@@ -476,10 +485,17 @@ app.get('/profile', (req, res) => {
   if (!user) return res.redirect('/login?next=' + encodeURIComponent('/profile'));
   const favCount = db.prepare('SELECT COUNT(*) AS c FROM favorites WHERE user_id = ?').get(user.id).c;
   const body = `
+  <div class="page-top">${backBar()}</div>
   <section class="auth-wrap">
     <div class="auth-card">
-      <img class="auth-logo" src="${logoSrc()}" alt="">
+      <img id="profileAvatarImg" class="auth-logo profile-avatar" src="${user.avatar ? esc(user.avatar) : logoSrc()}" alt="প্রোফাইল ছবি">
       <h1>👤 আমার প্রোফাইল</h1>
+      <div class="avatar-upload">
+        <input type="file" id="avatarInput" accept="image/*" hidden>
+        <label class="btn btn-ghost" for="avatarInput">📸 প্রোফাইল ছবি বদলান</label>
+        <button type="button" id="avatarSave" class="btn btn-main" disabled>💾 ছবি সেভ করুন</button>
+        <p id="avatarMsg" class="avatar-msg" role="status"></p>
+      </div>
       <table class="profile-table">
         <tr><th>নাম</th><td>${esc(user.name)}</td></tr>
         <tr><th>ইমেইল</th><td>${esc(user.email)}</td></tr>
@@ -491,6 +507,21 @@ app.get('/profile', (req, res) => {
     </div>
   </section>`;
   res.send(layout(req, { title: 'প্রোফাইল', body, user }));
+});
+
+// Profile picture: the browser downscales the image and sends a small JPEG data URL.
+app.post('/profile/avatar', (req, res) => {
+  const user = currentUser(req);
+  if (!user) return res.status(401).json({ ok: false, error: 'আগে লগইন করুন।' });
+  const avatar = req.body && req.body.avatar;
+  if (typeof avatar !== 'string' || !/^data:image\/(jpeg|png|webp);base64,/.test(avatar)) {
+    return res.status(400).json({ ok: false, error: 'এটা ছবি নয় — JPG/PNG ছবি বেছে নিন।' });
+  }
+  if (avatar.length > 250 * 1024) {
+    return res.status(413).json({ ok: false, error: 'ছবিটা অনেক বড় — আরেকটা ছোট ছবি দিন।' });
+  }
+  db.prepare('UPDATE users SET avatar = ? WHERE id = ?').run(avatar, user.id);
+  res.json({ ok: true });
 });
 
 // ---------------- admin ----------------
