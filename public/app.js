@@ -48,7 +48,7 @@ if (avatarInput) {
       pendingDataUrl = canvas.toDataURL('image/jpeg', 0.85);
       if (avatarImg) avatarImg.src = pendingDataUrl;
       if (saveBtn) saveBtn.disabled = false;
-      showMsg('Photo ready — now tap "💾 Save photo".', true);
+      showMsg('Photo ready — now tap "Save photo".', true);
     };
     img.onerror = () => {
       URL.revokeObjectURL(url);
@@ -69,7 +69,7 @@ if (avatarInput) {
         const data = await res.json().catch(() => ({}));
         if (res.ok && data.ok) {
           pendingDataUrl = '';
-          showMsg('✅ Profile photo saved!', true);
+          showMsg('Profile photo saved!', true);
         } else {
           saveBtn.disabled = false;
           showMsg(data.error || "Couldn't save — please try again.", false);
