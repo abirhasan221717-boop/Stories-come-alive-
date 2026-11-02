@@ -30,7 +30,7 @@ if (avatarInput) {
     const file = avatarInput.files && avatarInput.files[0];
     if (!file) return;
     if (!/^image\//.test(file.type)) {
-      showMsg('এটা ছবি নয় — JPG/PNG ছবি বেছে নিন।', false);
+      showMsg("That's not an image — please choose a JPG/PNG photo.", false);
       return;
     }
     const url = URL.createObjectURL(file);
@@ -48,11 +48,11 @@ if (avatarInput) {
       pendingDataUrl = canvas.toDataURL('image/jpeg', 0.85);
       if (avatarImg) avatarImg.src = pendingDataUrl;
       if (saveBtn) saveBtn.disabled = false;
-      showMsg('ছবি তৈরি — এবার "💾 ছবি সেভ করুন" চাপুন।', true);
+      showMsg('Photo ready — now tap "💾 Save photo".', true);
     };
     img.onerror = () => {
       URL.revokeObjectURL(url);
-      showMsg('ছবিটা পড়া যাচ্ছে না — অন্য ছবি চেষ্টা করুন।', false);
+      showMsg("Couldn't read that photo — please try another one.", false);
     };
     img.src = url;
   });
@@ -69,18 +69,28 @@ if (avatarInput) {
         const data = await res.json().catch(() => ({}));
         if (res.ok && data.ok) {
           pendingDataUrl = '';
-          showMsg('✅ প্রোফাইল ছবি সেভ হয়েছে!', true);
+          showMsg('✅ Profile photo saved!', true);
         } else {
           saveBtn.disabled = false;
-          showMsg(data.error || 'সেভ হয়নি — আবার চেষ্টা করুন।', false);
+          showMsg(data.error || "Couldn't save — please try again.", false);
         }
       } catch {
         saveBtn.disabled = false;
-        showMsg('সেভ হয়নি — ইন্টারনেট সংযোগ দেখে আবার চেষ্টা করুন।', false);
+        showMsg("Couldn't save — check your connection and try again.", false);
       }
     });
   }
 }
+
+// Featured hero synopsis: Read More / Read Less expands and collapses in place.
+document.querySelectorAll('[data-syn-toggle]').forEach((btn) => {
+  const syn = btn.previousElementSibling;
+  if (!syn || !syn.hasAttribute('data-syn')) return;
+  btn.addEventListener('click', () => {
+    const open = syn.classList.toggle('open');
+    btn.textContent = open ? 'Read Less' : 'Read More';
+  });
+});
 
 // Homepage poster rows: prev/next scroll buttons (native swipe works on touch devices).
 document.querySelectorAll('.rowwrap').forEach((wrap) => {
