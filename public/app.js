@@ -103,3 +103,28 @@ document.querySelectorAll('.rowwrap').forEach((wrap) => {
     });
   });
 });
+
+// Admin Settings: social-link list editor — add/remove channel/page rows.
+// Pure progressive enhancement: rows are ordinary form fields, so the form
+// still submits correctly with JS disabled (existing rows can be edited or
+// blanked; only adding brand-new rows needs JS).
+document.addEventListener('click', (e) => {
+  if (!e.target || typeof e.target.closest !== 'function') return;
+  const addBtn = e.target.closest('[data-add-link]');
+  if (addBtn) {
+    const platform = addBtn.getAttribute('data-add-link');
+    const rows = document.querySelector('[data-linkrows="' + platform + '"]');
+    const tpl = document.querySelector('template[data-linktemplate="' + platform + '"]');
+    if (rows && tpl) {
+      rows.appendChild(tpl.content.cloneNode(true));
+      const first = rows.lastElementChild ? rows.lastElementChild.querySelector('input') : null;
+      if (first) first.focus();
+    }
+    return;
+  }
+  const removeBtn = e.target.closest('[data-remove-link]');
+  if (removeBtn) {
+    const row = removeBtn.closest('[data-linkrow]');
+    if (row) row.remove();
+  }
+});
