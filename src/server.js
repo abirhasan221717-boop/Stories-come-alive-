@@ -84,6 +84,35 @@ function extractYouTubeId(input) {
   for (const p of patterns) { const m = s.match(p); if (m) return m[1]; }
   return null;
 }
+// Facebook video links: page videos, watch?v=, reels, share links and
+// fb.watch short links. Returns the URL to hand to Facebook's embed
+// plugin, or null when the input is not a recognizable Facebook video.
+// (Checked before YouTube: a numeric Facebook v= of 11+ digits would
+// otherwise match the YouTube v= pattern.)
+function extractFacebookUrl(input) {
+  const s = String(input || '').trim();
+  if (!s) return null;
+  const noScheme = s.replace(/^https?:\/\//i, '');
+  const short = noScheme.match(/^fb\.watch\/([A-Za-z0-9_-]+)\/?(?:[?#].*)?$/i);
+  if (short) return 'https://fb.watch/' + short[1] + '/';
+  const m = noScheme.match(/^(?:www\.|m\.|web\.)?facebook\.com(\/.*)?$/i);
+  if (!m) return null;
+  const path = (m[1] || '/').split('#')[0];
+  if (/\/videos\/\d+/.test(path)) return 'https://www.facebook.com' + path;
+  if (/\/reel\/\d+/.test(path)) return 'https://www.facebook.com' + path;
+  if (/\/share\/[vr]\/[A-Za-z0-9_-]+/.test(path)) return 'https://www.facebook.com' + path;
+  if (/[?&]v=\d+/.test(path)) return 'https://www.facebook.com' + path;
+  return null;
+}
+// Accepts a YouTube or Facebook video link; returns how to store it.
+function parseVideoLink(input) {
+  const fb = extractFacebookUrl(input);
+  if (fb) return { source: 'facebook', youtubeId: '', url: fb };
+  const yid = extractYouTubeId(input);
+  if (yid) return { source: 'youtube', youtubeId: yid, url: '' };
+  return null;
+}
+const VIDEO_LINK_ERROR = 'Please paste a valid YouTube or Facebook video link.';
 function subscribeUrl(url) {
   const u = String(url || '').trim();
   if (!u) return '';
@@ -328,7 +357,7 @@ async function layout(req, { title, body, user }) {
 <link rel="icon" href="/brand/logo">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=30">
+<link rel="stylesheet" href="/styles.css?v=32">
 </head>
 <body class="pubui">
 <header class="topbar">
@@ -362,7 +391,7 @@ ${body}
   <p class="footer-copy">© ${new Date().getFullYear()} ${esc(name)} — All rights reserved.</p>
 </footer>
 ${followPanelHtml(ytLinks, fbLinks)}
-<script src="/app.js?v=30"></script>
+<script src="/app.js?v=32"></script>
 </body>
 </html>`;
 }
@@ -416,22 +445,29 @@ async function adminLayout({ title, body, bare = false }) {
 <title>${esc(title)} — Admin — ${esc(name)}</title>
 <link rel="icon" href="/brand/logo">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=30">
+<link rel="stylesheet" href="/styles.css?v=32">
 </head>
 <body class="adminui">
 ${header}
 <main>
 ${body}
 </main>
-<script src="/app.js?v=30"></script>
+<script src="/app.js?v=32"></script>
 </body>
 </html>`;
+}
+
+// Facebook exposes no public thumbnail URL, so its cards and hero fall
+// back to the site's brand hero artwork (/banner.jpg — the same image
+// the homepage hero uses when no video is featured).
+function cardThumb(v) {
+  return v.source === 'facebook' ? '/banner.jpg' : `https://i.ytimg.com/vi/${esc(v.youtube_id)}/hqdefault.jpg`;
 }
 
 function videoCard(v, user, pos) {
   return `<a class="card" href="/watch/${v.id}">
     <div class="thumb">
-      <img loading="lazy" src="https://i.ytimg.com/vi/${esc(v.youtube_id)}/hqdefault.jpg" alt="${esc(v.title)}">
+      <img loading="lazy" src="${cardThumb(v)}" alt="${esc(v.title)}">
       ${pos ? `<span class="rank-chip">#${pos}</span>` : ''}
       ${v.episode ? `<span class="ep-badge">${esc(v.episode)}</span>` : ''}
       <span class="play-badge">▶</span>
@@ -505,8 +541,10 @@ app.get('/', async (req, res) => {
   if (featured) {
     hero = `
   <section class="fhero">
-    <img class="fhero-img" src="https://i.ytimg.com/vi/${esc(featured.youtube_id)}/maxresdefault.jpg"
-      onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/${esc(featured.youtube_id)}/hqdefault.jpg'" alt="${esc(featured.title)}">
+    ${featured.source === 'facebook'
+      ? `<img class="fhero-img" src="/banner.jpg" alt="${esc(featured.title)}">`
+      : `<img class="fhero-img" src="https://i.ytimg.com/vi/${esc(featured.youtube_id)}/maxresdefault.jpg"
+      onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/${esc(featured.youtube_id)}/hqdefault.jpg'" alt="${esc(featured.title)}">`}
     <div class="fhero-shade"></div>
     <div class="fhero-content">
       ${featuredTopPos ? `<span class="fhero-topbadge">Top ${featuredTopPos}</span>` : ''}
@@ -844,8 +882,11 @@ app.get('/watch/:id', async (req, res) => {
   <section class="section watch-section">
     ${backBar()}
     <div class="player">
-      <iframe src="https://www.youtube.com/embed/${esc(v.youtube_id)}" title="${esc(v.title)}"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      ${v.source === 'facebook'
+        ? `<iframe src="https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(v.source_url || '')}&show_text=false" title="${esc(v.title)}"
+        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture" allowfullscreen></iframe>`
+        : `<iframe src="https://www.youtube.com/embed/${esc(v.youtube_id)}" title="${esc(v.title)}"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`}
     </div>
     <div class="watch-head">
       <div>
@@ -1025,6 +1066,7 @@ app.post('/admin/logout', async (req, res) => {
 
 app.get('/admin/videos', async (req, res) => {
   if (!(await requireAdminPage(req, res))) return;
+  const err = req.query.err ? `<div class="alert alert-error">${esc(req.query.err)}</div>` : '';
   const cats = await allCategories();
   const videos = await queryAll(`SELECT v.*, c.name AS category_name FROM videos v
     LEFT JOIN categories c ON c.id = v.category_id ORDER BY v.id DESC`);
@@ -1032,8 +1074,10 @@ app.get('/admin/videos', async (req, res) => {
   res.send(await adminLayout({ title: 'Videos', body: `
   <section class="section">
     <h2 class="section-title">${ICONS.plusCircle}Add a New Video</h2>
+    ${err}
     <form method="POST" action="/admin/videos" class="form panel">
-      <label>YouTube Link<input type="text" name="youtube" required placeholder="https://www.youtube.com/watch?v=..."></label>
+      <label>Video Link (YouTube or Facebook)<input type="text" name="link" required placeholder="Paste a YouTube or Facebook video link…"></label>
+      <p class="muted">Facebook videos must be public (e.g. on a Page) to play here.</p>
       <label>Video Title<input type="text" name="title" required placeholder="e.g. The Black River"></label>
       <label>Story / Series Name<input type="text" name="story" placeholder="e.g. AGNIBRITTA"></label>
       <label>Episode<input type="text" name="episode" placeholder="e.g. Season 1 • Chapter 01"></label>
@@ -1046,8 +1090,8 @@ app.get('/admin/videos', async (req, res) => {
     ${videos.length ? `<div class="tablewrap"><table class="admintable">
       <tr><th>Thumbnail</th><th>Title</th><th>Story / Episode</th><th>Category</th><th>Views</th><th></th></tr>
       ${videos.map((v) => `<tr>
-        <td><img class="mini-thumb" src="https://i.ytimg.com/vi/${esc(v.youtube_id)}/default.jpg" alt=""></td>
-        <td>${esc(v.title)}${v.featured ? ' <span class="feat-badge">Featured</span>' : ''}</td>
+        <td><img class="mini-thumb" src="${v.source === 'facebook' ? '/banner.jpg' : `https://i.ytimg.com/vi/${esc(v.youtube_id)}/default.jpg`}" alt=""></td>
+        <td>${esc(v.title)}${v.featured ? ' <span class="feat-badge">Featured</span>' : ''} <span class="src-badge">${v.source === 'facebook' ? 'Facebook' : 'YouTube'}</span></td>
         <td>${esc(v.story)} ${v.episode ? '• ' + esc(v.episode) : ''}</td>
         <td>${esc(v.category_name || '—')}</td>
         <td>${Number(v.views || 0)}</td>
@@ -1061,14 +1105,14 @@ app.get('/admin/videos', async (req, res) => {
 
 app.post('/admin/videos', async (req, res) => {
   if (!(await requireAdminPage(req, res))) return;
-  const yid = extractYouTubeId(req.body.youtube);
-  if (!yid) return res.redirect('/admin/videos');
+  const parsed = parseVideoLink(req.body.link);
+  if (!parsed) return res.redirect('/admin/videos?err=' + encodeURIComponent(VIDEO_LINK_ERROR));
   const featured = req.body.featured ? 1 : 0;
   if (featured) await run('UPDATE videos SET featured = 0');
-  await run('INSERT INTO videos(youtube_id, title, story, episode, synopsis, featured, category_id) VALUES(?, ?, ?, ?, ?, ?, ?)',
-    [yid, String(req.body.title || '').trim() || 'Untitled', String(req.body.story || '').trim(),
+  await run('INSERT INTO videos(youtube_id, title, story, episode, synopsis, featured, category_id, source, source_url) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    [parsed.youtubeId, String(req.body.title || '').trim() || 'Untitled', String(req.body.story || '').trim(),
       String(req.body.episode || '').trim(), String(req.body.synopsis || '').trim(), featured,
-      Number(req.body.category_id) || null]);
+      Number(req.body.category_id) || null, parsed.source, parsed.url]);
   res.redirect('/admin/videos');
 });
 
@@ -1076,12 +1120,15 @@ app.get('/admin/videos/:id/edit', async (req, res) => {
   if (!(await requireAdminPage(req, res))) return;
   const v = await videoRow(Number(req.params.id));
   if (!v) return res.redirect('/admin/videos');
+  const err = req.query.err ? `<div class="alert alert-error">${esc(req.query.err)}</div>` : '';
   const cats = await allCategories();
   res.send(await adminLayout({ title: 'Edit Video', body: `
   <section class="section">
     <h2 class="section-title">${ICONS.pencil}Edit Video</h2>
+    ${err}
     <form method="POST" action="/admin/videos/${v.id}/edit" class="form panel">
-      <label>YouTube Link<input type="text" name="youtube" required value="https://www.youtube.com/watch?v=${esc(v.youtube_id)}"></label>
+      <label>Video Link (YouTube or Facebook)<input type="text" name="link" required value="${esc(v.source === 'facebook' ? (v.source_url || '') : 'https://www.youtube.com/watch?v=' + v.youtube_id)}"></label>
+      <p class="muted">Facebook videos must be public (e.g. on a Page) to play here.</p>
       <label>Video Title<input type="text" name="title" required value="${esc(v.title)}"></label>
       <label>Story / Series Name<input type="text" name="story" value="${esc(v.story)}"></label>
       <label>Episode<input type="text" name="episode" value="${esc(v.episode)}"></label>
@@ -1096,15 +1143,15 @@ app.get('/admin/videos/:id/edit', async (req, res) => {
 
 app.post('/admin/videos/:id/edit', async (req, res) => {
   if (!(await requireAdminPage(req, res))) return;
-  const yid = extractYouTubeId(req.body.youtube);
-  if (!yid) return res.redirect('/admin/videos');
   const id = Number(req.params.id);
+  const parsed = parseVideoLink(req.body.link);
+  if (!parsed) return res.redirect(`/admin/videos/${id}/edit?err=` + encodeURIComponent(VIDEO_LINK_ERROR));
   const featured = req.body.featured ? 1 : 0;
   if (featured) await run('UPDATE videos SET featured = 0 WHERE id != ?', [id]);
-  await run('UPDATE videos SET youtube_id = ?, title = ?, story = ?, episode = ?, synopsis = ?, featured = ?, category_id = ? WHERE id = ?',
-    [yid, String(req.body.title || '').trim() || 'Untitled', String(req.body.story || '').trim(),
+  await run('UPDATE videos SET youtube_id = ?, title = ?, story = ?, episode = ?, synopsis = ?, featured = ?, category_id = ?, source = ?, source_url = ? WHERE id = ?',
+    [parsed.youtubeId, String(req.body.title || '').trim() || 'Untitled', String(req.body.story || '').trim(),
       String(req.body.episode || '').trim(), String(req.body.synopsis || '').trim(), featured,
-      Number(req.body.category_id) || null, id]);
+      Number(req.body.category_id) || null, parsed.source, parsed.url, id]);
   res.redirect('/admin/videos');
 });
 
