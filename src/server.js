@@ -207,6 +207,7 @@ const ICONS = {
   key: lineIcon('<circle cx="8" cy="15.5" r="4.8"/><path d="M11.4 12.1L20.5 3"/><path d="M17.3 6.2l2 2"/>'),
   lock: lineIcon(LOCK_PATH),
   lockSm: lineIcon(LOCK_PATH, true),
+  eyeSm: lineIcon('<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/>', true),
   bell: lineIcon('<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>'),
   heart: lineIcon(HEART_PATH),
   heartFilled: `<svg class="ic" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${HEART_PATH}</svg>`,
@@ -357,7 +358,7 @@ async function layout(req, { title, body, user }) {
 <link rel="icon" href="/brand/logo">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=32">
+<link rel="stylesheet" href="/styles.css?v=33">
 </head>
 <body class="pubui">
 <header class="topbar">
@@ -391,7 +392,7 @@ ${body}
   <p class="footer-copy">© ${new Date().getFullYear()} ${esc(name)} — All rights reserved.</p>
 </footer>
 ${followPanelHtml(ytLinks, fbLinks)}
-<script src="/app.js?v=32"></script>
+<script src="/app.js?v=33"></script>
 </body>
 </html>`;
 }
@@ -445,14 +446,14 @@ async function adminLayout({ title, body, bare = false }) {
 <title>${esc(title)} — Admin — ${esc(name)}</title>
 <link rel="icon" href="/brand/logo">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=32">
+<link rel="stylesheet" href="/styles.css?v=33">
 </head>
 <body class="adminui">
 ${header}
 <main>
 ${body}
 </main>
-<script src="/app.js?v=32"></script>
+<script src="/app.js?v=33"></script>
 </body>
 </html>`;
 }
@@ -468,7 +469,7 @@ function videoCard(v, user, pos) {
   return `<a class="card" href="/watch/${v.id}">
     <div class="thumb">
       <img loading="lazy" src="${cardThumb(v)}" alt="${esc(v.title)}">
-      ${pos ? `<span class="rank-chip">#${pos}</span>` : ''}
+      ${pos ? `<span class="rank-chip">Top ${pos}</span>` : ''}
       ${v.episode ? `<span class="ep-badge">${esc(v.episode)}</span>` : ''}
       <span class="play-badge">▶</span>
     </div>
@@ -476,6 +477,7 @@ function videoCard(v, user, pos) {
       <h3>${esc(v.title)}</h3>
       ${v.story ? `<p class="card-story">${esc(v.story)}</p>` : ''}
       ${v.category_name ? `<p class="card-cat">${esc(v.category_name)}</p>` : ''}
+      <p class="card-views">${ICONS.eyeSm} ${Number(v.views || 0)} ${Number(v.views || 0) === 1 ? 'view' : 'views'}</p>
       ${user ? '' : '<p class="card-lock">' + ICONS.lockSm + 'Sign in to watch</p>'}
     </div>
   </a>`;
