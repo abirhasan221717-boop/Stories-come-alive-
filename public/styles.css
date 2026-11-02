@@ -198,6 +198,19 @@ img { max-width: 100%; }
 .auth-alt { color: var(--muted); }
 .welcome-card { max-width: 480px; }
 .welcome-btns { display: flex; flex-direction: column; gap: 10px; }
+
+/* ---------- back bar / profile ---------- */
+.page-top { max-width: 1180px; margin: 0 auto; padding: 16px 16px 0; width: 100%; }
+.backbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.section .backbar { margin-bottom: 14px; }
+.profile-avatar { width: 112px; height: 112px; }
+.nav-avatar { width: 22px; height: 22px; border-radius: 50%; object-fit: cover; border: 1px solid var(--gold); vertical-align: -6px; margin-right: 3px; }
+.avatar-upload { display: flex; flex-direction: column; gap: 8px; align-items: center; }
+.avatar-upload label.btn { cursor: pointer; }
+.avatar-upload .btn[disabled] { opacity: 0.5; cursor: default; }
+.avatar-msg { font-size: 0.92rem; min-height: 1.25em; font-weight: 600; }
+.avatar-msg.ok { color: #8fe3a8; }
+.avatar-msg.err { color: #ff9aa5; }
 .profile-table { width: 100%; border-collapse: collapse; text-align: left; }
 .profile-table th, .profile-table td { padding: 9px 6px; border-bottom: 1px solid var(--line); }
 .profile-table th { color: var(--muted); font-weight: 500; width: 40%; }
