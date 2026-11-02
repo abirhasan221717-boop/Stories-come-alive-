@@ -1,0 +1,20 @@
+# Stories Come Alive — Render blueprint (free web service)
+# NOTE (free tier): Render free web services spin down after ~15 min idle and
+# have an EPHEMERAL filesystem — the SQLite DB (accounts, videos, settings,
+# uploaded logo) resets on redeploy/restart. For durable data later, upgrade
+# to a paid instance with a persistent disk mounted at /var/data and set
+# DATABASE_PATH to it.
+services:
+  - type: web
+    name: stories-come-alive
+    env: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_PATH
+        value: /tmp/stories-come-alive.db
