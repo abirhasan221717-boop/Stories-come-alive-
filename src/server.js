@@ -17,7 +17,7 @@ const upload = multer({
   limits: { fileSize: 3 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     if (/^image\/(png|jpeg|webp|gif|svg\+xml)$/.test(file.mimetype)) cb(null, true);
-    else cb(new Error('শুধু ছবির ফাইল (PNG/JPG/WebP/GIF/SVG) দেওয়া যাবে।'));
+    else cb(new Error('Only image files (PNG/JPG/WebP/GIF/SVG) are allowed.'));
   },
 });
 
@@ -26,9 +26,6 @@ function esc(s) {
   return String(s === null || s === undefined ? '' : s)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-}
-function toBn(n) {
-  return String(n).replace(/[0-9]/g, (d) => '০১২৩৪৫৬৭৮৯'[Number(d)]);
 }
 function hashPassword(pw) {
   const salt = crypto.randomBytes(16);
@@ -179,14 +176,6 @@ function safeNext(next, fallback) {
   const n = String(next || '');
   return n.startsWith('/') && !n.startsWith('//') ? n : fallback;
 }
-// Top-list rank from the admin form: a positive whole number, or null when
-// the field is left empty/invalid (null = not in the Top Picks list).
-function parseRank(raw) {
-  const s = String(raw === null || raw === undefined ? '' : raw).trim();
-  if (!s) return null;
-  const n = Number(s);
-  return Number.isInteger(n) && n > 0 ? n : null;
-}
 // Obvious way back / home for inner user pages (profile, favorites, watch).
 function backBar() {
   return `<nav class="backbar">
@@ -245,35 +234,54 @@ ${body}
 </html>`;
 }
 
-async function adminLayout({ title, body }) {
+// Admin pages: map the page title to a nav key so the current page's pill
+// can be highlighted. Unknown titles (setup / login) simply highlight none.
+const ADMIN_NAV = [
+  { key: 'dashboard', href: '/admin', label: '📊 Dashboard', titles: ['Dashboard'] },
+  { key: 'videos', href: '/admin/videos', label: '🎬 Videos', titles: ['Videos', 'Edit Video'] },
+  { key: 'categories', href: '/admin/categories', label: '📚 Categories', titles: ['Categories'] },
+  { key: 'users', href: '/admin/users', label: '👥 Users', titles: ['Users'] },
+  { key: 'settings', href: '/admin/settings', label: '⚙️ Settings', titles: ['Settings'] },
+];
+
+async function adminLayout({ title, body, bare = false }) {
   const name = await siteName();
   const logo = await logoSrc();
+  const activeKey = (ADMIN_NAV.find((n) => n.titles.includes(title)) || {}).key || '';
+  const header = bare ? `
+<header class="topbar admin-topbar">
+  <div class="admin-toprow admin-toprow-bare">
+    <a class="brand" href="/admin">
+      <img class="brand-logo" src="${logo}" alt="">
+      <span class="brand-name">${esc(name)} — Admin</span>
+    </a>
+  </div>
+</header>` : `
+<header class="topbar admin-topbar">
+  <div class="admin-toprow">
+    <a class="brand" href="/admin">
+      <img class="brand-logo" src="${logo}" alt="">
+      <span class="brand-name">${esc(name)} — Admin</span>
+    </a>
+    <form method="POST" action="/admin/logout" class="inlineform"><button class="btn btn-logout" type="submit">Logout</button></form>
+  </div>
+  <nav class="adminnav">
+    ${ADMIN_NAV.map((n) => `<a class="adminnav-link${n.key === activeKey ? ' active' : ''}" href="${n.href}">${n.label}</a>`).join('')}
+    <a class="adminnav-link" href="/" target="_blank">🌐 View Site ↗</a>
+  </nav>
+</header>`;
   return `<!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${esc(title)} — অ্যাডমিন — ${esc(name)}</title>
+<title>${esc(title)} — Admin — ${esc(name)}</title>
 <link rel="icon" href="/brand/logo">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-<header class="topbar">
-  <a class="brand" href="/admin">
-    <img class="brand-logo" src="${logo}" alt="">
-    <span class="brand-name">${esc(name)} — অ্যাডমিন</span>
-  </a>
-  <nav class="mainnav">
-    <a class="navlink" href="/admin">ড্যাশবোর্ড</a>
-    <a class="navlink" href="/admin/videos">ভিডিও</a>
-    <a class="navlink" href="/admin/categories">ক্যাটাগরি</a>
-    <a class="navlink" href="/admin/users">ব্যবহারকারী</a>
-    <a class="navlink" href="/admin/settings">সেটিংস</a>
-    <a class="navlink" href="/" target="_blank">সাইট দেখুন ↗</a>
-  </nav>
-  <form method="POST" action="/admin/logout" class="inlineform"><button class="btn btn-ghost" type="submit">লগআউট</button></form>
-</header>
+${header}
 <main>
 ${body}
 </main>
@@ -282,11 +290,11 @@ ${body}
 </html>`;
 }
 
-function videoCard(v, user) {
+function videoCard(v, user, pos) {
   return `<a class="card" href="/watch/${v.id}">
     <div class="thumb">
       <img loading="lazy" src="https://i.ytimg.com/vi/${esc(v.youtube_id)}/hqdefault.jpg" alt="${esc(v.title)}">
-      ${v.rank ? `<span class="rank-chip">#${Number(v.rank)}</span>` : ''}
+      ${pos ? `<span class="rank-chip">#${pos}</span>` : ''}
       ${v.episode ? `<span class="ep-badge">${esc(v.episode)}</span>` : ''}
       <span class="play-badge">▶</span>
     </div>
@@ -304,7 +312,8 @@ function grid(videos, user) {
 }
 
 // Horizontally scrollable poster-card row (bhoot-style homepage rows).
-function posterRow({ title, videos, user, moreHref }) {
+// With ranked=true (the Top Picks row), cards get a position chip (#1, #2, …).
+function posterRow({ title, videos, user, moreHref, ranked = false }) {
   if (!videos.length) return '';
   return `<section class="section rowsection">
     <div class="rowhead">
@@ -312,7 +321,7 @@ function posterRow({ title, videos, user, moreHref }) {
       ${moreHref ? `<a class="rowmore" href="${moreHref}">View All →</a>` : ''}
     </div>
     <div class="rowwrap">
-      <div class="rowscroll">${videos.map((v) => videoCard(v, user)).join('')}</div>
+      <div class="rowscroll">${videos.map((v, i) => videoCard(v, user, ranked ? i + 1 : 0)).join('')}</div>
       <button class="rowbtn rowbtn-prev" type="button" data-scroll="prev" aria-label="Previous videos">‹</button>
       <button class="rowbtn rowbtn-next" type="button" data-scroll="next" aria-label="More videos">›</button>
     </div>
@@ -340,8 +349,17 @@ app.get('/', async (req, res) => {
   const name = await siteName();
   const featured = await queryOne(`SELECT v.*, c.name AS category_name FROM videos v
     LEFT JOIN categories c ON c.id = v.category_id WHERE v.featured = 1 ORDER BY v.id DESC LIMIT 1`);
+  // Top Picks is automatic: most-viewed first (newest wins ties), only
+  // videos somebody has actually watched, at most 10.
   const topPicks = await queryAll(`SELECT v.*, c.name AS category_name FROM videos v
-    LEFT JOIN categories c ON c.id = v.category_id WHERE v.rank IS NOT NULL AND v.rank > 0 ORDER BY v.rank ASC, v.id DESC LIMIT 20`);
+    LEFT JOIN categories c ON c.id = v.category_id WHERE v.views > 0 ORDER BY v.views DESC, v.id DESC LIMIT 10`);
+  // The featured video's own position in that same ordering (for its badge).
+  let featuredTopPos = 0;
+  if (featured && Number(featured.views) > 0) {
+    const ahead = await queryOne('SELECT COUNT(*) AS c FROM videos WHERE views > ? OR (views = ? AND id > ?)',
+      [Number(featured.views), Number(featured.views), featured.id]);
+    featuredTopPos = Number(ahead.c) + 1;
+  }
   const latest = await queryAll(`SELECT v.*, c.name AS category_name FROM videos v
     LEFT JOIN categories c ON c.id = v.category_id ORDER BY v.id DESC LIMIT 12`);
 
@@ -353,7 +371,7 @@ app.get('/', async (req, res) => {
       onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/${esc(featured.youtube_id)}/hqdefault.jpg'" alt="${esc(featured.title)}">
     <div class="fhero-shade"></div>
     <div class="fhero-content">
-      ${featured.rank ? `<span class="fhero-topbadge">Top ${Number(featured.rank)}</span>` : ''}
+      ${featuredTopPos ? `<span class="fhero-topbadge">Top ${featuredTopPos}</span>` : ''}
       ${featured.category_name ? `<span class="fhero-badge">${esc(featured.category_name)}</span>` : ''}
       <h1 class="fhero-title">${esc(featured.title)}</h1>
       ${featured.story ? `<p class="fhero-story">${esc(featured.story)}${featured.episode ? ' • ' + esc(featured.episode) : ''}</p>` : ''}
@@ -379,7 +397,7 @@ app.get('/', async (req, res) => {
   }
 
   let rows = '';
-  if (topPicks.length) rows += posterRow({ title: 'Top Picks', videos: topPicks, user });
+  if (topPicks.length) rows += posterRow({ title: 'Top Picks', videos: topPicks, user, ranked: true });
   rows += posterRow({ title: 'Latest Stories', videos: latest, user });
   for (const c of await allCategories()) {
     if (!c.video_count) continue;
@@ -678,6 +696,8 @@ app.get('/watch/:id', async (req, res) => {
   const v = await videoRow(Number(req.params.id));
   if (!v) return res.status(404).send(await layout(req, { title: 'Not Found', user, body: '<div class="empty">This video could not be found.</div>' }));
   if (!user) return res.redirect('/login?next=' + encodeURIComponent('/watch/' + v.id));
+  // Count the view only now: a signed-in viewer actually reached the player.
+  await run('UPDATE videos SET views = views + 1 WHERE id = ?', [v.id]);
   const fav = await queryOne('SELECT 1 AS x FROM favorites WHERE user_id = ? AND video_id = ?', [user.id, v.id]);
   const related = await queryAll(`SELECT v.*, c.name AS category_name FROM videos v
     LEFT JOIN categories c ON c.id = v.category_id
@@ -788,46 +808,46 @@ async function requireAdminPage(req, res) {
 app.get('/admin', async (req, res) => {
   const logo = await logoSrc();
   if (!(await getSetting('admin_password_hash'))) {
-    return res.send(await adminLayout({ title: 'প্রথম সেটআপ', body: `
+    return res.send(await adminLayout({ title: 'First Setup', bare: true, body: `
     <section class="auth-wrap"><div class="auth-card">
       <img class="auth-logo" src="${logo}" alt="">
-      <h1>🔐 অ্যাডমিন পাসওয়ার্ড তৈরি করুন</h1>
-      <p class="muted">এটাই প্রথমবার — নিজের জন্য একটা অ্যাডমিন পাসওয়ার্ড বেছে নিন। এটা দিয়েই পরে অ্যাডমিন প্যানেলে ঢুকবেন।</p>
+      <h1>🔐 Create the Admin Password</h1>
+      <p class="muted">This is the first run — choose an admin password for yourself. You will use it to sign in to the admin panel from now on.</p>
       <form method="POST" action="/admin/setup" class="form">
-        <label>নতুন পাসওয়ার্ড<input type="password" name="password" required minlength="6"></label>
-        <label>আবার লিখুন<input type="password" name="confirm" required minlength="6"></label>
-        <button class="btn btn-main btn-big" type="submit">পাসওয়ার্ড সেট করুন</button>
+        <label>New Password<input type="password" name="password" required minlength="6"></label>
+        <label>Type It Again<input type="password" name="confirm" required minlength="6"></label>
+        <button class="btn btn-main btn-big" type="submit">Set Password</button>
       </form>
     </div></section>` }));
   }
   if (!(await isAdmin(req))) {
-    const err = req.query.err ? '<div class="alert alert-error">পাসওয়ার্ড ভুল হয়েছে।</div>' : '';
-    return res.send(await adminLayout({ title: 'অ্যাডমিন লগইন', body: `
+    const err = req.query.err ? '<div class="alert alert-error">That password is wrong — please try again.</div>' : '';
+    return res.send(await adminLayout({ title: 'Admin Login', bare: true, body: `
     <section class="auth-wrap"><div class="auth-card">
       <img class="auth-logo" src="${logo}" alt="">
-      <h1>🔐 অ্যাডমিন লগইন</h1>
+      <h1>🔐 Admin Login</h1>
       ${err}
       <form method="POST" action="/admin/login" class="form">
-        <label>অ্যাডমিন পাসওয়ার্ড<input type="password" name="password" required></label>
-        <button class="btn btn-main btn-big" type="submit">ঢুকুন</button>
+        <label>Admin Password<input type="password" name="password" required></label>
+        <button class="btn btn-main btn-big" type="submit">Log In</button>
       </form>
     </div></section>` }));
   }
   const userCount = (await queryOne('SELECT COUNT(*) AS c FROM users')).c;
   const videoCount = (await queryOne('SELECT COUNT(*) AS c FROM videos')).c;
   const catCount = (await queryOne('SELECT COUNT(*) AS c FROM categories')).c;
-  res.send(await adminLayout({ title: 'ড্যাশবোর্ড', body: `
+  res.send(await adminLayout({ title: 'Dashboard', body: `
   <section class="section">
-    <h2 class="section-title">📊 ড্যাশবোর্ড</h2>
+    <h2 class="section-title">📊 Dashboard</h2>
     <div class="statgrid">
-      <div class="stat"><strong>${toBn(userCount)}</strong><span>রেজিস্টার্ড ব্যবহারকারী</span></div>
-      <div class="stat"><strong>${toBn(videoCount)}</strong><span>মোট ভিডিও</span></div>
-      <div class="stat"><strong>${toBn(catCount)}</strong><span>ক্যাটাগরি</span></div>
+      <div class="stat"><strong>${Number(userCount)}</strong><span>Registered Users</span></div>
+      <div class="stat"><strong>${Number(videoCount)}</strong><span>Total Videos</span></div>
+      <div class="stat"><strong>${Number(catCount)}</strong><span>Categories</span></div>
     </div>
     <div class="quicklinks">
-      <a class="btn btn-main" href="/admin/videos">➕ নতুন ভিডিও যোগ করুন</a>
-      <a class="btn btn-ghost" href="/admin/categories">ক্যাটাগরি সাজান</a>
-      <a class="btn btn-ghost" href="/admin/settings">সাইটের নাম / লোগো / লিংক বদলান</a>
+      <a class="btn btn-main" href="/admin/videos">➕ Add a New Video</a>
+      <a class="btn btn-ghost" href="/admin/categories">Organize Categories</a>
+      <a class="btn btn-ghost" href="/admin/settings">Change Site Name / Logo / Links</a>
     </div>
   </section>` }));
 });
@@ -859,33 +879,33 @@ app.get('/admin/videos', async (req, res) => {
   const videos = await queryAll(`SELECT v.*, c.name AS category_name FROM videos v
     LEFT JOIN categories c ON c.id = v.category_id ORDER BY v.id DESC`);
   const catOptions = (sel) => cats.map((c) => `<option value="${c.id}" ${Number(sel) === c.id ? 'selected' : ''}>${esc(c.name)}</option>`).join('');
-  res.send(await adminLayout({ title: 'ভিডিও', body: `
+  res.send(await adminLayout({ title: 'Videos', body: `
   <section class="section">
-    <h2 class="section-title">➕ নতুন ভিডিও যোগ করুন</h2>
+    <h2 class="section-title">➕ Add a New Video</h2>
     <form method="POST" action="/admin/videos" class="form panel">
-      <label>YouTube লিংক<input type="text" name="youtube" required placeholder="https://www.youtube.com/watch?v=..."></label>
-      <label>ভিডিওর শিরোনাম<input type="text" name="title" required placeholder="যেমন: কালো নদী"></label>
-      <label>গল্প / সিরিজের নাম<input type="text" name="story" placeholder="যেমন: AGNIBRITTA"></label>
-      <label>পর্ব (এপিসোড)<input type="text" name="episode" placeholder="যেমন: Season 1 • Chapter 01"></label>
-      <label>বিবরণ (ছোট্ট সারসংক্ষেপ)<textarea name="synopsis" rows="3" placeholder="গল্পটা সম্পর্কে দুই-তিন লাইন — ফিচার্ড হলে হোমপেজের হিরোতে দেখাবে"></textarea></label>
-      <label>ক্যাটাগরি<select name="category_id">${catOptions('')}</select></label>
-      <label class="checklabel"><input type="checkbox" name="featured" value="1"> ⭐ ফিচার্ড — হোমপেজের বড় হিরো ব্যানারে এই ভিডিওটা দেখাবে (একবারে একটাই ফিচার্ড থাকে)</label>
-      <label>টপ র‍্যাংক (খালি রাখলে টপ লিস্টে যাবে না)<input type="number" name="rank" min="1" step="1" placeholder="যেমন: 1"><small class="muted">প্রতিটা নম্বর একবারই ব্যবহার করুন — 1 মানে টপ লিস্টের সবার উপরে।</small></label>
-      <button class="btn btn-main" type="submit">ভিডিও যোগ করুন</button>
+      <label>YouTube Link<input type="text" name="youtube" required placeholder="https://www.youtube.com/watch?v=..."></label>
+      <label>Video Title<input type="text" name="title" required placeholder="e.g. The Black River"></label>
+      <label>Story / Series Name<input type="text" name="story" placeholder="e.g. AGNIBRITTA"></label>
+      <label>Episode<input type="text" name="episode" placeholder="e.g. Season 1 • Chapter 01"></label>
+      <label>Synopsis (a short summary)<textarea name="synopsis" rows="3" placeholder="Two or three lines about the story — if this video is featured, it shows in the homepage hero banner"></textarea></label>
+      <label>Category<select name="category_id">${catOptions('')}</select></label>
+      <label class="checklabel"><input type="checkbox" name="featured" value="1"> ⭐ Featured — this video shows in the big hero banner on the homepage (only one can be featured at a time)</label>
+      <button class="btn btn-main" type="submit">Add Video</button>
     </form>
-    <h2 class="section-title">🎬 সব ভিডিও (${toBn(videos.length)})</h2>
+    <h2 class="section-title">🎬 All Videos (${videos.length})</h2>
     ${videos.length ? `<div class="tablewrap"><table class="admintable">
-      <tr><th>থাম্বনেইল</th><th>শিরোনাম</th><th>গল্প / পর্ব</th><th>ক্যাটাগরি</th><th></th></tr>
+      <tr><th>Thumbnail</th><th>Title</th><th>Story / Episode</th><th>Category</th><th>Views</th><th></th></tr>
       ${videos.map((v) => `<tr>
         <td><img class="mini-thumb" src="https://i.ytimg.com/vi/${esc(v.youtube_id)}/default.jpg" alt=""></td>
-        <td>${v.featured ? '⭐ ' : ''}${v.rank ? '🏆#' + Number(v.rank) + ' ' : ''}${esc(v.title)}</td>
+        <td>${v.featured ? '⭐ ' : ''}${esc(v.title)}</td>
         <td>${esc(v.story)} ${v.episode ? '• ' + esc(v.episode) : ''}</td>
         <td>${esc(v.category_name || '—')}</td>
+        <td>${Number(v.views || 0)}</td>
         <td class="rowbtns">
-          <a class="btn btn-ghost btn-sm" href="/admin/videos/${v.id}/edit">এডিট</a>
-          <form method="POST" action="/admin/videos/${v.id}/delete" data-confirm="এই ভিডিও মুছে ফেলবেন?"><button class="btn btn-danger btn-sm" type="submit">মুছুন</button></form>
+          <a class="btn btn-ghost btn-sm" href="/admin/videos/${v.id}/edit">Edit</a>
+          <form method="POST" action="/admin/videos/${v.id}/delete" data-confirm="Delete this video?"><button class="btn btn-danger btn-sm" type="submit">Delete</button></form>
         </td></tr>`).join('')}
-    </table></div>` : '<div class="empty">এখনও কোনো ভিডিও নেই।</div>'}
+    </table></div>` : '<div class="empty">No videos yet.</div>'}
   </section>` }));
 });
 
@@ -895,10 +915,10 @@ app.post('/admin/videos', async (req, res) => {
   if (!yid) return res.redirect('/admin/videos');
   const featured = req.body.featured ? 1 : 0;
   if (featured) await run('UPDATE videos SET featured = 0');
-  await run('INSERT INTO videos(youtube_id, title, story, episode, synopsis, featured, rank, category_id) VALUES(?, ?, ?, ?, ?, ?, ?, ?)',
-    [yid, String(req.body.title || '').trim() || 'শিরোনামহীন', String(req.body.story || '').trim(),
+  await run('INSERT INTO videos(youtube_id, title, story, episode, synopsis, featured, category_id) VALUES(?, ?, ?, ?, ?, ?, ?)',
+    [yid, String(req.body.title || '').trim() || 'Untitled', String(req.body.story || '').trim(),
       String(req.body.episode || '').trim(), String(req.body.synopsis || '').trim(), featured,
-      parseRank(req.body.rank), Number(req.body.category_id) || null]);
+      Number(req.body.category_id) || null]);
   res.redirect('/admin/videos');
 });
 
@@ -907,20 +927,19 @@ app.get('/admin/videos/:id/edit', async (req, res) => {
   const v = await videoRow(Number(req.params.id));
   if (!v) return res.redirect('/admin/videos');
   const cats = await allCategories();
-  res.send(await adminLayout({ title: 'ভিডিও এডিট', body: `
+  res.send(await adminLayout({ title: 'Edit Video', body: `
   <section class="section">
-    <h2 class="section-title">✏️ ভিডিও এডিট</h2>
+    <h2 class="section-title">✏️ Edit Video</h2>
     <form method="POST" action="/admin/videos/${v.id}/edit" class="form panel">
-      <label>YouTube লিংক<input type="text" name="youtube" required value="https://www.youtube.com/watch?v=${esc(v.youtube_id)}"></label>
-      <label>ভিডিওর শিরোনাম<input type="text" name="title" required value="${esc(v.title)}"></label>
-      <label>গল্প / সিরিজের নাম<input type="text" name="story" value="${esc(v.story)}"></label>
-      <label>পর্ব (এপিসোড)<input type="text" name="episode" value="${esc(v.episode)}"></label>
-      <label>বিবরণ (ছোট্ট সারসংক্ষেপ)<textarea name="synopsis" rows="3" placeholder="গল্পটা সম্পর্কে দুই-তিন লাইন">${esc(v.synopsis || '')}</textarea></label>
-      <label>ক্যাটাগরি<select name="category_id">${cats.map((c) => `<option value="${c.id}" ${v.category_id === c.id ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select></label>
-      <label class="checklabel"><input type="checkbox" name="featured" value="1" ${v.featured ? 'checked' : ''}> ⭐ ফিচার্ড — হোমপেজের বড় হিরো ব্যানারে এই ভিডিওটা দেখাবে (একবারে একটাই ফিচার্ড থাকে)</label>
-      <label>টপ র‍্যাংক (খালি রাখলে টপ লিস্টে যাবে না)<input type="number" name="rank" min="1" step="1" placeholder="যেমন: 1" value="${v.rank ? Number(v.rank) : ''}"><small class="muted">প্রতিটা নম্বর একবারই ব্যবহার করুন — 1 মানে টপ লিস্টের সবার উপরে।</small></label>
-      <button class="btn btn-main" type="submit">সেভ করুন</button>
-      <a class="btn btn-ghost" href="/admin/videos">ফিরে যান</a>
+      <label>YouTube Link<input type="text" name="youtube" required value="https://www.youtube.com/watch?v=${esc(v.youtube_id)}"></label>
+      <label>Video Title<input type="text" name="title" required value="${esc(v.title)}"></label>
+      <label>Story / Series Name<input type="text" name="story" value="${esc(v.story)}"></label>
+      <label>Episode<input type="text" name="episode" value="${esc(v.episode)}"></label>
+      <label>Synopsis (a short summary)<textarea name="synopsis" rows="3" placeholder="Two or three lines about the story…">${esc(v.synopsis || '')}</textarea></label>
+      <label>Category<select name="category_id">${cats.map((c) => `<option value="${c.id}" ${v.category_id === c.id ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select></label>
+      <label class="checklabel"><input type="checkbox" name="featured" value="1" ${v.featured ? 'checked' : ''}> ⭐ Featured — this video shows in the big hero banner on the homepage (only one can be featured at a time)</label>
+      <button class="btn btn-main" type="submit">Save</button>
+      <a class="btn btn-ghost" href="/admin/videos">Back</a>
     </form>
   </section>` }));
 });
@@ -932,10 +951,10 @@ app.post('/admin/videos/:id/edit', async (req, res) => {
   const id = Number(req.params.id);
   const featured = req.body.featured ? 1 : 0;
   if (featured) await run('UPDATE videos SET featured = 0 WHERE id != ?', [id]);
-  await run('UPDATE videos SET youtube_id = ?, title = ?, story = ?, episode = ?, synopsis = ?, featured = ?, rank = ?, category_id = ? WHERE id = ?',
-    [yid, String(req.body.title || '').trim() || 'শিরোনামহীন', String(req.body.story || '').trim(),
+  await run('UPDATE videos SET youtube_id = ?, title = ?, story = ?, episode = ?, synopsis = ?, featured = ?, category_id = ? WHERE id = ?',
+    [yid, String(req.body.title || '').trim() || 'Untitled', String(req.body.story || '').trim(),
       String(req.body.episode || '').trim(), String(req.body.synopsis || '').trim(), featured,
-      parseRank(req.body.rank), Number(req.body.category_id) || null, id]);
+      Number(req.body.category_id) || null, id]);
   res.redirect('/admin/videos');
 });
 
@@ -950,25 +969,25 @@ app.post('/admin/videos/:id/delete', async (req, res) => {
 app.get('/admin/categories', async (req, res) => {
   if (!(await requireAdminPage(req, res))) return;
   const cats = await allCategories();
-  res.send(await adminLayout({ title: 'ক্যাটাগরি', body: `
+  res.send(await adminLayout({ title: 'Categories', body: `
   <section class="section">
-    <h2 class="section-title">➕ নতুন ক্যাটাগরি</h2>
+    <h2 class="section-title">➕ Add a New Category</h2>
     <form method="POST" action="/admin/categories" class="form panel inline-add">
-      <input type="text" name="name" required placeholder="ক্যাটাগরির নাম">
-      <button class="btn btn-main" type="submit">যোগ করুন</button>
+      <input type="text" name="name" required placeholder="Category name">
+      <button class="btn btn-main" type="submit">Add</button>
     </form>
-    <h2 class="section-title">📚 সব ক্যাটাগরি (${toBn(cats.length)})</h2>
+    <h2 class="section-title">📚 All Categories (${cats.length})</h2>
     <div class="tablewrap"><table class="admintable">
-      <tr><th>নাম</th><th>ভিডিও</th><th></th></tr>
+      <tr><th>Name</th><th>Videos</th><th></th></tr>
       ${cats.map((c) => `<tr>
         <td>
           <form method="POST" action="/admin/categories/${c.id}/rename" class="rename-form">
             <input type="text" name="name" value="${esc(c.name)}" required>
-            <button class="btn btn-ghost btn-sm" type="submit">নাম বদলান</button>
+            <button class="btn btn-ghost btn-sm" type="submit">Rename</button>
           </form>
         </td>
-        <td>${toBn(c.video_count)}টি</td>
-        <td><form method="POST" action="/admin/categories/${c.id}/delete" data-confirm="এই ক্যাটাগরি মুছবেন? এর ভিডিওগুলো ক্যাটাগরি ছাড়া হয়ে যাবে।"><button class="btn btn-danger btn-sm" type="submit">মুছুন</button></form></td>
+        <td>${Number(c.video_count)}</td>
+        <td><form method="POST" action="/admin/categories/${c.id}/delete" data-confirm="Delete this category? Its videos will be left without a category."><button class="btn btn-danger btn-sm" type="submit">Delete</button></form></td>
       </tr>`).join('')}
     </table></div>
   </section>` }));
@@ -1002,19 +1021,19 @@ app.post('/admin/categories/:id/delete', async (req, res) => {
 app.get('/admin/users', async (req, res) => {
   if (!(await requireAdminPage(req, res))) return;
   const users = await queryAll('SELECT * FROM users ORDER BY id DESC');
-  res.send(await adminLayout({ title: 'ব্যবহারকারী', body: `
+  res.send(await adminLayout({ title: 'Users', body: `
   <section class="section">
-    <h2 class="section-title">👥 রেজিস্টার্ড ব্যবহারকারী — মোট ${toBn(users.length)} জন</h2>
+    <h2 class="section-title">👥 Registered Users — ${users.length} in total</h2>
     ${users.length ? `<div class="tablewrap"><table class="admintable">
-      <tr><th>#</th><th>নাম</th><th>ইমেইল</th><th>যোগ দিয়েছেন</th></tr>
-      ${users.map((u) => `<tr><td>${toBn(u.id)}</td><td>${esc(u.name)}</td><td>${esc(u.email)}</td><td>${esc(String(u.created_at).slice(0, 10))}</td></tr>`).join('')}
-    </table></div>` : '<div class="empty">এখনও কেউ অ্যাকাউন্ট খোলেনি।</div>'}
+      <tr><th>#</th><th>Name</th><th>Email</th><th>Joined</th></tr>
+      ${users.map((u) => `<tr><td>${Number(u.id)}</td><td>${esc(u.name)}</td><td>${esc(u.email)}</td><td>${esc(String(u.created_at).slice(0, 10))}</td></tr>`).join('')}
+    </table></div>` : '<div class="empty">No one has created an account yet.</div>'}
   </section>` }));
 });
 
 app.get('/admin/settings', async (req, res) => {
   if (!(await requireAdminPage(req, res))) return;
-  const msg = req.query.ok ? '<div class="alert alert-ok">সেভ হয়েছে ✅</div>' : '';
+  const msg = req.query.ok ? '<div class="alert alert-ok">Saved ✅</div>' : '';
   const err = req.query.err ? `<div class="alert alert-error">${esc(req.query.err)}</div>` : '';
   const name = await siteName();
   const logo = await logoSrc();
@@ -1022,9 +1041,9 @@ app.get('/admin/settings', async (req, res) => {
   const fbLinks = await getFacebookLinks();
   const linkRowHtml = (platform, item) => `
         <div class="linkrow" data-linkrow>
-          <input type="text" class="linkrow-label" name="${platform}_label" value="${esc(item ? item.label : '')}" placeholder="নাম (ঐচ্ছিক)" maxlength="60">
+          <input type="text" class="linkrow-label" name="${platform}_label" value="${esc(item ? item.label : '')}" placeholder="Name (optional)" maxlength="60">
           <input type="text" class="linkrow-url" name="${platform}_url" value="${esc(item ? item.url : '')}" placeholder="${platform === 'youtube' ? 'https://www.youtube.com/@YourChannel' : 'https://www.facebook.com/YourPage'}">
-          <button type="button" class="btn btn-danger btn-sm" data-remove-link>মুছুন</button>
+          <button type="button" class="btn btn-danger btn-sm" data-remove-link>Remove</button>
         </div>`;
   const linkGroupHtml = (platform, title, addText, links) => `
       <div class="linkgroup">
@@ -1035,34 +1054,34 @@ app.get('/admin/settings', async (req, res) => {
         <template data-linktemplate="${platform}">${linkRowHtml(platform, null)}</template>
         <div><button type="button" class="btn btn-ghost btn-sm" data-add-link="${platform}">${addText}</button></div>
       </div>`;
-  res.send(await adminLayout({ title: 'সেটিংস', body: `
+  res.send(await adminLayout({ title: 'Settings', body: `
   <section class="section">
-    <h2 class="section-title">⚙️ সেটিংস</h2>
+    <h2 class="section-title">⚙️ Settings</h2>
     ${msg}${err}
     <form method="POST" action="/admin/settings" class="form panel">
-      <label>সাইটের নাম<input type="text" name="site_name" value="${esc(name)}" required></label>
-      ${linkGroupHtml('youtube', 'YouTube চ্যানেলের লিংক', '+ আরও YouTube চ্যানেল যোগ করুন', ytLinks)}
-      ${linkGroupHtml('facebook', 'Facebook পেজের লিংক', '+ আরও Facebook পেজ যোগ করুন', fbLinks)}
-      <button class="btn btn-main" type="submit">সেভ করুন</button>
-      <p class="muted">প্রতি সারিতে একটা করে লিংক; নাম দিলে বাটনে সেই নাম দেখাবে; খালি রাখলে লিংক দেখাবে না।</p>
+      <label>Site Name<input type="text" name="site_name" value="${esc(name)}" required></label>
+      ${linkGroupHtml('youtube', 'YouTube Channel Links', '+ Add Another YouTube Channel', ytLinks)}
+      ${linkGroupHtml('facebook', 'Facebook Page Links', '+ Add Another Facebook Page', fbLinks)}
+      <button class="btn btn-main" type="submit">Save</button>
+      <p class="muted">One link per row; if you give a link a name, the button will show that name; leave a row empty and that link will not be shown.</p>
     </form>
-    <h2 class="section-title">🖼️ সাইটের লোগো</h2>
+    <h2 class="section-title">🖼️ Site Logo</h2>
     <div class="panel">
-      <p>বর্তমান লোগো:</p>
+      <p>Current logo:</p>
       <img class="logo-preview" src="${logo}" alt="">
       <form method="POST" action="/admin/logo" enctype="multipart/form-data" class="form">
-        <label>নতুন লোগো ছবি (PNG/JPG/WebP, সর্বোচ্চ ৩MB)<input type="file" name="logo" accept="image/*" required></label>
-        <button class="btn btn-main" type="submit">লোগো আপলোড করুন</button>
+        <label>New logo image (PNG/JPG/WebP, max 3MB)<input type="file" name="logo" accept="image/*" required></label>
+        <button class="btn btn-main" type="submit">Upload Logo</button>
       </form>
-      <form method="POST" action="/admin/logo/reset" data-confirm="ডিফল্ট লোগোতে ফিরে যাবেন?">
-        <button class="btn btn-ghost" type="submit">ডিফল্ট লোগোতে ফিরুন</button>
+      <form method="POST" action="/admin/logo/reset" data-confirm="Return to the default logo?">
+        <button class="btn btn-ghost" type="submit">Return to Default Logo</button>
       </form>
     </div>
-    <h2 class="section-title">🔑 অ্যাডমিন পাসওয়ার্ড বদলান</h2>
+    <h2 class="section-title">🔑 Change Admin Password</h2>
     <form method="POST" action="/admin/settings/password" class="form panel">
-      <label>বর্তমান পাসওয়ার্ড<input type="password" name="current" required></label>
-      <label>নতুন পাসওয়ার্ড<input type="password" name="next" required minlength="6"></label>
-      <button class="btn btn-main" type="submit">পাসওয়ার্ড বদলান</button>
+      <label>Current Password<input type="password" name="current" required></label>
+      <label>New Password<input type="password" name="next" required minlength="6"></label>
+      <button class="btn btn-main" type="submit">Change Password</button>
     </form>
   </section>` }));
 });
@@ -1084,17 +1103,17 @@ app.post('/admin/settings/password', async (req, res) => {
   if (!(await requireAdminPage(req, res))) return;
   const hash = await getSetting('admin_password_hash');
   if (!verifyPassword(String(req.body.current || ''), hash)) {
-    return res.redirect('/admin/settings?err=' + encodeURIComponent('বর্তমান পাসওয়ার্ড ভুল।'));
+    return res.redirect('/admin/settings?err=' + encodeURIComponent('The current password is wrong.'));
   }
   const next = String(req.body.next || '');
-  if (next.length < 6) return res.redirect('/admin/settings?err=' + encodeURIComponent('নতুন পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।'));
+  if (next.length < 6) return res.redirect('/admin/settings?err=' + encodeURIComponent('The new password must be at least 6 characters long.'));
   await setSetting('admin_password_hash', hashPassword(next));
   res.redirect('/admin/settings?ok=1');
 });
 
 app.post('/admin/logo', upload.single('logo'), async (req, res) => {
   if (!(await requireAdminPage(req, res))) return;
-  if (!req.file) return res.redirect('/admin/settings?err=' + encodeURIComponent('ছবি পাওয়া যায়নি।'));
+  if (!req.file) return res.redirect('/admin/settings?err=' + encodeURIComponent('No image was received.'));
   await setAsset('logo', req.file.mimetype, req.file.buffer);
   await setSetting('logo_version', String(Date.now()));
   res.redirect('/admin/settings?ok=1');
@@ -1109,7 +1128,7 @@ app.post('/admin/logo/reset', async (req, res) => {
 
 // upload errors (e.g. wrong file type / too big)
 app.use((err, req, res, next) => {
-  if (err) return res.redirect('/admin/settings?err=' + encodeURIComponent('আপলোড হয়নি: ' + (err.message || 'ভুল ফাইল')));
+  if (err) return res.redirect('/admin/settings?err=' + encodeURIComponent('Upload failed: ' + (err.message || 'invalid file')));
   next();
 });
 
