@@ -599,7 +599,7 @@ app.get('/privacy-policy', async (req, res) => {
     <h3>Where your data is stored</h3>
     <p>Your account information is stored in the site's hosted database, and it is kept for as long as your account exists.</p>
     <h3>Your account and contact</h3>
-    <p>If you have any question about your privacy, or you would like your account and its data deleted, please email us at <a href="mailto:abirhasan221717@gmail.com">abirhasan221717@gmail.com</a> and we will take care of it.</p>
+    <p>If you have any question about your privacy, or you would like your account and its data deleted, please email us at <a href="mailto:bi4994331@gmail.com">bi4994331@gmail.com</a> and we will take care of it.</p>
     <p class="muted">Last updated: November 2, 2026</p>
   </section>`;
   res.send(await layout(req, { title: 'Privacy Policy', body, user }));
