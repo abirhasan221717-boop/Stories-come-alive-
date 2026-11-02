@@ -152,12 +152,49 @@ function linkListFromForm(labelField, urlField) {
   }
   return out;
 }
+
+// Minimal single-color line icons for the whole UI (thin stroke style,
+// no pictographic emoji anywhere). Decorative only: aria-hidden, sized
+// and spaced by the .ic / .ic-sm classes in styles.css.
+const lineIcon = (inner, small) => `<svg class="${small ? 'ic ic-sm' : 'ic'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${inner}</svg>`;
+const HEART_PATH = '<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>';
+const PLAY_PATH = '<path d="M8 5.4v13.2c0 .8.9 1.3 1.6.9l10-6.6c.6-.4.6-1.4 0-1.8l-10-6.6c-.7-.4-1.6.1-1.6.9z"/>';
+const USERS_PATH = '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>';
+const LOCK_PATH = '<rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/>';
+const HOME_PATH = '<path d="M3 9.5L12 3l9 6.5V20a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22v-8h6v8"/>';
+const ICONS = {
+  grid: lineIcon('<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>'),
+  playRect: lineIcon('<rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10.6 9.7l4.6 2.3-4.6 2.3z"/>'),
+  play: lineIcon(PLAY_PATH),
+  playSm: lineIcon(PLAY_PATH, true),
+  plusCircle: lineIcon('<circle cx="12" cy="12" r="9"/><path d="M12 8.5v7M8.5 12h7"/>'),
+  pencil: lineIcon('<path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>'),
+  layers: lineIcon('<path d="M12 3l9 4.9-9 4.9-9-4.9z"/><path d="M3.4 12.4L12 17l8.6-4.6"/><path d="M3.4 16.4L12 21l8.6-4.6"/>'),
+  users: lineIcon(USERS_PATH),
+  usersSm: lineIcon(USERS_PATH, true),
+  gear: lineIcon('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>'),
+  external: lineIcon('<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M21 3l-9.5 9.5"/>'),
+  image: lineIcon('<rect x="3" y="3" width="18" height="18" rx="2.5"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15.5L16 10.5 5 21"/>'),
+  key: lineIcon('<circle cx="8" cy="15.5" r="4.8"/><path d="M11.4 12.1L20.5 3"/><path d="M17.3 6.2l2 2"/>'),
+  lock: lineIcon(LOCK_PATH),
+  lockSm: lineIcon(LOCK_PATH, true),
+  bell: lineIcon('<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>'),
+  heart: lineIcon(HEART_PATH),
+  heartFilled: `<svg class="ic" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${HEART_PATH}</svg>`,
+  home: lineIcon(HOME_PATH),
+  homeSm: lineIcon(HOME_PATH, true),
+  user: lineIcon('<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'),
+  userPlus: lineIcon('<path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/>'),
+  book: lineIcon('<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>'),
+  camera: lineIcon('<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>'),
+};
+
 // Welcome-page button caption: the label when there is one; the plain
 // platform name for a single link; platform + position when several links
 // share no label, so the buttons stay distinguishable.
 function socialBtnText(kind, links, link, index) {
   const isYt = kind === 'youtube';
-  const base = isYt ? '▶️ Subscribe' : '📘 Follow';
+  const base = isYt ? ICONS.play + 'Subscribe' : ICONS.userPlus + 'Follow';
   const platform = isYt ? 'YouTube' : 'Facebook';
   if (link.label) return `${base} — ${esc(link.label)}`;
   return links.length > 1 ? `${base} on ${platform} ${index + 1}` : `${base} on ${platform}`;
@@ -259,7 +296,7 @@ function safeNext(next, fallback) {
 function backBar() {
   return `<nav class="backbar">
     <button type="button" class="btn btn-ghost btn-sm" data-back>← Back</button>
-    <a class="btn btn-ghost btn-sm" href="/">🏠 Home</a>
+    <a class="btn btn-ghost btn-sm" href="/">${ICONS.homeSm}Home</a>
   </nav>`;
 }
 
@@ -278,7 +315,7 @@ async function layout(req, { title, body, user }) {
 <link rel="icon" href="/brand/logo">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=27">
+<link rel="stylesheet" href="/styles.css?v=28">
 </head>
 <body>
 <header class="topbar">
@@ -287,10 +324,10 @@ async function layout(req, { title, body, user }) {
     <span class="brand-name">${esc(name)}</span>
   </a>
   <div class="userbox">
-    ${(ytLinks.length || fbLinks.length) ? '<button type="button" class="btn btn-main btn-follow" data-follow-open aria-haspopup="dialog" aria-controls="followPanel">🔔 Follow / Subscribe</button>' : ''}
+    ${(ytLinks.length || fbLinks.length) ? '<button type="button" class="btn btn-main btn-follow" data-follow-open aria-haspopup="dialog" aria-controls="followPanel">' + ICONS.bell + 'Follow / Subscribe</button>' : ''}
     ${user
-      ? `<a class="navlink" href="/favorites">❤️ Favorites</a>
-         <a class="navlink" href="/profile">${user.avatar ? `<img class="nav-avatar" src="${esc(user.avatar)}" alt="">` : '👤'} Profile</a>
+      ? `<a class="navlink" href="/favorites">${ICONS.heart}Favorites</a>
+         <a class="navlink" href="/profile">${user.avatar ? `<img class="nav-avatar" src="${esc(user.avatar)}" alt="">` : ICONS.user} Profile</a>
          <form method="POST" action="/logout" class="inlineform"><button class="btn btn-ghost btn-sm" type="submit">Logout</button></form>`
       : `<a class="btn btn-main signin-btn" href="/login">Sign In</a>`}
   </div>
@@ -302,15 +339,15 @@ ${body}
   <div class="footer-brand"><img src="${logo}" alt=""><span>${esc(name)}</span></div>
   ${(ytLinks.length || fbLinks.length) ? '<p class="footer-follow">FOLLOW US</p>' : ''}
   <div class="footer-links">
-    ${ytLinks.map((l) => `<a href="${esc(l.url)}" target="_blank" rel="noopener">▶️ ${esc(l.label || 'YouTube')}</a>`).join('')}
-    ${fbLinks.map((l) => `<a href="${esc(l.url)}" target="_blank" rel="noopener">📘 ${esc(l.label || 'Facebook')}</a>`).join('')}
+    ${ytLinks.map((l) => `<a href="${esc(l.url)}" target="_blank" rel="noopener">${ICONS.playSm}${esc(l.label || 'YouTube')}</a>`).join('')}
+    ${fbLinks.map((l) => `<a href="${esc(l.url)}" target="_blank" rel="noopener">${ICONS.usersSm}${esc(l.label || 'Facebook')}</a>`).join('')}
     <a href="/privacy-policy">Privacy Policy</a>
     <a href="/admin">Admin</a>
   </div>
   <p class="footer-copy">© ${new Date().getFullYear()} ${esc(name)} — All rights reserved.</p>
 </footer>
 ${followPanelHtml(ytLinks, fbLinks)}
-<script src="/app.js?v=27"></script>
+<script src="/app.js?v=28"></script>
 </body>
 </html>`;
 }
@@ -319,11 +356,11 @@ ${followPanelHtml(ytLinks, fbLinks)}
 // in the hamburger menu can be highlighted. Unknown titles (setup / login)
 // simply highlight none. Labels are plain text — no emoji icons.
 const ADMIN_NAV = [
-  { key: 'dashboard', href: '/admin', label: 'Dashboard', titles: ['Dashboard'] },
-  { key: 'videos', href: '/admin/videos', label: 'Videos', titles: ['Videos', 'Edit Video'] },
-  { key: 'categories', href: '/admin/categories', label: 'Categories', titles: ['Categories'] },
-  { key: 'users', href: '/admin/users', label: 'Users', titles: ['Users'] },
-  { key: 'settings', href: '/admin/settings', label: 'Settings', titles: ['Settings'] },
+  { key: 'dashboard', href: '/admin', label: 'Dashboard', icon: ICONS.grid, titles: ['Dashboard'] },
+  { key: 'videos', href: '/admin/videos', label: 'Videos', icon: ICONS.playRect, titles: ['Videos', 'Edit Video'] },
+  { key: 'categories', href: '/admin/categories', label: 'Categories', icon: ICONS.layers, titles: ['Categories'] },
+  { key: 'users', href: '/admin/users', label: 'Users', icon: ICONS.users, titles: ['Users'] },
+  { key: 'settings', href: '/admin/settings', label: 'Settings', icon: ICONS.gear, titles: ['Settings'] },
 ];
 
 async function adminLayout({ title, body, bare = false }) {
@@ -349,8 +386,8 @@ async function adminLayout({ title, body, bare = false }) {
         <span></span><span></span><span></span>
       </button>
       <nav class="adminmenu" data-admin-menu hidden>
-        ${ADMIN_NAV.map((n) => `<a class="adminmenu-link${n.key === activeKey ? ' active' : ''}" href="${n.href}">${n.label}</a>`).join('')}
-        <a class="adminmenu-link" href="/" target="_blank">View Site</a>
+        ${ADMIN_NAV.map((n) => `<a class="adminmenu-link${n.key === activeKey ? ' active' : ''}" href="${n.href}">${n.icon}${n.label}</a>`).join('')}
+        <a class="adminmenu-link" href="/" target="_blank">${ICONS.external}View Site</a>
       </nav>
     </div>
   </div>
@@ -363,14 +400,14 @@ async function adminLayout({ title, body, bare = false }) {
 <title>${esc(title)} — Admin — ${esc(name)}</title>
 <link rel="icon" href="/brand/logo">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=27">
+<link rel="stylesheet" href="/styles.css?v=28">
 </head>
 <body>
 ${header}
 <main>
 ${body}
 </main>
-<script src="/app.js?v=27"></script>
+<script src="/app.js?v=28"></script>
 </body>
 </html>`;
 }
@@ -387,7 +424,7 @@ function videoCard(v, user, pos) {
       <h3>${esc(v.title)}</h3>
       ${v.story ? `<p class="card-story">${esc(v.story)}</p>` : ''}
       ${v.category_name ? `<p class="card-cat">${esc(v.category_name)}</p>` : ''}
-      ${user ? '' : '<p class="card-lock">🔒 Sign in to watch</p>'}
+      ${user ? '' : '<p class="card-lock">' + ICONS.lockSm + 'Sign in to watch</p>'}
     </div>
   </a>`;
 }
@@ -520,7 +557,7 @@ app.get('/search', async (req, res) => {
     WHERE v.title LIKE ? OR v.story LIKE ? ORDER BY v.id DESC`, [like, like]) : [];
   const body = `
   <section class="section">
-    <h2 class="section-title">🔎 Search results</h2>
+    <h2 class="section-title">Search results</h2>
     ${q ? `<p class="muted">for &ldquo;${esc(q)}&rdquo;</p>` : ''}
     ${q ? grid(videos, user) : '<div class="empty">Type something to search.</div>'}
   </section>`;
@@ -763,13 +800,13 @@ app.get('/welcome', async (req, res) => {
   <section class="auth-wrap">
     <div class="auth-card welcome-card">
       <img class="auth-logo" src="${logo}" alt="">
-      <h1>Welcome, ${esc(user.name)}! 🎉</h1>
+      <h1>Welcome, ${esc(user.name)}!</h1>
       <p class="muted">Your account is ready — you can now watch every video. Join us on YouTube and Facebook too, so new stories reach you first.</p>
       <div class="welcome-btns">
         ${ytLinks.map((l, i) => `<a class="btn btn-youtube btn-big" href="${esc(subscribeUrl(l.url))}" target="_blank" rel="noopener">${socialBtnText('youtube', ytLinks, l, i)}</a>`).join('')}
         ${fbLinks.map((l, i) => `<a class="btn btn-facebook btn-big" href="${esc(l.url)}" target="_blank" rel="noopener">${socialBtnText('facebook', fbLinks, l, i)}</a>`).join('')}
       </div>
-      <a class="btn btn-main btn-big" href="/">📚 Start Watching</a>
+      <a class="btn btn-main btn-big" href="/">${ICONS.book}Start Watching</a>
     </div>
   </section>`;
   res.send(await layout(req, { title: 'Welcome', body, user }));
@@ -802,7 +839,7 @@ app.get('/watch/:id', async (req, res) => {
       <form method="POST" action="/favorites/toggle">
         <input type="hidden" name="video_id" value="${v.id}">
         <input type="hidden" name="next" value="/watch/${v.id}">
-        <button class="btn ${fav ? 'btn-main' : 'btn-ghost'}" type="submit">${fav ? '❤️ Remove from Favorites' : '🤍 Add to Favorites'}</button>
+        <button class="btn ${fav ? 'btn-main' : 'btn-ghost'}" type="submit">${fav ? ICONS.heartFilled + 'Remove from Favorites' : ICONS.heart + 'Add to Favorites'}</button>
       </form>
     </div>
   </section>
@@ -832,8 +869,8 @@ app.get('/favorites', async (req, res) => {
   const body = `
   <section class="section">
     ${backBar()}
-    <h2 class="section-title">❤️ My Favorites</h2>
-    ${videos.length ? grid(videos, user) : '<div class="empty">Your favorites list is empty — tap ❤️ while watching a video and it will show up here.</div>'}
+    <h2 class="section-title">${ICONS.heart}My Favorites</h2>
+    ${videos.length ? grid(videos, user) : '<div class="empty">Your favorites list is empty — tap the heart button while watching a video and it will show up here.</div>'}
   </section>`;
   res.send(await layout(req, { title: 'My Favorites', body, user }));
 });
@@ -848,11 +885,11 @@ app.get('/profile', async (req, res) => {
   <section class="auth-wrap">
     <div class="auth-card">
       <img id="profileAvatarImg" class="auth-logo profile-avatar" src="${user.avatar ? esc(user.avatar) : logo}" alt="Profile photo">
-      <h1>👤 My Profile</h1>
+      <h1>My Profile</h1>
       <div class="avatar-upload">
         <input type="file" id="avatarInput" accept="image/*" hidden>
-        <label class="btn btn-ghost" for="avatarInput">📸 Change profile photo</label>
-        <button type="button" id="avatarSave" class="btn btn-main" disabled>💾 Save photo</button>
+        <label class="btn btn-ghost" for="avatarInput">${ICONS.camera}Change profile photo</label>
+        <button type="button" id="avatarSave" class="btn btn-main" disabled>Save photo</button>
         <p id="avatarMsg" class="avatar-msg" role="status"></p>
       </div>
       <table class="profile-table">
@@ -861,7 +898,7 @@ app.get('/profile', async (req, res) => {
         <tr><th>Joined</th><td>${esc(String(user.created_at).slice(0, 10))}</td></tr>
         <tr><th>Favorite videos</th><td>${favCount}</td></tr>
       </table>
-      <a class="btn btn-main btn-big" href="/favorites">❤️ View Favorites</a>
+      <a class="btn btn-main btn-big" href="/favorites">${ICONS.heart}View Favorites</a>
       <form method="POST" action="/logout" class="form"><button class="btn btn-ghost btn-big" type="submit">Logout</button></form>
     </div>
   </section>`;
@@ -896,7 +933,7 @@ app.get('/admin', async (req, res) => {
     return res.send(await adminLayout({ title: 'First Setup', bare: true, body: `
     <section class="auth-wrap"><div class="auth-card">
       <img class="auth-logo" src="${logo}" alt="">
-      <h1>🔐 Create the Admin Password</h1>
+      <h1>${ICONS.lock}Create the Admin Password</h1>
       <p class="muted">This is the first run — choose an admin password for yourself. You will use it to sign in to the admin panel from now on.</p>
       <form method="POST" action="/admin/setup" class="form">
         <label>New Password<input type="password" name="password" required minlength="6"></label>
@@ -910,7 +947,7 @@ app.get('/admin', async (req, res) => {
     return res.send(await adminLayout({ title: 'Admin Login', bare: true, body: `
     <section class="auth-wrap"><div class="auth-card">
       <img class="auth-logo" src="${logo}" alt="">
-      <h1>🔐 Admin Login</h1>
+      <h1>${ICONS.lock}Admin Login</h1>
       ${err}
       <form method="POST" action="/admin/login" class="form">
         <label>Admin Password<input type="password" name="password" required></label>
@@ -923,14 +960,14 @@ app.get('/admin', async (req, res) => {
   const catCount = (await queryOne('SELECT COUNT(*) AS c FROM categories')).c;
   res.send(await adminLayout({ title: 'Dashboard', body: `
   <section class="section">
-    <h2 class="section-title">📊 Dashboard</h2>
+    <h2 class="section-title">${ICONS.grid}Dashboard</h2>
     <div class="statgrid">
       <div class="stat"><strong>${Number(userCount)}</strong><span>Registered Users</span></div>
       <div class="stat"><strong>${Number(videoCount)}</strong><span>Total Videos</span></div>
       <div class="stat"><strong>${Number(catCount)}</strong><span>Categories</span></div>
     </div>
     <div class="quicklinks">
-      <a class="btn btn-main" href="/admin/videos">➕ Add a New Video</a>
+      <a class="btn btn-main" href="/admin/videos">Add a New Video</a>
       <a class="btn btn-ghost" href="/admin/categories">Organize Categories</a>
       <a class="btn btn-ghost" href="/admin/settings">Change Site Name / Logo / Links</a>
     </div>
@@ -966,7 +1003,7 @@ app.get('/admin/videos', async (req, res) => {
   const catOptions = (sel) => cats.map((c) => `<option value="${c.id}" ${Number(sel) === c.id ? 'selected' : ''}>${esc(c.name)}</option>`).join('');
   res.send(await adminLayout({ title: 'Videos', body: `
   <section class="section">
-    <h2 class="section-title">➕ Add a New Video</h2>
+    <h2 class="section-title">${ICONS.plusCircle}Add a New Video</h2>
     <form method="POST" action="/admin/videos" class="form panel">
       <label>YouTube Link<input type="text" name="youtube" required placeholder="https://www.youtube.com/watch?v=..."></label>
       <label>Video Title<input type="text" name="title" required placeholder="e.g. The Black River"></label>
@@ -974,15 +1011,15 @@ app.get('/admin/videos', async (req, res) => {
       <label>Episode<input type="text" name="episode" placeholder="e.g. Season 1 • Chapter 01"></label>
       <label>Synopsis (a short summary)<textarea name="synopsis" rows="3" placeholder="Two or three lines about the story — if this video is featured, it shows in the homepage hero banner"></textarea></label>
       <label>Category<select name="category_id">${catOptions('')}</select></label>
-      <label class="checklabel"><input type="checkbox" name="featured" value="1"> ⭐ Featured — this video shows in the big hero banner on the homepage (only one can be featured at a time)</label>
+      <label class="checklabel"><input type="checkbox" name="featured" value="1"> Featured — this video shows in the big hero banner on the homepage (only one can be featured at a time)</label>
       <button class="btn btn-main" type="submit">Add Video</button>
     </form>
-    <h2 class="section-title">🎬 All Videos (${videos.length})</h2>
+    <h2 class="section-title">${ICONS.playRect}All Videos (${videos.length})</h2>
     ${videos.length ? `<div class="tablewrap"><table class="admintable">
       <tr><th>Thumbnail</th><th>Title</th><th>Story / Episode</th><th>Category</th><th>Views</th><th></th></tr>
       ${videos.map((v) => `<tr>
         <td><img class="mini-thumb" src="https://i.ytimg.com/vi/${esc(v.youtube_id)}/default.jpg" alt=""></td>
-        <td>${v.featured ? '⭐ ' : ''}${esc(v.title)}</td>
+        <td>${esc(v.title)}${v.featured ? ' <span class="feat-badge">Featured</span>' : ''}</td>
         <td>${esc(v.story)} ${v.episode ? '• ' + esc(v.episode) : ''}</td>
         <td>${esc(v.category_name || '—')}</td>
         <td>${Number(v.views || 0)}</td>
@@ -1014,7 +1051,7 @@ app.get('/admin/videos/:id/edit', async (req, res) => {
   const cats = await allCategories();
   res.send(await adminLayout({ title: 'Edit Video', body: `
   <section class="section">
-    <h2 class="section-title">✏️ Edit Video</h2>
+    <h2 class="section-title">${ICONS.pencil}Edit Video</h2>
     <form method="POST" action="/admin/videos/${v.id}/edit" class="form panel">
       <label>YouTube Link<input type="text" name="youtube" required value="https://www.youtube.com/watch?v=${esc(v.youtube_id)}"></label>
       <label>Video Title<input type="text" name="title" required value="${esc(v.title)}"></label>
@@ -1022,7 +1059,7 @@ app.get('/admin/videos/:id/edit', async (req, res) => {
       <label>Episode<input type="text" name="episode" value="${esc(v.episode)}"></label>
       <label>Synopsis (a short summary)<textarea name="synopsis" rows="3" placeholder="Two or three lines about the story…">${esc(v.synopsis || '')}</textarea></label>
       <label>Category<select name="category_id">${cats.map((c) => `<option value="${c.id}" ${v.category_id === c.id ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select></label>
-      <label class="checklabel"><input type="checkbox" name="featured" value="1" ${v.featured ? 'checked' : ''}> ⭐ Featured — this video shows in the big hero banner on the homepage (only one can be featured at a time)</label>
+      <label class="checklabel"><input type="checkbox" name="featured" value="1" ${v.featured ? 'checked' : ''}> Featured — this video shows in the big hero banner on the homepage (only one can be featured at a time)</label>
       <button class="btn btn-main" type="submit">Save</button>
       <a class="btn btn-ghost" href="/admin/videos">Back</a>
     </form>
@@ -1056,12 +1093,12 @@ app.get('/admin/categories', async (req, res) => {
   const cats = await allCategories();
   res.send(await adminLayout({ title: 'Categories', body: `
   <section class="section">
-    <h2 class="section-title">➕ Add a New Category</h2>
+    <h2 class="section-title">${ICONS.plusCircle}Add a New Category</h2>
     <form method="POST" action="/admin/categories" class="form panel inline-add">
       <input type="text" name="name" required placeholder="Category name">
       <button class="btn btn-main" type="submit">Add</button>
     </form>
-    <h2 class="section-title">📚 All Categories (${cats.length})</h2>
+    <h2 class="section-title">${ICONS.layers}All Categories (${cats.length})</h2>
     <div class="tablewrap"><table class="admintable">
       <tr><th>Name</th><th>Videos</th><th></th></tr>
       ${cats.map((c) => `<tr>
@@ -1108,7 +1145,7 @@ app.get('/admin/users', async (req, res) => {
   const users = await queryAll('SELECT * FROM users ORDER BY id DESC');
   res.send(await adminLayout({ title: 'Users', body: `
   <section class="section">
-    <h2 class="section-title">👥 Registered Users — ${users.length} in total</h2>
+    <h2 class="section-title">${ICONS.users}Registered Users — ${users.length} in total</h2>
     ${users.length ? `<div class="tablewrap"><table class="admintable">
       <tr><th>#</th><th>Name</th><th>Email</th><th>Joined</th></tr>
       ${users.map((u) => `<tr><td>${Number(u.id)}</td><td>${esc(u.name)}</td><td>${esc(u.email)}</td><td>${esc(String(u.created_at).slice(0, 10))}</td></tr>`).join('')}
@@ -1118,7 +1155,7 @@ app.get('/admin/users', async (req, res) => {
 
 app.get('/admin/settings', async (req, res) => {
   if (!(await requireAdminPage(req, res))) return;
-  const msg = req.query.ok ? '<div class="alert alert-ok">Saved ✅</div>' : '';
+  const msg = req.query.ok ? '<div class="alert alert-ok">Saved</div>' : '';
   const err = req.query.err ? `<div class="alert alert-error">${esc(req.query.err)}</div>` : '';
   const name = await siteName();
   const logo = await logoSrc();
@@ -1141,7 +1178,7 @@ app.get('/admin/settings', async (req, res) => {
       </div>`;
   res.send(await adminLayout({ title: 'Settings', body: `
   <section class="section">
-    <h2 class="section-title">⚙️ Settings</h2>
+    <h2 class="section-title">${ICONS.gear}Settings</h2>
     ${msg}${err}
     <form method="POST" action="/admin/settings" class="form panel">
       <label>Site Name<input type="text" name="site_name" value="${esc(name)}" required></label>
@@ -1150,7 +1187,7 @@ app.get('/admin/settings', async (req, res) => {
       <button class="btn btn-main" type="submit">Save</button>
       <p class="muted">One link per row; if you give a link a name, the button will show that name; leave a row empty and that link will not be shown.</p>
     </form>
-    <h2 class="section-title">🖼️ Site Logo</h2>
+    <h2 class="section-title">${ICONS.image}Site Logo</h2>
     <div class="panel">
       <p>Current logo:</p>
       <img class="logo-preview" src="${logo}" alt="">
@@ -1162,7 +1199,7 @@ app.get('/admin/settings', async (req, res) => {
         <button class="btn btn-ghost" type="submit">Return to Default Logo</button>
       </form>
     </div>
-    <h2 class="section-title">🔑 Change Admin Password</h2>
+    <h2 class="section-title">${ICONS.key}Change Admin Password</h2>
     <form method="POST" action="/admin/settings/password" class="form panel">
       <label>Current Password<input type="password" name="current" required></label>
       <label>New Password<input type="password" name="next" required minlength="6"></label>
