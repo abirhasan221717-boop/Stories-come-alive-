@@ -138,6 +138,14 @@ img { max-width: 100%; }
   box-shadow: 0 4px 16px rgba(0,0,0,0.45);
 }
 .fhero-btn { margin-top: 16px; padding: 13px 30px; font-size: 1.12rem; border-radius: 999px; box-shadow: 0 6px 22px rgba(0,0,0,0.45); }
+
+/* hero button pair (Watch Now + More Info) and the search row under an auto hero */
+.fhero-btns { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 16px; }
+.fhero-btns .fhero-btn { margin-top: 0; }
+.fhero-btn-info { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.42); color: #fff; backdrop-filter: blur(6px); }
+.fhero-btn-info .ic { color: #fff; }
+.hero-search { padding: 2px 16px 12px; }
+.hero-search .searchbar { margin-top: 14px; }
 .fhero-note { margin-top: 10px; color: var(--muted); font-size: 0.9rem; }
 @media (max-width: 560px) {
   .fhero { aspect-ratio: auto; height: 380px; }
@@ -653,6 +661,16 @@ body.adminui .gearbtn { flex: 0 0 auto; }
 .comment-body { line-height: 1.55; overflow-wrap: break-word; }
 .comment-del { background: none; border: 0; padding: 2px 0 0; font: inherit; font-size: 0.82rem; font-weight: 600; color: #ff9aa5; cursor: pointer; }
 .comment-del:hover { text-decoration: underline; }
+
+/* threaded replies */
+.comment-actions { display: flex; align-items: center; gap: 16px; margin-top: 4px; }
+.comment-act { background: none; border: 0; padding: 2px 0 0; font: inherit; font-size: 0.82rem; font-weight: 700; color: var(--gold-bright); cursor: pointer; }
+.comment-act:hover { text-decoration: underline; }
+.replies { display: flex; flex-direction: column; gap: 14px; margin-top: 14px; }
+.comment-reply .comment-avatar { width: 32px; height: 32px; flex: 0 0 32px; font-size: 0.92rem; }
+.reply-form { margin-top: 10px; }
+.reply-form textarea { width: 100%; }
+.reply-form[hidden] { display: none; }
 
 /* ---------- notifications page ---------- */
 .notif-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 22px; }
