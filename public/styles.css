@@ -376,3 +376,138 @@ img { max-width: 100%; }
   .follow-avatar { width: 40px; height: 40px; flex-basis: 40px; }
   .follow-action { min-width: 86px; }
 }
+
+/* ---------- admin premium glow theme (owner's mockup) ---------- */
+/* Everything below is scoped to body.adminui (admin pages only). Public
+   pages never carry that class, so they are visually unaffected. */
+
+/* Ambience: deep navy with layered ambient glows fixed behind content. */
+body.adminui {
+  background:
+    radial-gradient(900px 480px at 88% -90px, rgba(217, 164, 65, 0.15), rgba(217, 164, 65, 0) 60%),
+    radial-gradient(820px 520px at -140px 32%, rgba(96, 66, 196, 0.17), rgba(96, 66, 196, 0) 62%),
+    radial-gradient(760px 460px at 112% 78%, rgba(64, 40, 160, 0.13), rgba(64, 40, 160, 0) 60%),
+    linear-gradient(180deg, #0a1730 0%, var(--bg) 360px);
+  background-attachment: fixed;
+}
+/* Header: hairline gold-gradient bottom border. */
+.adminui .topbar {
+  border-bottom: 1px solid transparent;
+  border-image: linear-gradient(90deg, rgba(217, 164, 65, 0) 0%, rgba(217, 164, 65, 0.65) 50%, rgba(217, 164, 65, 0) 100%) 1;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+}
+/* Glass panels / cards with a soft gold-tinted glow. */
+.adminui .panel,
+.adminui .auth-card,
+.adminui .card,
+.adminui .empty {
+  background: linear-gradient(180deg, rgba(23, 38, 80, 0.92), rgba(13, 25, 56, 0.94));
+  border: 1px solid rgba(217, 164, 65, 0.28);
+  border-radius: 16px;
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.45), 0 0 22px rgba(217, 164, 65, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+.adminui .empty { border-style: dashed; }
+/* Primary buttons: gold gradient (base) + glow shadow. */
+.adminui .btn-main {
+  box-shadow: 0 6px 22px rgba(217, 164, 65, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+.adminui .btn-main:hover {
+  border-color: var(--gold);
+  box-shadow: 0 9px 28px rgba(217, 164, 65, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+/* Header: gold-rimmed circular Settings (gear) shortcut. */
+.adminui .gearbtn {
+  width: 42px; height: 42px; flex: 0 0 auto; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--gold-bright);
+  border: 1.5px solid rgba(217, 164, 65, 0.6);
+  background: rgba(217, 164, 65, 0.08);
+  box-shadow: 0 0 14px rgba(217, 164, 65, 0.3), inset 0 0 8px rgba(217, 164, 65, 0.18);
+}
+.adminui .gearbtn .ic { width: 21px; height: 21px; margin-right: 0; }
+.adminui .gearbtn:hover {
+  text-decoration: none; border-color: var(--gold-bright);
+  box-shadow: 0 0 22px rgba(217, 164, 65, 0.5), inset 0 0 10px rgba(217, 164, 65, 0.25);
+}
+/* Hamburger dropdown: add a gold-tinted glow to its shadow. */
+.adminui .adminmenu {
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5), 0 0 22px rgba(217, 164, 65, 0.14);
+}
+/* Tables: glass surface, highlighted header row. */
+.adminui .admintable {
+  background: linear-gradient(180deg, rgba(23, 38, 80, 0.92), rgba(13, 25, 56, 0.94));
+  border-color: rgba(217, 164, 65, 0.25);
+  border-radius: 16px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), 0 0 18px rgba(217, 164, 65, 0.06);
+}
+.adminui .admintable th { background: rgba(217, 164, 65, 0.09); color: var(--gold-bright); }
+/* Inputs: keep the readable base styling; gold focus ring + soft glow. */
+.adminui .form input:focus, .adminui .form select:focus, .adminui .form textarea:focus,
+.adminui .inline-add input:focus, .adminui .rename-form input:focus {
+  outline: 2px solid var(--gold);
+  box-shadow: 0 0 0 4px rgba(217, 164, 65, 0.15);
+}
+
+/* Dashboard stat cards: colored neon glow per accent (mockup centerpiece). */
+.adminui .statgrid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+@media (min-width: 900px) { .adminui .statgrid { grid-template-columns: repeat(3, 1fr); } }
+.adminui .stat {
+  position: relative; overflow: hidden;
+  flex-direction: row; align-items: center; gap: 14px;
+  padding: 16px 18px; border-radius: 16px;
+  background: linear-gradient(160deg, rgba(24, 40, 86, 0.95), rgba(11, 22, 50, 0.97));
+}
+.adminui .stat-glow {
+  --acc: 217, 164, 65; --acc-solid: var(--gold-bright);
+  border: 1px solid rgba(var(--acc), 0.45);
+  box-shadow: 0 0 22px rgba(var(--acc), 0.2), 0 12px 30px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+.adminui .accent-gold { --acc: 217, 164, 65; --acc-solid: var(--gold-bright); }
+.adminui .accent-purple { --acc: 150, 110, 255; --acc-solid: #b79bff; }
+.adminui .accent-green { --acc: 52, 199, 137; --acc-solid: #4fe0ac; }
+.adminui .stat-ic {
+  position: relative; z-index: 1;
+  flex: 0 0 54px; width: 54px; height: 54px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--acc-solid);
+  border: 1.5px solid rgba(var(--acc), 0.6);
+  background: rgba(var(--acc), 0.1);
+  box-shadow: 0 0 16px rgba(var(--acc), 0.45), inset 0 0 10px rgba(var(--acc), 0.25);
+}
+.adminui .stat-ic .ic { width: 26px; height: 26px; margin-right: 0; }
+.adminui .stat-meta { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 2px; }
+.adminui .stat-meta strong { font-size: 2.2rem; line-height: 1.05; color: var(--gold-bright); }
+.adminui .stat-meta > span { color: var(--muted); font-size: 0.95rem; }
+.adminui .stat-wm {
+  position: absolute; z-index: 0; right: -16px; top: 50%; transform: translateY(-50%);
+  color: rgb(var(--acc)); opacity: 0.07; pointer-events: none; line-height: 0;
+}
+.adminui .stat-wm .ic { width: 104px; height: 104px; margin-right: 0; }
+@media (max-width: 400px) { .adminui .stat { padding: 14px; gap: 10px; } }
+
+/* Dashboard quick actions (mockup): glowing gold primary, purple-outline
+   glass secondary, full-width settings link row — chevrons pushed right. */
+.adminui .quicklinks { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 640px) { .adminui .quicklinks { grid-template-columns: 1fr; } }
+.adminui .quicklinks .btn {
+  justify-content: flex-start; gap: 10px;
+  padding: 14px 18px; border-radius: 14px; font-size: 1.02rem;
+}
+.adminui .quicklinks .qa-chev { margin-left: auto; margin-right: 0; opacity: 0.85; }
+.adminui .qa-primary {
+  box-shadow: 0 10px 30px rgba(217, 164, 65, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+.adminui .qa-primary:hover { box-shadow: 0 13px 36px rgba(217, 164, 65, 0.58), inset 0 1px 0 rgba(255, 255, 255, 0.45); }
+.adminui .qa-purple {
+  border-color: rgba(150, 110, 255, 0.55);
+  background: rgba(88, 60, 180, 0.12);
+  box-shadow: 0 0 18px rgba(150, 110, 255, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+.adminui .qa-purple:hover { border-color: rgba(183, 155, 255, 0.9); background: rgba(88, 60, 180, 0.18); }
+.adminui .qa-wide {
+  grid-column: 1 / -1;
+  border-color: rgba(217, 164, 65, 0.35);
+  background: rgba(13, 25, 56, 0.6);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+.adminui .qa-wide:hover { border-color: var(--gold); }
