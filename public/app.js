@@ -105,6 +105,33 @@ document.querySelectorAll('[data-reply-toggle]').forEach((btn) => {
   });
 });
 
+// Top Picks row: auto-slide one card at a time (Bhoot-style). Pauses while
+// the viewer interacts and resumes a few seconds after they stop.
+document.querySelectorAll('[data-autoslide]').forEach((scroller) => {
+  const cards = scroller.querySelectorAll('.card');
+  if (cards.length < 2) return;
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  let timer = null;
+  let resumeTimer = null;
+  const step = () => {
+    const gap = parseFloat(getComputedStyle(scroller).gap) || 12;
+    const w = cards[0].offsetWidth + gap;
+    const max = scroller.scrollWidth - scroller.clientWidth - 8;
+    if (scroller.scrollLeft >= max) scroller.scrollTo({ left: 0, behavior: 'smooth' });
+    else scroller.scrollBy({ left: w, behavior: 'smooth' });
+  };
+  const start = () => { if (!timer) timer = setInterval(step, 3000); };
+  const stop = () => { if (timer) { clearInterval(timer); timer = null; } };
+  const pause = () => { stop(); if (resumeTimer) clearTimeout(resumeTimer); resumeTimer = setTimeout(start, 5000); };
+  const wrap = scroller.closest('.rowwrap') || scroller;
+  wrap.addEventListener('pointerdown', pause);
+  scroller.addEventListener('wheel', pause, { passive: true });
+  scroller.addEventListener('mouseenter', stop);
+  scroller.addEventListener('mouseleave', start);
+  document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); else start(); });
+  start();
+});
+
 // Homepage poster rows: prev/next scroll buttons (native swipe works on touch devices).
 document.querySelectorAll('.rowwrap').forEach((wrap) => {
   const scroller = wrap.querySelector('.rowscroll');
