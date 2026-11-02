@@ -129,6 +129,7 @@ CREATE TABLE IF NOT EXISTS assets (
   if (!videoCols.includes('synopsis')) await client.execute("ALTER TABLE videos ADD COLUMN synopsis TEXT NOT NULL DEFAULT ''");
   if (!videoCols.includes('featured')) await client.execute('ALTER TABLE videos ADD COLUMN featured INTEGER NOT NULL DEFAULT 0');
   if (!videoCols.includes('rank')) await client.execute('ALTER TABLE videos ADD COLUMN rank INTEGER');
+  if (!videoCols.includes('views')) await client.execute('ALTER TABLE videos ADD COLUMN views INTEGER NOT NULL DEFAULT 0');
   const userCols = (await client.execute('PRAGMA table_info(users)')).rows.map((r) => r.name);
   if (!userCols.includes('avatar')) await client.execute('ALTER TABLE users ADD COLUMN avatar TEXT');
 
@@ -140,11 +141,34 @@ CREATE TABLE IF NOT EXISTS assets (
 
   const catCount = (await client.execute('SELECT COUNT(*) AS c FROM categories')).rows[0].c;
   if (Number(catCount) === 0) {
-    const seed = ['রোমান্স', 'রোমান্টিক কমেডি', 'হরর', 'থ্রিলার', 'মিস্ট্রি', 'ফ্যান্টাসি', 'ডার্ক ফ্যান্টাসি', 'সিরিজ'];
+    const seed = ['Romance', 'Romantic Comedy', 'Horror', 'Thriller', 'Mystery', 'Fantasy', 'Dark Fantasy', 'Series'];
     await client.batch(
       seed.map((name, i) => ({ sql: 'INSERT INTO categories(name, sort_order) VALUES(?, ?)', args: [name, i] })),
       'write'
     );
+  }
+
+  // ---- one-time rename: Bengali seed category names -> English ----
+  // Databases seeded by older builds carry the Bengali names. Rename each
+  // one to its English equivalent, but ONLY when no category already has the
+  // English name, so this never creates duplicates. Idempotent (after the
+  // first pass the Bengali names are gone, so later boots change nothing)
+  // and it leaves custom categories — of any name — untouched.
+  const CATEGORY_RENAMES = [
+    ['রোমান্স', 'Romance'],
+    ['রোমান্টিক কমেডি', 'Romantic Comedy'],
+    ['হরর', 'Horror'],
+    ['থ্রিলার', 'Thriller'],
+    ['মিস্ট্রি', 'Mystery'],
+    ['ফ্যান্টাসি', 'Fantasy'],
+    ['ডার্ক ফ্যান্টাসি', 'Dark Fantasy'],
+    ['সিরিজ', 'Series'],
+  ];
+  for (const [bn, en] of CATEGORY_RENAMES) {
+    const enCount = (await client.execute({ sql: 'SELECT COUNT(*) AS c FROM categories WHERE name = ?', args: [en] })).rows[0].c;
+    if (Number(enCount) === 0) {
+      await client.execute({ sql: 'UPDATE categories SET name = ? WHERE name = ?', args: [en, bn] });
+    }
   }
 })();
 
