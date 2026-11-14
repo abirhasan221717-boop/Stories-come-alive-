@@ -1,15 +1,15 @@
-/* Stories Come Alive — deep navy / gold theme (matches the logo artwork), mobile-first */
+/* Stories Come Alive — near-black / hot-pink theme (PARXSTREAM style), mobile-first */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --bg: #081226;
-  --bg2: #0d1b3e;
-  --panel: #101e42;
-  --line: #26386a;
-  --text: #f5f2e9;
-  --muted: #a9b4d0;
-  --gold: #d9a441;
-  --gold-bright: #f0c75e;
-  --gold-dark: #9c7422;
+  --bg: #07070d;
+  --bg2: #0c0c15;
+  --panel: #12121e;
+  --line: #292936;
+  --text: #f7f4f9;
+  --muted: #a8a4bb;
+  --gold: #f72585;
+  --gold-bright: #ff5da2;
+  --gold-dark: #b3125f;
 }
 html { scroll-behavior: smooth; }
 body {
@@ -30,13 +30,13 @@ img { max-width: 100%; }
   position: sticky; top: 0; z-index: 50;
   display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
   padding: 7px 16px;
-  background: rgba(8, 18, 38, 0.96);
+  background: rgba(7, 7, 13, 0.96);
   border-bottom: 1px solid var(--line);
   backdrop-filter: blur(6px);
 }
 .brand { display: flex; align-items: center; gap: 10px; color: var(--text); margin-right: auto; }
 .brand:hover { text-decoration: none; }
-.brand-logo { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 2px solid var(--gold); }
+.brand-logo { width: 40px; height: 40px; border-radius: 11px; object-fit: cover; box-shadow: 0 3px 14px rgba(247, 37, 133, 0.5); }
 .brand-name { font-weight: 700; font-size: 1.12rem; letter-spacing: 0.4px; }
 .mainnav { display: flex; gap: 4px; flex-wrap: wrap; flex: 1; }
 .navlink { color: var(--muted); padding: 6px 10px; border-radius: 8px; font-size: 0.98rem; }
@@ -53,7 +53,7 @@ img { max-width: 100%; }
   background: var(--bg2); color: var(--text); text-align: center;
 }
 .btn:hover { text-decoration: none; border-color: var(--gold); }
-.btn-main { background: linear-gradient(180deg, var(--gold-bright), var(--gold)); border-color: var(--gold-dark); color: #241a03; }
+.btn-main { background: linear-gradient(180deg, var(--gold-bright), var(--gold)); border-color: var(--gold-dark); color: #ffffff; }
 .btn-ghost { background: transparent; }
 .btn-danger { background: #3a0d12; border-color: #6e1420; color: #ff9aa5; }
 .btn-sm { padding: 4px 10px; font-size: 0.88rem; }
@@ -88,15 +88,15 @@ img { max-width: 100%; }
 .hero-overlay {
   text-align: center;
   padding: 26px 18px 36px;
-  background: linear-gradient(180deg, #0a1730, var(--bg));
+  background: linear-gradient(180deg, #0a0a14, var(--bg));
 }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-.hero p { color: #d5dcf2; max-width: 560px; margin: 0 auto; font-size: 1.05rem; }
+.hero p { color: #eae5f4; max-width: 560px; margin: 0 auto; font-size: 1.05rem; }
 .hero-note { margin-top: 14px; font-size: 0.98rem; }
 .searchbar { display: flex; gap: 8px; max-width: 520px; margin: 20px auto 0; }
 .searchbar input {
   flex: 1; font: inherit; color: var(--text);
-  background: rgba(8,18,38,0.85); border: 1px solid var(--line); border-radius: 10px; padding: 11px 14px;
+  background: rgba(7,7,13,0.85); border: 1px solid var(--line); border-radius: 10px; padding: 11px 14px;
 }
 
 /* ---------- featured hero ---------- */
@@ -106,7 +106,7 @@ img { max-width: 100%; }
 .fhero-img { position: absolute; inset: 0; }
 .fhero-shade {
   position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(4,8,20,0.18) 0%, rgba(4,8,20,0.05) 42%, rgba(4,8,20,0.88) 82%, rgba(4,8,20,0.97) 100%);
+  background: linear-gradient(180deg, rgba(4,4,10,0.18) 0%, rgba(4,4,10,0.05) 42%, rgba(4,4,10,0.88) 82%, rgba(4,4,10,0.97) 100%);
 }
 .fhero-content {
   position: absolute; left: 0; right: 0; bottom: 0;
@@ -114,14 +114,14 @@ img { max-width: 100%; }
   max-width: 1180px; margin: 0 auto; width: 100%;
 }
 .fhero-badge {
-  display: inline-block; background: rgba(0,0,0,0.65); color: #ffe9b3;
+  display: inline-block; background: rgba(0,0,0,0.65); color: #ffd7ec;
   border: 1px solid var(--gold); border-radius: 999px;
   padding: 3px 12px; font-size: 0.85rem; font-weight: 600; margin-bottom: 10px;
 }
 .fhero-title { font-size: clamp(1.6rem, 5.2vw, 2.7rem); line-height: 1.2; text-shadow: 0 2px 14px rgba(0,0,0,0.7); }
 .fhero-story { color: var(--gold-bright); font-weight: 600; margin-top: 6px; font-size: 1.02rem; }
 .fhero-syn {
-  color: #e6ebfa; margin-top: 8px; max-width: 620px; line-height: 1.55; font-size: 0.99rem;
+  color: #f0ebf7; margin-top: 8px; max-width: 620px; line-height: 1.55; font-size: 0.99rem;
   display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
 }
 .fhero-syn.open { display: block; -webkit-line-clamp: unset; overflow: visible; }
@@ -173,11 +173,11 @@ img { max-width: 100%; }
   display: none;
   position: absolute; top: 38%; z-index: 5;
   width: 42px; height: 42px; border-radius: 50%;
-  background: rgba(8,18,38,0.9); color: var(--gold-bright);
+  background: rgba(7,7,13,0.9); color: var(--gold-bright);
   border: 1px solid var(--gold); font-size: 1.5rem; line-height: 1; cursor: pointer;
   align-items: center; justify-content: center;
 }
-.rowbtn:hover { background: var(--gold); color: #241a03; }
+.rowbtn:hover { background: var(--gold); color: #ffffff; }
 .rowbtn-prev { left: -8px; }
 .rowbtn-next { right: -8px; }
 @media (min-width: 900px) { .rowbtn { display: flex; } }
@@ -199,7 +199,7 @@ img { max-width: 100%; }
 .card:hover { border-color: var(--gold); text-decoration: none; transform: translateY(-2px); transition: transform 0.15s ease; }
 .thumb { position: relative; aspect-ratio: 16 / 9; background: #000; }
 .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.ep-badge { position: absolute; left: 8px; bottom: 8px; background: rgba(0,0,0,0.78); color: #ffe9b3; border: 1px solid var(--gold); border-radius: 6px; padding: 2px 8px; font-size: 0.78rem; font-weight: 600; }
+.ep-badge { position: absolute; left: 8px; bottom: 8px; background: rgba(0,0,0,0.78); color: #ffd7ec; border: 1px solid var(--gold); border-radius: 6px; padding: 2px 8px; font-size: 0.78rem; font-weight: 600; }
 .rank-chip { position: absolute; top: 8px; left: 8px; background: #fff; color: var(--bg); border: 2px solid var(--gold); border-radius: 7px; padding: 1px 8px; font-size: 0.85rem; font-weight: 800; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
 
 /* big Bhoot-style rank number down the left of a Top Picks card */
@@ -210,7 +210,7 @@ img { max-width: 100%; }
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.55); pointer-events: none;
 }
 @media (max-width: 560px) { .rank-big { font-size: 2.9rem; -webkit-text-stroke-width: 1.6px; } }
-.play-badge { position: absolute; right: 8px; bottom: 8px; width: 32px; height: 32px; border-radius: 50%; background: var(--gold); color: #241a03; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; }
+.play-badge { position: absolute; right: 8px; bottom: 8px; width: 32px; height: 32px; border-radius: 50%; background: var(--gold); color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; }
 .card-body { padding: 12px 14px 14px; }
 .card-body h3 { font-size: 1.02rem; line-height: 1.35; }
 .card-story { color: var(--gold); font-size: 0.9rem; margin-top: 3px; }
@@ -228,7 +228,7 @@ img { max-width: 100%; }
 /* ---------- auth ---------- */
 .auth-wrap { display: flex; justify-content: center; padding: 34px 16px; }
 .auth-card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 26px 22px; width: 100%; max-width: 430px; text-align: center; display: flex; flex-direction: column; gap: 14px; }
-.auth-logo { width: 84px; height: 84px; border-radius: 50%; object-fit: cover; border: 2px solid var(--gold); margin: 0 auto; }
+.auth-logo { width: 84px; height: 84px; border-radius: 22px; object-fit: cover; box-shadow: 0 8px 26px rgba(247, 37, 133, 0.45); margin: 0 auto; }
 .auth-card h1 { font-size: 1.45rem; }
 .auth-card .form { text-align: left; }
 .auth-alt { color: var(--muted); }
@@ -288,9 +288,9 @@ img { max-width: 100%; }
 .adminmenu-link:hover { color: var(--text); background: var(--bg2); text-decoration: none; }
 .adminmenu-link.active {
   background: linear-gradient(180deg, var(--gold-bright), var(--gold));
-  color: #241a03;
+  color: #ffffff;
 }
-.adminmenu-link.active:hover { color: #241a03; }
+.adminmenu-link.active:hover { color: #ffffff; }
 .statgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 18px; }
 .stat { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 4px; }
 .stat strong { font-size: 1.8rem; color: var(--gold); }
@@ -311,7 +311,7 @@ img { max-width: 100%; }
 .inline-add { flex-direction: row; }
 .inline-add input { flex: 1; }
 .rename-form { display: flex; gap: 6px; }
-.logo-preview { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; border: 2px solid var(--gold); margin: 8px 0 14px; display: block; }
+.logo-preview { width: 110px; height: 110px; border-radius: 24px; object-fit: cover; border: 2px solid var(--gold); margin: 8px 0 14px; display: block; }
 .linkgroup { display: flex; flex-direction: column; gap: 8px; }
 .linkgroup-title { font-weight: 600; font-size: 0.95rem; }
 .linkrows { display: flex; flex-direction: column; gap: 8px; }
@@ -327,12 +327,12 @@ img { max-width: 100%; }
 /* ---------- follow / subscribe panel ---------- */
 .btn-follow {
   border-radius: 999px; padding: 8px 15px; white-space: nowrap;
-  box-shadow: 0 2px 10px rgba(217, 164, 65, 0.22);
+  box-shadow: 0 2px 10px rgba(247, 37, 133, 0.22);
 }
 .follow-overlay {
   position: fixed; inset: 0; z-index: 200;
   display: flex; align-items: center; justify-content: center;
-  padding: 18px; background: rgba(2, 6, 18, 0.74);
+  padding: 18px; background: rgba(3, 3, 8, 0.74);
   backdrop-filter: blur(3px);
 }
 .follow-overlay[hidden] { display: none !important; }
@@ -362,7 +362,7 @@ img { max-width: 100%; }
 .follow-rows { display: flex; flex-direction: column; gap: 10px; }
 .follow-row {
   display: flex; align-items: center; gap: 12px;
-  background: rgba(8, 18, 38, 0.66); border: 1px solid var(--line);
+  background: rgba(7, 7, 13, 0.66); border: 1px solid var(--line);
   border-radius: 16px; padding: 10px 12px;
 }
 .follow-avatar {
@@ -402,16 +402,16 @@ img { max-width: 100%; }
 /* Ambience: deep navy with layered ambient glows fixed behind content. */
 body.adminui {
   background:
-    radial-gradient(900px 480px at 88% -90px, rgba(217, 164, 65, 0.15), rgba(217, 164, 65, 0) 60%),
-    radial-gradient(820px 520px at -140px 32%, rgba(96, 66, 196, 0.17), rgba(96, 66, 196, 0) 62%),
-    radial-gradient(760px 460px at 112% 78%, rgba(64, 40, 160, 0.13), rgba(64, 40, 160, 0) 60%),
-    linear-gradient(180deg, #0a1730 0%, var(--bg) 360px);
+    radial-gradient(900px 480px at 88% -90px, rgba(247, 37, 133, 0.15), rgba(247, 37, 133, 0) 60%),
+    radial-gradient(820px 520px at -140px 32%, rgba(205, 32, 132, 0.17), rgba(205, 32, 132, 0) 62%),
+    radial-gradient(760px 460px at 112% 78%, rgba(150, 18, 100, 0.13), rgba(150, 18, 100, 0) 60%),
+    linear-gradient(180deg, #0a0a14 0%, var(--bg) 360px);
   background-attachment: fixed;
 }
 /* Header: hairline gold-gradient bottom border. */
 .adminui .topbar {
   border-bottom: 1px solid transparent;
-  border-image: linear-gradient(90deg, rgba(217, 164, 65, 0) 0%, rgba(217, 164, 65, 0.65) 50%, rgba(217, 164, 65, 0) 100%) 1;
+  border-image: linear-gradient(90deg, rgba(247, 37, 133, 0) 0%, rgba(247, 37, 133, 0.65) 50%, rgba(247, 37, 133, 0) 100%) 1;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
 }
 /* Glass panels / cards with a soft gold-tinted glow. */
@@ -419,51 +419,51 @@ body.adminui {
 .adminui .auth-card,
 .adminui .card,
 .adminui .empty {
-  background: linear-gradient(180deg, rgba(23, 38, 80, 0.92), rgba(13, 25, 56, 0.94));
-  border: 1px solid rgba(217, 164, 65, 0.28);
+  background: linear-gradient(180deg, rgba(24, 24, 40, 0.92), rgba(14, 14, 25, 0.94));
+  border: 1px solid rgba(247, 37, 133, 0.28);
   border-radius: 16px;
-  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.45), 0 0 22px rgba(217, 164, 65, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.45), 0 0 22px rgba(247, 37, 133, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 .adminui .empty { border-style: dashed; }
 /* Primary buttons: gold gradient (base) + glow shadow. */
 .adminui .btn-main {
-  box-shadow: 0 6px 22px rgba(217, 164, 65, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  box-shadow: 0 6px 22px rgba(247, 37, 133, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 .adminui .btn-main:hover {
   border-color: var(--gold);
-  box-shadow: 0 9px 28px rgba(217, 164, 65, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  box-shadow: 0 9px 28px rgba(247, 37, 133, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 /* Header: gold-rimmed circular Settings (gear) shortcut. */
 .adminui .gearbtn {
   width: 42px; height: 42px; flex: 0 0 auto; border-radius: 50%;
   display: inline-flex; align-items: center; justify-content: center;
   color: var(--gold-bright);
-  border: 1.5px solid rgba(217, 164, 65, 0.6);
-  background: rgba(217, 164, 65, 0.08);
-  box-shadow: 0 0 14px rgba(217, 164, 65, 0.3), inset 0 0 8px rgba(217, 164, 65, 0.18);
+  border: 1.5px solid rgba(247, 37, 133, 0.6);
+  background: rgba(247, 37, 133, 0.08);
+  box-shadow: 0 0 14px rgba(247, 37, 133, 0.3), inset 0 0 8px rgba(247, 37, 133, 0.18);
 }
 .adminui .gearbtn .ic { width: 21px; height: 21px; margin-right: 0; }
 .adminui .gearbtn:hover {
   text-decoration: none; border-color: var(--gold-bright);
-  box-shadow: 0 0 22px rgba(217, 164, 65, 0.5), inset 0 0 10px rgba(217, 164, 65, 0.25);
+  box-shadow: 0 0 22px rgba(247, 37, 133, 0.5), inset 0 0 10px rgba(247, 37, 133, 0.25);
 }
 /* Hamburger dropdown: add a gold-tinted glow to its shadow. */
 .adminui .adminmenu {
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5), 0 0 22px rgba(217, 164, 65, 0.14);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5), 0 0 22px rgba(247, 37, 133, 0.14);
 }
 /* Tables: glass surface, highlighted header row. */
 .adminui .admintable {
-  background: linear-gradient(180deg, rgba(23, 38, 80, 0.92), rgba(13, 25, 56, 0.94));
-  border-color: rgba(217, 164, 65, 0.25);
+  background: linear-gradient(180deg, rgba(24, 24, 40, 0.92), rgba(14, 14, 25, 0.94));
+  border-color: rgba(247, 37, 133, 0.25);
   border-radius: 16px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), 0 0 18px rgba(217, 164, 65, 0.06);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), 0 0 18px rgba(247, 37, 133, 0.06);
 }
-.adminui .admintable th { background: rgba(217, 164, 65, 0.09); color: var(--gold-bright); }
+.adminui .admintable th { background: rgba(247, 37, 133, 0.09); color: var(--gold-bright); }
 /* Inputs: keep the readable base styling; gold focus ring + soft glow. */
 .adminui .form input:focus, .adminui .form select:focus, .adminui .form textarea:focus,
 .adminui .inline-add input:focus, .adminui .rename-form input:focus {
   outline: 2px solid var(--gold);
-  box-shadow: 0 0 0 4px rgba(217, 164, 65, 0.15);
+  box-shadow: 0 0 0 4px rgba(247, 37, 133, 0.15);
 }
 
 /* Dashboard stat cards: colored neon glow per accent (mockup centerpiece). */
@@ -473,14 +473,14 @@ body.adminui {
   position: relative; overflow: hidden;
   flex-direction: row; align-items: center; gap: 14px;
   padding: 16px 18px; border-radius: 16px;
-  background: linear-gradient(160deg, rgba(24, 40, 86, 0.95), rgba(11, 22, 50, 0.97));
+  background: linear-gradient(160deg, rgba(27, 27, 45, 0.95), rgba(12, 12, 23, 0.97));
 }
 .adminui .stat-glow {
-  --acc: 217, 164, 65; --acc-solid: var(--gold-bright);
+  --acc: 247, 37, 133; --acc-solid: var(--gold-bright);
   border: 1px solid rgba(var(--acc), 0.45);
   box-shadow: 0 0 22px rgba(var(--acc), 0.2), 0 12px 30px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
-.adminui .accent-gold { --acc: 217, 164, 65; --acc-solid: var(--gold-bright); }
+.adminui .accent-gold { --acc: 247, 37, 133; --acc-solid: var(--gold-bright); }
 .adminui .accent-purple { --acc: 150, 110, 255; --acc-solid: #b79bff; }
 .adminui .accent-green { --acc: 52, 199, 137; --acc-solid: #4fe0ac; }
 .adminui .stat-ic {
@@ -513,9 +513,9 @@ body.adminui {
 }
 .adminui .quicklinks .qa-chev { margin-left: auto; margin-right: 0; opacity: 0.85; }
 .adminui .qa-primary {
-  box-shadow: 0 10px 30px rgba(217, 164, 65, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  box-shadow: 0 10px 30px rgba(247, 37, 133, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
-.adminui .qa-primary:hover { box-shadow: 0 13px 36px rgba(217, 164, 65, 0.58), inset 0 1px 0 rgba(255, 255, 255, 0.45); }
+.adminui .qa-primary:hover { box-shadow: 0 13px 36px rgba(247, 37, 133, 0.58), inset 0 1px 0 rgba(255, 255, 255, 0.45); }
 .adminui .qa-purple {
   border-color: rgba(150, 110, 255, 0.55);
   background: rgba(88, 60, 180, 0.12);
@@ -524,8 +524,8 @@ body.adminui {
 .adminui .qa-purple:hover { border-color: rgba(183, 155, 255, 0.9); background: rgba(88, 60, 180, 0.18); }
 .adminui .qa-wide {
   grid-column: 1 / -1;
-  border-color: rgba(217, 164, 65, 0.35);
-  background: rgba(13, 25, 56, 0.6);
+  border-color: rgba(247, 37, 133, 0.35);
+  background: rgba(14, 14, 25, 0.6);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 .adminui .qa-wide:hover { border-color: var(--gold); }
@@ -535,32 +535,32 @@ body.adminui {
    only the public layout emits, so admin pages are never affected. */
 body.pubui {
   background:
-    radial-gradient(900px 480px at 88% -90px, rgba(217, 164, 65, 0.15), rgba(217, 164, 65, 0) 60%),
-    radial-gradient(820px 520px at -140px 32%, rgba(96, 66, 196, 0.17), rgba(96, 66, 196, 0) 62%),
-    radial-gradient(760px 460px at 112% 78%, rgba(64, 40, 160, 0.13), rgba(64, 40, 160, 0) 60%),
-    linear-gradient(180deg, #0a1730 0%, var(--bg) 360px);
+    radial-gradient(900px 480px at 88% -90px, rgba(247, 37, 133, 0.15), rgba(247, 37, 133, 0) 60%),
+    radial-gradient(820px 520px at -140px 32%, rgba(205, 32, 132, 0.17), rgba(205, 32, 132, 0) 62%),
+    radial-gradient(760px 460px at 112% 78%, rgba(150, 18, 100, 0.13), rgba(150, 18, 100, 0) 60%),
+    linear-gradient(180deg, #0a0a14 0%, var(--bg) 360px);
   background-attachment: fixed;
 }
 .pubui .topbar {
   border-bottom: 1px solid transparent;
-  border-image: linear-gradient(90deg, rgba(217, 164, 65, 0) 0%, rgba(217, 164, 65, 0.65) 50%, rgba(217, 164, 65, 0) 100%) 1;
+  border-image: linear-gradient(90deg, rgba(247, 37, 133, 0) 0%, rgba(247, 37, 133, 0.65) 50%, rgba(247, 37, 133, 0) 100%) 1;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
 }
 .pubui .brand-gold { color: var(--gold-bright); }
 .pubui .signin-pill {
   background: linear-gradient(180deg, var(--gold-bright), var(--gold));
   border-color: var(--gold-dark);
-  color: #241a03;
+  color: #ffffff;
   border-radius: 999px;
   padding: 9px 20px;
   font-size: 1rem;
-  box-shadow: 0 6px 22px rgba(217, 164, 65, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  box-shadow: 0 6px 22px rgba(247, 37, 133, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 .pubui .signin-pill .ic { margin-right: 0; }
 .pubui .signin-pill:hover {
   text-decoration: none;
   border-color: var(--gold);
-  box-shadow: 0 9px 28px rgba(217, 164, 65, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  box-shadow: 0 9px 28px rgba(247, 37, 133, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 .pubui .hairline-row {
   display: flex; align-items: center; justify-content: center;
@@ -569,7 +569,7 @@ body.pubui {
 .pubui .hairline-row p { margin: 0; }
 .pubui .hairline {
   flex: 1 1 48px; max-width: 110px; height: 1px;
-  background: linear-gradient(90deg, rgba(217, 164, 65, 0) 0%, rgba(217, 164, 65, 0.75) 50%, rgba(217, 164, 65, 0) 100%);
+  background: linear-gradient(90deg, rgba(247, 37, 133, 0) 0%, rgba(247, 37, 133, 0.75) 50%, rgba(247, 37, 133, 0) 100%);
 }
 .pubui .hairline-row a { color: var(--gold-bright); }
 .pubui .searchwrap { position: relative; flex: 1; display: block; }
@@ -579,52 +579,52 @@ body.pubui {
 }
 .pubui .searchwrap input { width: 100%; padding-left: 42px; }
 .pubui .panel, .pubui .auth-card, .pubui .card, .pubui .follow-sheet {
-  background: linear-gradient(180deg, rgba(23, 38, 80, 0.92), rgba(13, 25, 56, 0.94));
-  border: 1px solid rgba(217, 164, 65, 0.28);
-  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.45), 0 0 22px rgba(217, 164, 65, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  background: linear-gradient(180deg, rgba(24, 24, 40, 0.92), rgba(14, 14, 25, 0.94));
+  border: 1px solid rgba(247, 37, 133, 0.28);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.45), 0 0 22px rgba(247, 37, 133, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 .pubui .card:hover {
-  border-color: rgba(217, 164, 65, 0.6);
-  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.5), 0 0 26px rgba(217, 164, 65, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  border-color: rgba(247, 37, 133, 0.6);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.5), 0 0 26px rgba(247, 37, 133, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 .pubui .catchip {
-  background: linear-gradient(180deg, rgba(23, 38, 80, 0.92), rgba(13, 25, 56, 0.94));
-  border: 1px solid rgba(217, 164, 65, 0.28);
+  background: linear-gradient(180deg, rgba(24, 24, 40, 0.92), rgba(14, 14, 25, 0.94));
+  border: 1px solid rgba(247, 37, 133, 0.28);
   box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 .pubui .catchip:hover {
-  border-color: rgba(217, 164, 65, 0.6);
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.4), 0 0 20px rgba(217, 164, 65, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  border-color: rgba(247, 37, 133, 0.6);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.4), 0 0 20px rgba(247, 37, 133, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 .pubui .btn-main {
-  box-shadow: 0 6px 22px rgba(217, 164, 65, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  box-shadow: 0 6px 22px rgba(247, 37, 133, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 .pubui .btn-main:hover {
   border-color: var(--gold);
-  box-shadow: 0 9px 28px rgba(217, 164, 65, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  box-shadow: 0 9px 28px rgba(247, 37, 133, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 .pubui .empty {
-  border: 1px solid rgba(217, 164, 65, 0.4);
-  box-shadow: 0 0 24px rgba(217, 164, 65, 0.12), 0 12px 30px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(247, 37, 133, 0.4);
+  box-shadow: 0 0 24px rgba(247, 37, 133, 0.12), 0 12px 30px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
   background:
-    radial-gradient(520px 180px at 50% 108%, rgba(217, 164, 65, 0.22), rgba(217, 164, 65, 0) 65%),
-    radial-gradient(360px 200px at 0% 0%, rgba(96, 66, 196, 0.16), rgba(96, 66, 196, 0) 60%),
-    radial-gradient(360px 200px at 100% 0%, rgba(64, 40, 160, 0.14), rgba(64, 40, 160, 0) 60%),
-    linear-gradient(180deg, #101e42, #0a1730);
+    radial-gradient(520px 180px at 50% 108%, rgba(247, 37, 133, 0.22), rgba(247, 37, 133, 0) 65%),
+    radial-gradient(360px 200px at 0% 0%, rgba(205, 32, 132, 0.16), rgba(205, 32, 132, 0) 60%),
+    radial-gradient(360px 200px at 100% 0%, rgba(150, 18, 100, 0.14), rgba(150, 18, 100, 0) 60%),
+    linear-gradient(180deg, #14141f, #0a0a14);
 }
 .pubui .empty-book { display: block; color: var(--gold-bright); margin-bottom: 12px; }
 .pubui .empty-book .ic {
   width: 54px; height: 54px; margin-right: 0;
-  filter: drop-shadow(0 0 10px rgba(217, 164, 65, 0.55));
+  filter: drop-shadow(0 0 10px rgba(247, 37, 133, 0.55));
 }
 .pubui .fhero {
   border-bottom: 1px solid transparent;
-  border-image: linear-gradient(90deg, rgba(217, 164, 65, 0) 0%, rgba(217, 164, 65, 0.65) 50%, rgba(217, 164, 65, 0) 100%) 1;
+  border-image: linear-gradient(90deg, rgba(247, 37, 133, 0) 0%, rgba(247, 37, 133, 0.65) 50%, rgba(247, 37, 133, 0) 100%) 1;
 }
 .pubui .footer-logo {
-  width: 56px; height: 56px; border-radius: 50%; object-fit: cover;
-  border: 2px solid var(--gold); display: block; margin: 0 auto;
-  box-shadow: 0 0 16px rgba(217, 164, 65, 0.3);
+  width: 56px; height: 56px; border-radius: 15px; object-fit: cover;
+  display: block; margin: 0 auto;
+  box-shadow: 0 0 16px rgba(247, 37, 133, 0.3);
 }
 .pubui .footer-brand { max-width: 520px; margin: 10px auto 0; font-size: 1.05rem; }
 .pubui .footer-links a { color: var(--gold-bright); }
@@ -650,7 +650,7 @@ body.adminui .gearbtn { flex: 0 0 auto; }
 .card-views .ic { color: var(--gold); }
 
 /* ---------- NEW chip on fresh video cards ---------- */
-.new-chip { position: absolute; top: 8px; right: 8px; background: linear-gradient(180deg, var(--gold-bright), var(--gold)); color: #241a03; border-radius: 6px; padding: 2px 8px; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.6px; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+.new-chip { position: absolute; top: 8px; right: 8px; background: linear-gradient(180deg, var(--gold-bright), var(--gold)); color: #ffffff; border-radius: 6px; padding: 2px 8px; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.6px; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
 
 /* ---------- notifications bell (public header) ---------- */
 .bell-link { position: relative; display: inline-flex; align-items: center; }
@@ -685,11 +685,11 @@ body.adminui .gearbtn { flex: 0 0 auto; }
 .notif-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 22px; }
 .notif-row { display: flex; gap: 14px; align-items: center; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 10px 14px 10px 10px; color: var(--text); }
 .notif-row:hover { text-decoration: none; border-color: var(--gold); }
-.notif-unread { border-color: var(--gold-dark); background: linear-gradient(180deg, rgba(217, 164, 65, 0.13), rgba(217, 164, 65, 0.04)), var(--panel); }
+.notif-unread { border-color: var(--gold-dark); background: linear-gradient(180deg, rgba(247, 37, 133, 0.13), rgba(247, 37, 133, 0.04)), var(--panel); }
 .notif-thumb { width: 118px; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 9px; flex: 0 0 118px; background: #000; }
 .notif-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
 .notif-label { color: var(--muted); font-size: 0.82rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
-.notif-pill { background: linear-gradient(180deg, var(--gold-bright), var(--gold)); color: #241a03; border-radius: 999px; padding: 0 8px; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.4px; }
+.notif-pill { background: linear-gradient(180deg, var(--gold-bright), var(--gold)); color: #ffffff; border-radius: 999px; padding: 0 8px; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.4px; }
 .notif-title { font-weight: 700; font-size: 1.02rem; line-height: 1.3; }
 .notif-sub { color: var(--gold-bright); font-size: 0.9rem; }
 .notif-time { color: var(--muted); font-size: 0.82rem; white-space: nowrap; }
@@ -712,3 +712,107 @@ body.adminui .gearbtn { flex: 0 0 auto; }
 
 /* ---------- admin: YouTube views refresh ---------- */
 .yt-refresh { margin-bottom: 20px; }
+
+/* ---------- PARXSTREAM redesign: shell, sidebar, badges (2026-11-14) ---------- */
+/* Content shell: category sidebar on the left, page content on the right.
+   Public pages only — adminLayout never emits .shell. */
+.shell { display: flex; align-items: flex-start; width: 100%; flex: 1; }
+.shell main { flex: 1 1 auto; min-width: 0; width: auto; }
+
+/* Sidebar (desktop) */
+.sidebar {
+  flex: 0 0 236px; width: 236px;
+  position: sticky; top: 57px; align-self: flex-start;
+  max-height: calc(100vh - 57px); overflow-y: auto;
+  padding: 18px 12px 22px;
+  background: linear-gradient(180deg, rgba(24, 24, 40, 0.5), rgba(14, 14, 25, 0.15));
+  border-right: 1px solid var(--line);
+  scrollbar-width: thin; scrollbar-color: var(--line) transparent;
+}
+.side-head {
+  display: flex; align-items: center;
+  background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+  color: #fff; font-weight: 700; font-size: 0.98rem;
+  border-radius: 10px; padding: 10px 14px; margin-bottom: 12px;
+  box-shadow: 0 6px 18px rgba(247, 37, 133, 0.35);
+}
+.side-head .ic { margin-right: 8px; }
+.side-nav { display: flex; flex-direction: column; gap: 2px; }
+.side-link {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: 10px;
+  color: var(--muted); font-weight: 600; font-size: 0.98rem; line-height: 1.3;
+}
+.side-link .ic { color: var(--gold-bright); margin-right: 0; width: 20px; height: 20px; }
+.side-link:hover { color: var(--text); background: var(--bg2); text-decoration: none; }
+.side-link:hover .ic { color: var(--gold); }
+.side-count { margin-left: auto; color: var(--muted); font-size: 0.82rem; font-weight: 500; }
+
+/* Mobile category menu: hamburger in the topbar (same pattern as the admin
+   menu), visible only when the sidebar is hidden. */
+.sidemenu-wrap { position: relative; display: none; }
+.sidemenu {
+  position: absolute; top: calc(100% + 8px); left: 0; z-index: 60;
+  min-width: 236px; max-height: min(70vh, 480px); overflow-y: auto;
+  padding: 6px; display: flex; flex-direction: column;
+  background: var(--panel); border: 1px solid var(--gold-dark); border-radius: 12px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55), 0 0 22px rgba(247, 37, 133, 0.14);
+}
+.sidemenu[hidden] { display: none; }
+.sidemenu-link {
+  display: flex; align-items: center; gap: 9px; padding: 11px 13px; border-radius: 8px;
+  color: var(--muted); font-weight: 600; font-size: 0.98rem; line-height: 1.3;
+}
+.sidemenu-link .ic { color: var(--gold-bright); margin-right: 0; }
+.sidemenu-link:hover { color: var(--text); background: var(--bg2); text-decoration: none; }
+@media (max-width: 1023px) {
+  .sidebar { display: none; }
+  .sidemenu-wrap { display: block; }
+}
+
+/* Section titles: pink accent bar (mockup) + "See More" pink pill. */
+.section-title { position: relative; padding-left: 15px; }
+.section-title::before {
+  content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+  width: 5px; height: 1.02em; border-radius: 3px;
+  background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+  box-shadow: 0 0 12px rgba(247, 37, 133, 0.55);
+}
+.rowmore {
+  background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+  color: #fff; padding: 6px 15px; border-radius: 999px;
+  box-shadow: 0 4px 14px rgba(247, 37, 133, 0.35);
+}
+.rowmore:hover { text-decoration: none; filter: brightness(1.1); }
+
+/* Card overlays: star-rating badge top-left, category chip top-right.
+   When a badge occupies a corner, the chip that normally sits there
+   (rank chip / NEW chip) drops below it instead of overlapping. */
+.rate-badge {
+  position: absolute; top: 8px; left: 8px; z-index: 4;
+  display: inline-flex; align-items: center; gap: 3px;
+  background: rgba(5, 5, 10, 0.82); color: #ffd7ec;
+  border: 1px solid rgba(247, 37, 133, 0.55); border-radius: 7px;
+  padding: 2px 8px; font-size: 0.82rem; font-weight: 800; line-height: 1.35;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+}
+.cat-chip {
+  position: absolute; top: 8px; right: 8px; z-index: 4;
+  max-width: 62%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  background: rgba(5, 5, 10, 0.78); color: #f3eefb;
+  border: 1px solid var(--line); border-radius: 7px;
+  padding: 2px 8px; font-size: 0.74rem; font-weight: 700; letter-spacing: 0.4px;
+  text-transform: uppercase; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+.rate-badge ~ .rank-chip { top: 44px; }
+.cat-chip ~ .new-chip { top: 44px; }
+
+/* Hero: floating rounded banner with a pink rim (mockup), not full-bleed. */
+.pubui .fhero, .pubui .hero {
+  margin: 18px 16px 0; border-radius: 22px; overflow: hidden;
+  border: 1px solid rgba(247, 37, 133, 0.38);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.55), 0 0 30px rgba(247, 37, 133, 0.14);
+}
+@media (max-width: 560px) {
+  .pubui .fhero, .pubui .hero { margin: 12px 10px 0; border-radius: 16px; }
+}

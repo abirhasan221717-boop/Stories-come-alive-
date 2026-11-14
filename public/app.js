@@ -236,3 +236,37 @@ if (adminMenuBtn && adminMenu) {
     if (e.target && typeof e.target.closest === 'function' && e.target.closest('a')) closeAdminMenu();
   });
 }
+
+// Public header: category hamburger menu (mobile stand-in for the sidebar) —
+// same interaction pattern as the admin menu above.
+const sideMenuBtn = document.querySelector('[data-side-menu-btn]');
+const sideMenu = document.querySelector('[data-side-menu]');
+if (sideMenuBtn && sideMenu) {
+  const closeSideMenu = () => {
+    sideMenu.hidden = true;
+    sideMenuBtn.setAttribute('aria-expanded', 'false');
+  };
+  sideMenuBtn.addEventListener('click', () => {
+    if (sideMenu.hidden) {
+      sideMenu.hidden = false;
+      sideMenuBtn.setAttribute('aria-expanded', 'true');
+    } else {
+      closeSideMenu();
+    }
+  });
+  document.addEventListener('click', (e) => {
+    if (sideMenu.hidden) return;
+    if (!e.target || typeof e.target.closest !== 'function' || !e.target.closest('.sidemenu-wrap')) {
+      closeSideMenu();
+    }
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !sideMenu.hidden) {
+      closeSideMenu();
+      sideMenuBtn.focus();
+    }
+  });
+  sideMenu.addEventListener('click', (e) => {
+    if (e.target && typeof e.target.closest === 'function' && e.target.closest('a')) closeSideMenu();
+  });
+}
