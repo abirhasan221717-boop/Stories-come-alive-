@@ -229,6 +229,24 @@ const ICONS = {
   chevronRight: '<svg class="ic qa-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>',
 };
 
+// Sidebar category icons: thin-line SVGs matched by (case-insensitive)
+// category name, in the same stroke style as ICONS above. Order matters:
+// the more specific names are tested first. Unknown names get a film-frame.
+const CATEGORY_ICONS = [
+  [/romantic\s+comedy/i, '<circle cx="12" cy="12" r="9"/><path d="M8.3 14.2c1 1.3 2.3 2 3.7 2s2.7-.7 3.7-2"/><path d="M9 9.6h.01"/><path d="M15 9.6h.01"/>'],
+  [/romance/i, HEART_PATH],
+  [/horror/i, '<path d="M12 3a7.5 7.5 0 0 0-7.5 7.5V21l2.5-1.9 2.5 1.9 2.5-1.9 2.5 1.9 2.5-1.9V10.5A7.5 7.5 0 0 0 12 3z"/><path d="M9.3 10.8h.01"/><path d="M14.7 10.8h.01"/>'],
+  [/thriller/i, '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>'],
+  [/mystery/i, '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/>'],
+  [/dark\s+fantasy/i, '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>'],
+  [/fantasy/i, '<path d="M12 3l1.8 4.9 4.7 1.8-4.7 1.8L12 16.4l-1.8-4.9L5.5 9.7l4.7-1.8z"/><path d="M18.8 15.2l.9 2.3 2.3.9-2.3.9-.9 2.3-.9-2.3-2.3-.9 2.3-.9z"/>'],
+  [/series/i, '<path d="M12 3l9 4.9-9 4.9-9-4.9z"/><path d="M3.4 12.4L12 17l8.6-4.6"/><path d="M3.4 16.4L12 21l8.6-4.6"/>'],
+];
+function categoryIcon(name) {
+  const hit = CATEGORY_ICONS.find(([re]) => re.test(String(name || '')));
+  return lineIcon(hit ? hit[1] : '<rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10.6 9.7l4.6 2.3-4.6 2.3z"/>');
+}
+
 // Welcome-page button caption: the label when there is one; the plain
 // platform name for a single link; platform + position when several links
 // share no label, so the buttons stay distinguishable.
@@ -320,13 +338,13 @@ function followPanelHtml(ytLinks, fbLinks) {
 }
 async function siteName() { return (await getSetting('site_name')) || 'Stories Come Alive'; }
 async function logoSrc() { return '/brand/logo?v=' + ((await getSetting('logo_version')) || '0'); }
-// Two-tone public wordmark: with three or more words the second word is
-// wrapped so it can render in gold. One- and two-word names render as-is.
-// The name itself still comes from Settings; nothing is hardcoded here.
+// Two-tone public wordmark (PARXSTREAM style): the first word renders in
+// white and every following word in the accent pink. One-word names render
+// as-is. The name itself still comes from Settings; nothing is hardcoded.
 function brandNameHtml(name) {
   const words = String(name || '').split(/\s+/).filter(Boolean);
-  if (words.length < 3) return esc(name);
-  return words.map((w, i) => (i === 1 ? `<span class="brand-gold">${esc(w)}</span>` : esc(w))).join(' ');
+  if (words.length < 2) return esc(name);
+  return esc(words[0]) + ' <span class="brand-gold">' + esc(words.slice(1).join(' ')) + '</span>';
 }
 function allCategories() {
   return queryAll(`SELECT c.*, (SELECT COUNT(*) FROM videos v WHERE v.category_id = c.id) AS video_count
@@ -354,6 +372,8 @@ async function layout(req, { title, body, user }) {
   const logo = await logoSrc();
   const ytLinks = await getYoutubeLinks();
   const fbLinks = await getFacebookLinks();
+  const cats = await allCategories();
+  const catLinks = (cls) => cats.map((c) => `<a class="${cls}" href="/category/${c.id}">${categoryIcon(c.name)}<span>${esc(c.name)}</span></a>`).join('');
   const notifCount = user ? await unreadNotifCount(user) : 0;
   return `<!DOCTYPE html>
 <html lang="bn">
@@ -364,10 +384,19 @@ async function layout(req, { title, body, user }) {
 <link rel="icon" href="/brand/logo">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=36">
+<link rel="stylesheet" href="/styles.css?v=37">
 </head>
 <body class="pubui">
 <header class="topbar">
+  <div class="sidemenu-wrap">
+    <button type="button" class="hambtn" data-side-menu-btn aria-haspopup="true" aria-expanded="false" aria-label="Browse categories">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="sidemenu" data-side-menu hidden>
+      <a class="sidemenu-link" href="/">${ICONS.homeSm}Home</a>
+      ${catLinks('sidemenu-link')}
+    </nav>
+  </div>
   <a class="brand" href="/">
     <img class="brand-logo" src="${logo}" alt="${esc(name)}">
     <span class="brand-name">${brandNameHtml(name)}</span>
@@ -383,9 +412,17 @@ async function layout(req, { title, body, user }) {
          <a class="btn btn-main signin-pill" href="/login">${ICONS.user}Sign In</a>`}
   </div>
 </header>
+<div class="shell">
+<aside class="sidebar">
+  <p class="side-head">${ICONS.grid}Browse Categories</p>
+  <nav class="side-nav">
+    ${cats.map((c) => `<a class="side-link" href="/category/${c.id}">${categoryIcon(c.name)}<span>${esc(c.name)}</span><span class="side-count">${Number(c.video_count)}</span></a>`).join('')}
+  </nav>
+</aside>
 <main>
 ${body}
 </main>
+</div>
 <footer class="footer">
   <img class="footer-logo" src="${logo}" alt="">
   <div class="hairline-row footer-brand"><span class="hairline" aria-hidden="true"></span><span>${brandNameHtml(name)}</span><span class="hairline" aria-hidden="true"></span></div>
@@ -399,7 +436,7 @@ ${body}
   <p class="footer-copy">© ${new Date().getFullYear()} ${esc(name)} — All rights reserved.</p>
 </footer>
 ${followPanelHtml(ytLinks, fbLinks)}
-<script src="/app.js?v=36"></script>
+<script src="/app.js?v=37"></script>
 </body>
 </html>`;
 }
@@ -454,14 +491,14 @@ async function adminLayout({ title, body, bare = false }) {
 <title>${esc(title)} — Admin — ${esc(name)}</title>
 <link rel="icon" href="/brand/logo">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=36">
+<link rel="stylesheet" href="/styles.css?v=37">
 </head>
 <body class="adminui">
 ${header}
 <main>
 ${body}
 </main>
-<script src="/app.js?v=36"></script>
+<script src="/app.js?v=37"></script>
 </body>
 </html>`;
 }
@@ -478,6 +515,8 @@ function videoCard(v, user, pos) {
   return `<a class="card" href="/watch/${v.id}">
     <div class="thumb">
       <img loading="lazy" src="${cardThumb(v)}" alt="${esc(v.title)}">
+      ${Number(v.rating_count || 0) > 0 ? `<span class="rate-badge">★ ${Number(v.rating_avg || 0).toFixed(1)}</span>` : ''}
+      ${v.category_name ? `<span class="cat-chip">${esc(v.category_name)}</span>` : ''}
       ${pos ? `<span class="rank-chip">Top ${pos}</span>` : ''}
       ${pos ? `<span class="rank-big" aria-hidden="true">${pos}</span>` : ''}
       ${isFreshVideo(v) ? '<span class="new-chip">NEW</span>' : ''}
@@ -507,7 +546,7 @@ function posterRow({ title, videos, user, moreHref, ranked = false }) {
   return `<section class="section rowsection">
     <div class="rowhead">
       <h2 class="section-title">${title}</h2>
-      ${moreHref ? `<a class="rowmore" href="${moreHref}">View All →</a>` : ''}
+      ${moreHref ? `<a class="rowmore" href="${moreHref}">See More →</a>` : ''}
     </div>
     <div class="rowwrap">
       <div class="rowscroll"${ranked ? ' data-autoslide' : ''}>${videos.map((v, i) => videoCard(v, user, ranked ? i + 1 : 0)).join('')}</div>
