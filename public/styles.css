@@ -860,3 +860,8 @@ body.adminui .gearbtn { flex: 0 0 auto; }
 @media (max-width: 560px) {
   .pubui .fhero, .pubui .hero, .pubui .bhero { margin: 12px 10px 0; border-radius: 16px; }
 }
+
+/* Public content rows use the full column width, like the mockup. The
+   old 1180px cap on .section left wide empty gaps on both sides of the
+   rows on desktop screens (owner marked them, 2026-11-14). */
+.pubui .section, .pubui .page-top { max-width: none; }
