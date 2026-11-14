@@ -150,6 +150,47 @@ img { max-width: 100%; }
 .hero-search { padding: 2px 16px 12px; }
 .hero-search .searchbar { margin-top: 14px; }
 .fhero-note { margin-top: 10px; color: var(--muted); font-size: 0.9rem; }
+
+/* ---------- brand hero (PARXSTREAM-mockup style, 2026-11-14) ---------- */
+/* The homepage hero is a brand banner — logo, site name, slogan, Watch
+   Now — with the brand artwork fading in on the right. It never uses a
+   video thumbnail as a stretched background (owner rejected that). */
+.bhero {
+  position: relative; overflow: hidden; background: #07070d;
+  border-bottom: 1px solid var(--line); min-height: 330px;
+  display: flex; align-items: center;
+}
+.bhero-art {
+  position: absolute; top: 0; right: 0; height: 100%; width: 64%;
+  object-fit: cover; object-position: center 28%;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 34%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 34%);
+}
+.bhero-content { position: relative; z-index: 2; padding: 30px 22px 34px; max-width: 620px; }
+.bhero-logo {
+  width: 86px; height: 86px; border-radius: 50%; object-fit: cover;
+  border: 2px solid rgba(247, 37, 133, 0.55);
+  box-shadow: 0 0 26px rgba(247, 37, 133, 0.4);
+}
+.bhero-name {
+  margin-top: 14px; font-size: clamp(2rem, 5.4vw, 3.3rem);
+  font-weight: 900; letter-spacing: 0.5px; line-height: 1.05;
+  text-transform: uppercase;
+}
+.bhero-tag { margin-top: 12px; font-size: clamp(1.25rem, 3vw, 1.8rem); font-weight: 700; line-height: 1.3; color: #f3eefb; }
+.bhero-tag em {
+  font-style: italic; color: var(--gold-bright); font-weight: 800;
+  font-size: 1.14em;
+}
+@media (max-width: 700px) {
+  .bhero { min-height: 0; }
+  .bhero-art { width: 100%; opacity: 0.5; object-position: center 20%;
+    -webkit-mask-image: linear-gradient(180deg, #000 55%, transparent 98%);
+    mask-image: linear-gradient(180deg, #000 55%, transparent 98%);
+  }
+  .bhero-content { padding: 20px 16px 22px; }
+  .bhero-logo { width: 64px; height: 64px; }
+}
 @media (max-width: 560px) {
   .fhero { aspect-ratio: auto; height: 380px; }
   .fhero-content { padding: 14px 16px 18px; }
@@ -811,11 +852,11 @@ body.adminui .gearbtn { flex: 0 0 auto; }
 .cat-chip ~ .new-chip { top: 44px; }
 
 /* Hero: floating rounded banner with a pink rim (mockup), not full-bleed. */
-.pubui .fhero, .pubui .hero {
+.pubui .fhero, .pubui .hero, .pubui .bhero {
   margin: 18px 16px 0; border-radius: 22px; overflow: hidden;
   border: 1px solid rgba(247, 37, 133, 0.38);
   box-shadow: 0 18px 44px rgba(0, 0, 0, 0.55), 0 0 30px rgba(247, 37, 133, 0.14);
 }
 @media (max-width: 560px) {
-  .pubui .fhero, .pubui .hero { margin: 12px 10px 0; border-radius: 16px; }
+  .pubui .fhero, .pubui .hero, .pubui .bhero { margin: 12px 10px 0; border-radius: 16px; }
 }
