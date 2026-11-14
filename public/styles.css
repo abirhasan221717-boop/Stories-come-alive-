@@ -767,7 +767,8 @@ body.adminui .gearbtn { flex: 0 0 auto; }
 .sidebar {
   flex: 0 0 236px; width: 236px;
   position: sticky; top: 57px; align-self: flex-start;
-  max-height: calc(100vh - 57px); overflow-y: auto;
+  height: calc(100vh - 57px); overflow-y: auto;
+  display: flex; flex-direction: column;
   padding: 18px 12px 22px;
   background: linear-gradient(180deg, rgba(24, 24, 40, 0.5), rgba(14, 14, 25, 0.15));
   border-right: 1px solid var(--line);
@@ -791,6 +792,19 @@ body.adminui .gearbtn { flex: 0 0 auto; }
 .side-link:hover { color: var(--text); background: var(--bg2); text-decoration: none; }
 .side-link:hover .ic { color: var(--gold); }
 .side-count { margin-left: auto; color: var(--muted); font-size: 0.82rem; font-weight: 500; }
+
+/* Sidebar lower sections (2026-11-14): quiet sub-heads for Menu / Follow
+   Us, and a foot block pinned to the bottom of the sidebar so the column
+   never looks half-empty on tall screens. */
+.side-head-sub {
+  background: none; box-shadow: none; border-radius: 0;
+  color: var(--muted); font-size: 0.78rem; font-weight: 700;
+  letter-spacing: 1.4px; text-transform: uppercase;
+  padding: 0 14px 4px; margin: 24px 0 6px;
+}
+.side-head-sub .ic { display: none; }
+.side-foot { margin-top: auto; border-top: 1px solid var(--line); padding-top: 10px; }
+.side-copy { color: var(--muted); font-size: 0.76rem; line-height: 1.45; padding: 8px 12px 0; }
 
 /* Mobile category menu: hamburger in the topbar (same pattern as the admin
    menu), visible only when the sidebar is hidden. */
