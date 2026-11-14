@@ -384,7 +384,7 @@ async function layout(req, { title, body, user }) {
 <link rel="icon" href="/brand/logo">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=38">
+<link rel="stylesheet" href="/styles.css?v=39">
 </head>
 <body class="pubui">
 <header class="topbar">
@@ -436,7 +436,7 @@ ${body}
   <p class="footer-copy">© ${new Date().getFullYear()} ${esc(name)} — All rights reserved.</p>
 </footer>
 ${followPanelHtml(ytLinks, fbLinks)}
-<script src="/app.js?v=38"></script>
+<script src="/app.js?v=39"></script>
 </body>
 </html>`;
 }
@@ -491,14 +491,14 @@ async function adminLayout({ title, body, bare = false }) {
 <title>${esc(title)} — Admin — ${esc(name)}</title>
 <link rel="icon" href="/brand/logo">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=38">
+<link rel="stylesheet" href="/styles.css?v=39">
 </head>
 <body class="adminui">
 ${header}
 <main>
 ${body}
 </main>
-<script src="/app.js?v=38"></script>
+<script src="/app.js?v=39"></script>
 </body>
 </html>`;
 }
@@ -740,25 +740,21 @@ app.get('/', async (req, res) => {
   if (heroVideo && heroVideo.episode) heroStoryBits.push(esc(heroVideo.episode));
   const heroStoryLine = heroStoryBits.join(' • ');
 
-  let hero;
-  if (heroVideo) {
-    hero = `
-  <section class="fhero">
-    ${heroVideo.source === 'facebook'
-      ? `<img class="fhero-img" src="/banner.jpg" alt="${esc(heroVideo.title)}">`
-      : `<img class="fhero-img" src="https://i.ytimg.com/vi/${esc(heroVideo.youtube_id)}/maxresdefault.jpg"
-      onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/${esc(heroVideo.youtube_id)}/hqdefault.jpg'" alt="${esc(heroVideo.title)}">`}
-    <div class="fhero-shade"></div>
-    <div class="fhero-content">
-      ${heroTopPos ? `<span class="fhero-topbadge">Top ${heroTopPos}</span>` : ''}
-      ${heroVideo.category_name ? `<span class="fhero-badge">${esc(heroVideo.category_name)}</span>` : ''}
-      <h1 class="fhero-title">${esc(heroVideo.title)}</h1>
-      ${heroStoryLine ? `<p class="fhero-story">${heroStoryLine}</p>` : ''}
-      ${heroVideo.synopsis ? `<p class="fhero-syn" data-syn>${esc(heroVideo.synopsis)}</p>${String(heroVideo.synopsis).trim().length > 160 ? '<button type="button" class="syn-toggle" data-syn-toggle>Read More</button>' : ''}` : ''}
-      <div class="fhero-btns">
-        <a class="btn btn-main fhero-btn" href="/watch/${heroVideo.id}">▶ Watch Now</a>
-        <a class="btn fhero-btn fhero-btn-info" href="/watch/${heroVideo.id}">${ICONS.info} More Info</a>
-      </div>
+  // Homepage hero = a brand banner in the owner's PARXSTREAM mockup style:
+  // logo + site name + slogan + Watch Now, with the brand artwork on the
+  // right. It must NOT be a video thumbnail stretched full-width with text
+  // over it — the owner crossed that design out on 2026-11-14 (thumbnail
+  // quality looks terrible blown up on desktop). Watch Now still leads to
+  // the featured / Top 1 video, so no function is lost.
+  const heroLogo = await logoSrc();
+  const hero = `
+  <section class="bhero">
+    <img class="bhero-art" src="/hero-art.jpg" alt="" aria-hidden="true">
+    <div class="bhero-content">
+      <img class="bhero-logo" src="${heroLogo}" alt="${esc(name)} logo">
+      <h1 class="bhero-name">${brandNameHtml(name)}</h1>
+      <p class="bhero-tag">Unlimited Stories<br><em>at Your Fingertips!</em></p>
+      ${heroVideo ? `<div class="fhero-btns"><a class="btn btn-main fhero-btn" href="/watch/${heroVideo.id}">▶ Watch Now</a></div>` : ''}
       ${user ? '' : '<p class="fhero-note">Sign in to watch — new here? Create a free account.</p>'}
     </div>
   </section>
@@ -768,21 +764,6 @@ app.get('/', async (req, res) => {
       <button class="btn btn-main" type="submit">Search</button>
     </form>
   </section>`;
-  } else {
-    hero = `
-  <section class="hero">
-    <img class="hero-art" src="/banner.jpg" alt="${esc(name)}">
-    <div class="hero-overlay">
-      <h1 class="sr-only">${esc(name)}</h1>
-      <div class="hairline-row"><span class="hairline" aria-hidden="true"></span><p>A library of story videos, sorted by category — pick a story and start watching.</p><span class="hairline" aria-hidden="true"></span></div>
-      <form class="searchbar" method="GET" action="/search">
-        <span class="searchwrap">${ICONS.search}<input type="text" name="q" placeholder="Search stories…"></span>
-        <button class="btn btn-main" type="submit">Search</button>
-      </form>
-      ${user ? '' : '<div class="hairline-row"><span class="hairline" aria-hidden="true"></span><p class="hero-note"><a href="/login">Sign in</a> to watch, or <a href="/register">create a free account</a>.</p><span class="hairline" aria-hidden="true"></span></div>'}
-    </div>
-  </section>`;
-  }
 
   let rows = '';
   if (topPicks.length) rows += posterRow({ title: 'Top Picks', videos: topPicks, user, ranked: true });
