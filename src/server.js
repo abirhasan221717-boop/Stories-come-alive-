@@ -384,7 +384,7 @@ async function layout(req, { title, body, user }) {
 <link rel="icon" href="/brand/logo">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=40">
+<link rel="stylesheet" href="/styles.css?v=41">
 </head>
 <body class="pubui">
 <header class="topbar">
@@ -418,6 +418,23 @@ async function layout(req, { title, body, user }) {
   <nav class="side-nav">
     ${cats.map((c) => `<a class="side-link" href="/category/${c.id}">${categoryIcon(c.name)}<span>${esc(c.name)}</span><span class="side-count">${Number(c.video_count)}</span></a>`).join('')}
   </nav>
+  <p class="side-head side-head-sub">Menu</p>
+  <nav class="side-nav">
+    <a class="side-link" href="/">${ICONS.home}<span>Home</span></a>
+    <a class="side-link" href="/#top-picks">${ICONS.star}<span>Top Picks</span></a>
+    <a class="side-link" href="/#latest">${ICONS.book}<span>Latest Stories</span></a>
+    ${user ? `<a class="side-link" href="/favorites">${ICONS.heart}<span>My Favorites</span></a>` : ''}
+  </nav>
+  ${(ytLinks.length || fbLinks.length) ? `<p class="side-head side-head-sub">Follow Us</p>
+  <nav class="side-nav">
+    ${ytLinks.map((l, i) => `<a class="side-link" href="${esc(l.url)}" target="_blank" rel="noopener">${ICONS.playSm}<span>${esc(socialDisplayNames('youtube', ytLinks)[i])}</span></a>`).join('')}
+    ${fbLinks.map((l, i) => `<a class="side-link" href="${esc(l.url)}" target="_blank" rel="noopener">${ICONS.usersSm}<span>${esc(socialDisplayNames('facebook', fbLinks)[i])}</span></a>`).join('')}
+  </nav>` : ''}
+  <div class="side-foot">
+    ${user ? `<a class="side-link" href="/notifications">${ICONS.bell}<span>Notifications</span>${notifCount ? `<span class="side-count">${notifCount > 9 ? '9+' : notifCount}</span>` : ''}</a>` : ''}
+    <a class="side-link" href="/privacy-policy">${ICONS.info}<span>Privacy Policy</span></a>
+    <p class="side-copy">© ${new Date().getFullYear()} ${esc(name)} — All rights reserved.</p>
+  </div>
 </aside>
 <main>
 ${body}
@@ -436,7 +453,7 @@ ${body}
   <p class="footer-copy">© ${new Date().getFullYear()} ${esc(name)} — All rights reserved.</p>
 </footer>
 ${followPanelHtml(ytLinks, fbLinks)}
-<script src="/app.js?v=40"></script>
+<script src="/app.js?v=41"></script>
 </body>
 </html>`;
 }
@@ -491,14 +508,14 @@ async function adminLayout({ title, body, bare = false }) {
 <title>${esc(title)} — Admin — ${esc(name)}</title>
 <link rel="icon" href="/brand/logo">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=40">
+<link rel="stylesheet" href="/styles.css?v=41">
 </head>
 <body class="adminui">
 ${header}
 <main>
 ${body}
 </main>
-<script src="/app.js?v=40"></script>
+<script src="/app.js?v=41"></script>
 </body>
 </html>`;
 }
@@ -547,9 +564,9 @@ function grid(videos, user) {
 // Horizontally scrollable poster-card row (bhoot-style homepage rows).
 // With ranked=true (the Top Picks row), cards get a "Top N" chip plus a
 // big Bhoot-style rank number, and the row auto-slides on its own.
-function posterRow({ title, videos, user, moreHref, ranked = false }) {
+function posterRow({ title, videos, user, moreHref, ranked = false, anchorId = '' }) {
   if (!videos.length) return '';
-  return `<section class="section rowsection">
+  return `<section class="section rowsection"${anchorId ? ` id="${anchorId}"` : ''}>
     <div class="rowhead">
       <h2 class="section-title">${title}</h2>
       ${moreHref ? `<a class="rowmore" href="${moreHref}">See More →</a>` : ''}
@@ -766,8 +783,8 @@ app.get('/', async (req, res) => {
   </section>`;
 
   let rows = '';
-  if (topPicks.length) rows += posterRow({ title: 'Top Picks', videos: topPicks, user, ranked: true });
-  rows += posterRow({ title: 'Latest Stories', videos: latest, user });
+  if (topPicks.length) rows += posterRow({ title: 'Top Picks', videos: topPicks, user, ranked: true, anchorId: 'top-picks' });
+  rows += posterRow({ title: 'Latest Stories', videos: latest, user, anchorId: 'latest' });
   for (const c of await allCategories()) {
     if (!c.video_count) continue;
     const vids = await queryAll(`SELECT v.*, c.name AS category_name FROM videos v
