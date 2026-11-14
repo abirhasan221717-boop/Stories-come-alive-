@@ -384,7 +384,7 @@ async function layout(req, { title, body, user }) {
 <link rel="icon" href="/brand/logo">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=37">
+<link rel="stylesheet" href="/styles.css?v=38">
 </head>
 <body class="pubui">
 <header class="topbar">
@@ -436,7 +436,7 @@ ${body}
   <p class="footer-copy">© ${new Date().getFullYear()} ${esc(name)} — All rights reserved.</p>
 </footer>
 ${followPanelHtml(ytLinks, fbLinks)}
-<script src="/app.js?v=37"></script>
+<script src="/app.js?v=38"></script>
 </body>
 </html>`;
 }
@@ -491,14 +491,14 @@ async function adminLayout({ title, body, bare = false }) {
 <title>${esc(title)} — Admin — ${esc(name)}</title>
 <link rel="icon" href="/brand/logo">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=37">
+<link rel="stylesheet" href="/styles.css?v=38">
 </head>
 <body class="adminui">
 ${header}
 <main>
 ${body}
 </main>
-<script src="/app.js?v=37"></script>
+<script src="/app.js?v=38"></script>
 </body>
 </html>`;
 }
@@ -510,6 +510,13 @@ function cardThumb(v) {
   return v.source === 'facebook' ? '/banner.jpg' : `https://i.ytimg.com/vi/${esc(v.youtube_id)}/hqdefault.jpg`;
 }
 
+// True only when the story name adds information beyond the title. For
+// single-story imports the story name repeats the title word for word, and
+// printing both shows the same text twice (owner flagged this 2026-11-14).
+function storyDiffers(v) {
+  return !!(v && v.story && String(v.story).trim() && String(v.story).trim() !== String(v.title || '').trim());
+}
+
 function videoCard(v, user, pos) {
   const totalViews = Number(v.views || 0) + Number(v.yt_views || 0);
   return `<a class="card" href="/watch/${v.id}">
@@ -517,7 +524,6 @@ function videoCard(v, user, pos) {
       <img loading="lazy" src="${cardThumb(v)}" alt="${esc(v.title)}">
       ${Number(v.rating_count || 0) > 0 ? `<span class="rate-badge">★ ${Number(v.rating_avg || 0).toFixed(1)}</span>` : ''}
       ${v.category_name ? `<span class="cat-chip">${esc(v.category_name)}</span>` : ''}
-      ${pos ? `<span class="rank-chip">Top ${pos}</span>` : ''}
       ${pos ? `<span class="rank-big" aria-hidden="true">${pos}</span>` : ''}
       ${isFreshVideo(v) ? '<span class="new-chip">NEW</span>' : ''}
       ${v.episode ? `<span class="ep-badge">${esc(v.episode)}</span>` : ''}
@@ -525,7 +531,7 @@ function videoCard(v, user, pos) {
     </div>
     <div class="card-body">
       <h3>${esc(v.title)}</h3>
-      ${v.story ? `<p class="card-story">${esc(v.story)}</p>` : ''}
+      ${storyDiffers(v) ? `<p class="card-story">${esc(v.story)}</p>` : ''}
       ${v.category_name ? `<p class="card-cat">${esc(v.category_name)}</p>` : ''}
       <p class="card-views">${ICONS.eyeSm} ${totalViews} ${totalViews === 1 ? 'view' : 'views'}</p>
       ${Number(v.rating_count || 0) > 0 ? `<p class="card-views card-rating">${ICONS.starSm} ${Number(v.rating_avg || 0).toFixed(1)} (${Number(v.rating_count)})</p>` : ''}
@@ -727,6 +733,12 @@ app.get('/', async (req, res) => {
   // top story is always big on the homepage with no admin work needed.
   const heroVideo = featured || (topPicks.length ? topPicks[0] : null);
   const heroTopPos = featured ? featuredTopPos : (heroVideo ? 1 : 0);
+  // Sub-title line under the hero title: story name (only when it is not
+  // just the title repeated) plus the episode label.
+  const heroStoryBits = [];
+  if (heroVideo && storyDiffers(heroVideo)) heroStoryBits.push(esc(heroVideo.story));
+  if (heroVideo && heroVideo.episode) heroStoryBits.push(esc(heroVideo.episode));
+  const heroStoryLine = heroStoryBits.join(' • ');
 
   let hero;
   if (heroVideo) {
@@ -741,7 +753,7 @@ app.get('/', async (req, res) => {
       ${heroTopPos ? `<span class="fhero-topbadge">Top ${heroTopPos}</span>` : ''}
       ${heroVideo.category_name ? `<span class="fhero-badge">${esc(heroVideo.category_name)}</span>` : ''}
       <h1 class="fhero-title">${esc(heroVideo.title)}</h1>
-      ${heroVideo.story ? `<p class="fhero-story">${esc(heroVideo.story)}${heroVideo.episode ? ' • ' + esc(heroVideo.episode) : ''}</p>` : ''}
+      ${heroStoryLine ? `<p class="fhero-story">${heroStoryLine}</p>` : ''}
       ${heroVideo.synopsis ? `<p class="fhero-syn" data-syn>${esc(heroVideo.synopsis)}</p>${String(heroVideo.synopsis).trim().length > 160 ? '<button type="button" class="syn-toggle" data-syn-toggle>Read More</button>' : ''}` : ''}
       <div class="fhero-btns">
         <a class="btn btn-main fhero-btn" href="/watch/${heroVideo.id}">▶ Watch Now</a>
@@ -1148,7 +1160,7 @@ app.get('/watch/:id', async (req, res) => {
     <div class="watch-head">
       <div>
         <h1>${esc(v.title)}</h1>
-        <p class="muted">${v.story ? esc(v.story) + ' • ' : ''}${v.episode ? esc(v.episode) + ' • ' : ''}${v.category_name ? esc(v.category_name) : ''}</p>
+        <p class="muted">${storyDiffers(v) ? esc(v.story) + ' • ' : ''}${v.episode ? esc(v.episode) + ' • ' : ''}${v.category_name ? esc(v.category_name) : ''}</p>
         ${ratingHtml}
       </div>
       <form method="POST" action="/favorites/toggle">
