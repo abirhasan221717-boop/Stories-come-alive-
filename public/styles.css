@@ -106,19 +106,22 @@ img { max-width: 100%; }
 .fhero-img { position: absolute; inset: 0; }
 .fhero-shade {
   position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(4,4,10,0.18) 0%, rgba(4,4,10,0.05) 42%, rgba(4,4,10,0.88) 82%, rgba(4,4,10,0.97) 100%);
+  background: linear-gradient(180deg, rgba(4,4,10,0.42) 0%, rgba(4,4,10,0.30) 30%, rgba(4,4,10,0.66) 52%, rgba(4,4,10,0.93) 76%, rgba(4,4,10,0.99) 100%);
 }
 .fhero-content {
   position: absolute; left: 0; right: 0; bottom: 0;
-  padding: 20px 20px 24px;
+  padding: 56px 20px 24px;
   max-width: 1180px; margin: 0 auto; width: 100%;
+  /* solid dark floor under the text so white/pink type stays readable
+     over any thumbnail, however bright (owner flagged this 2026-11-14) */
+  background: linear-gradient(180deg, rgba(4,4,10,0) 0%, rgba(4,4,10,0.55) 34%, rgba(4,4,10,0.88) 68%, rgba(4,4,10,0.97) 100%);
 }
 .fhero-badge {
   display: inline-block; background: rgba(0,0,0,0.65); color: #ffd7ec;
   border: 1px solid var(--gold); border-radius: 999px;
   padding: 3px 12px; font-size: 0.85rem; font-weight: 600; margin-bottom: 10px;
 }
-.fhero-title { font-size: clamp(1.6rem, 5.2vw, 2.7rem); line-height: 1.2; text-shadow: 0 2px 14px rgba(0,0,0,0.7); }
+.fhero-title { font-size: clamp(1.6rem, 5.2vw, 2.7rem); line-height: 1.2; font-weight: 800; text-shadow: 0 2px 6px rgba(0,0,0,0.9), 0 4px 22px rgba(0,0,0,0.85); }
 .fhero-story { color: var(--gold-bright); font-weight: 600; margin-top: 6px; font-size: 1.02rem; }
 .fhero-syn {
   color: #f0ebf7; margin-top: 8px; max-width: 620px; line-height: 1.55; font-size: 0.99rem;
