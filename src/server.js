@@ -392,7 +392,7 @@ async function layout(req, { title, body, user }) {
 <link rel="icon" href="/brand/logo">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=54">
+<link rel="stylesheet" href="/styles.css?v=55">
 </head>
 <body class="pubui">
 <header class="topbar">
@@ -444,7 +444,7 @@ async function layout(req, { title, body, user }) {
   </div>
   ${(ytLinks.length || fbLinks.length) ? `<div class="side-socials">
     ${ytLinks.length ? `<a href="${esc(ytLinks[0].url)}" target="_blank" rel="noopener" aria-label="YouTube">${ICONS.playSm}</a>` : ''}
-    ${fbLinks.length ? `<a href="${esc(fbLinks[0].url)}" target="_blank" rel="noopener" aria-label="Facebook">${ICONS.usersSm}</a>` : ''}
+    ${fbLinks.length ? `<a href="${esc(fbLinks[0].url)}" target="_blank" rel="noopener" aria-label="Facebook"><span style="font-weight:800;font-size:17px;line-height:1">f</span></a>` : ''}
   </div>` : ''}
   <p class="side-copy">© ${new Date().getFullYear()} ${esc(name)} — All rights reserved.</p>
 </aside>
@@ -465,7 +465,7 @@ ${body}
   <p class="footer-copy">© ${new Date().getFullYear()} ${esc(name)} — All rights reserved.</p>
 </footer>
 ${followPanelHtml(ytLinks, fbLinks)}
-<script src="/app.js?v=54"></script>
+<script src="/app.js?v=55"></script>
 </body>
 </html>`;
 }
