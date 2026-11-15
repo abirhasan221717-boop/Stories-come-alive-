@@ -397,7 +397,7 @@ async function layout(req, { title, body, user }) {
 <link rel="icon" href="/brand/logo">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=63">
+<link rel="stylesheet" href="/styles.css?v=64">
 </head>
 <body class="pubui">
 <header class="topbar">
@@ -470,7 +470,7 @@ ${body}
   <p class="footer-copy">© ${new Date().getFullYear()} ${esc(name)} — All rights reserved.</p>
 </footer>
 ${followPanelHtml(ytLinks, fbLinks)}
-<script src="/app.js?v=63"></script>
+<script src="/app.js?v=64"></script>
 </body>
 </html>`;
 }
@@ -541,7 +541,7 @@ ${body}
 // back to the site's brand hero artwork (/banner.jpg — the same image
 // the homepage hero uses when no video is featured).
 function cardThumb(v) {
-  return v.source === 'facebook' ? '/banner.jpg' : `https://i.ytimg.com/vi/${esc(v.youtube_id)}/hqdefault.jpg`;
+  return v.source === 'facebook' ? '/banner.jpg' : `https://i.ytimg.com/vi/${esc(v.youtube_id)}/maxresdefault.jpg`;
 }
 
 // True only when the story name adds information beyond the title. For
