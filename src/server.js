@@ -191,6 +191,12 @@ function linkListFromForm(labelField, urlField, stats) {
 // no pictographic emoji anywhere). Decorative only: aria-hidden, sized
 // and spaced by the .ic / .ic-sm classes in styles.css.
 const lineIcon = (inner, small) => `<svg class="${small ? 'ic ic-sm' : 'ic'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${inner}</svg>`;
+const fillIcon = (inner, small) => `<svg class="${small ? 'ic ic-sm' : 'ic'}" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true" focusable="false">${inner}</svg>`;
+const lineIconThick = (inner, small) => `<svg class="${small ? 'ic ic-sm' : 'ic'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${inner}</svg>`;
+const SEARCH_SOLID = '<path fill-rule="evenodd" d="M11 3.3a7.7 7.7 0 1 0 0 15.4 7.7 7.7 0 0 0 0-15.4zm0 2.8a4.9 4.9 0 1 1 0 9.8 4.9 4.9 0 0 1 0-9.8z"/><path d="M15.4 13.8l6.2 6.2a1.75 1.75 0 0 1-2.5 2.5l-6.2-6.2a1.75 1.75 0 0 1 2.5-2.5z"/>';
+const LOCK_SOLID = '<path fill-rule="evenodd" d="M6.5 10.5h11a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-11a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2zm5.5 3.4a1.7 1.7 0 1 0 0 3.4 1.7 1.7 0 0 0 0-3.4z"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3h-2.3V7.5a1.7 1.7 0 0 0-3.4 0v3z"/>';
+const HOME_SOLID = '<path d="M12 3l9.6 8.1h-2.9v8.4a1.5 1.5 0 0 1-1.5 1.5h-3.7v-6.2H10.5v6.2H6.8a1.5 1.5 0 0 1-1.5-1.5V11.1H2.4z"/>';
+const LAYERS_SOLID = '<path d="M12 2.8l9.6 5.2L12 13.2 2.4 8z"/><path d="M3.2 12.5l8.8 4.7 8.8-4.7 1.6 2.1L12 20.2 1.6 14.6z"/>';
 const HEART_PATH = '<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>';
 const PLAY_PATH = '<path d="M8 5.4v13.2c0 .8.9 1.3 1.6.9l10-6.6c.6-.4.6-1.4 0-1.8l-10-6.6c-.7-.4-1.6.1-1.6.9z"/>';
 const USERS_PATH = '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>';
@@ -198,67 +204,67 @@ const LOCK_PATH = '<rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d
 const STAR_POINTS = '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>';
 const HOME_PATH = '<path d="M3 9.5L12 3l9 6.5V20a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22v-8h6v8"/>';
 const ICONS = {
-  grid: lineIcon('<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>'),
-  playRect: lineIcon('<rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10.6 9.7l4.6 2.3-4.6 2.3z"/>'),
-  play: lineIcon(PLAY_PATH),
-  playSm: lineIcon(PLAY_PATH, true),
-  playSolid: `<svg class="ic" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true" focusable="false">${PLAY_PATH}</svg>`,
-  plusCircle: lineIcon('<circle cx="12" cy="12" r="9"/><path d="M12 8.5v7M8.5 12h7"/>'),
-  pencil: lineIcon('<path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>'),
-  layers: lineIcon('<path d="M12 3l9 4.9-9 4.9-9-4.9z"/><path d="M3.4 12.4L12 17l8.6-4.6"/><path d="M3.4 16.4L12 21l8.6-4.6"/>'),
-  users: lineIcon(USERS_PATH),
-  usersSm: lineIcon(USERS_PATH, true),
-  gear: lineIcon('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>'),
-  external: lineIcon('<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M21 3l-9.5 9.5"/>'),
-  image: lineIcon('<rect x="3" y="3" width="18" height="18" rx="2.5"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15.5L16 10.5 5 21"/>'),
-  key: lineIcon('<circle cx="8" cy="15.5" r="4.8"/><path d="M11.4 12.1L20.5 3"/><path d="M17.3 6.2l2 2"/>'),
-  lock: lineIcon(LOCK_PATH),
-  lockSm: lineIcon(LOCK_PATH, true),
-  eyeSm: lineIcon('<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/>', true),
+  grid: fillIcon('<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>'),
+  playRect: fillIcon('<path fill-rule="evenodd" d="M6 5h12a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V8a3 3 0 0 1 3-3zm4.4 4.5v5c0 .5.55.85 1 .55l4.2-2.5c.4-.25.4-.85 0-1.1l-4.2-2.5c-.45-.3-1 .05-1 .55z"/>'),
+  play: fillIcon(PLAY_PATH),
+  playSm: fillIcon(PLAY_PATH, true),
+  playSolid: fillIcon(PLAY_PATH),
+  plusCircle: fillIcon('<path fill-rule="evenodd" d="M12 2.8a9.2 9.2 0 1 0 0 18.4 9.2 9.2 0 0 0 0-18.4zm-1.1 4.9h2.2v3.2h3.2v2.2h-3.2v3.2h-2.2v-3.2H7.7v-2.2h3.2z"/>'),
+  pencil: fillIcon('<path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>'),
+  layers: fillIcon(LAYERS_SOLID),
+  users: fillIcon(USERS_PATH),
+  usersSm: fillIcon(USERS_PATH, true),
+  gear: fillIcon('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>'),
+  external: fillIcon('<path d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2z"/><path d="M14 3v2h3.6l-9.8 9.8 1.4 1.4L19 6.4V10h2V3z"/>'),
+  image: fillIcon('<path fill-rule="evenodd" d="M5.5 3h13A2.5 2.5 0 0 1 21 5.5v13a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 18.5v-13A2.5 2.5 0 0 1 5.5 3zm3 3.9a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2zM21 15.5L16 10.5 5 21h16z"/>'),
+  key: lineIconThick('<circle cx="8" cy="15.5" r="4.8"/><path d="M11.4 12.1L20.5 3"/><path d="M17.3 6.2l2 2"/>'),
+  lock: fillIcon(LOCK_SOLID),
+  lockSm: fillIcon(LOCK_SOLID, true),
+  eyeSm: fillIcon('<path fill-rule="evenodd" d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12zm9.5-3a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>', true),
   star: lineIcon(STAR_POINTS),
   starSm: lineIcon(STAR_POINTS, true),
-  starFilled: `<svg class="ic" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${STAR_POINTS}</svg>`,
-  bell: lineIcon('<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>'),
+  starFilled: fillIcon(STAR_POINTS),
+  bell: fillIcon('<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9z"/><circle cx="12" cy="20.3" r="1.8"/>'),
   heart: lineIcon(HEART_PATH),
-  heartFilled: `<svg class="ic" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${HEART_PATH}</svg>`,
-  home: lineIcon(HOME_PATH),
-  homeSm: lineIcon(HOME_PATH, true),
-  user: lineIcon('<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'),
-  userPlus: lineIcon('<path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/>'),
-  book: lineIcon('<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>'),
-  crown: lineIcon('<path d="M3 17.5 4.2 8.5 8.5 12 12 5.5 15.5 12 19.8 8.5 21 17.5Z"/><path d="M4.5 20.5h15"/>'),
-  flame: lineIcon('<path d="M12 21.5c3.9 0 6.5-2.7 6.5-6.3 0-3-1.9-5-3.3-6.6C13.9 7.1 13 5.5 13 2.5c-2.8 2-4.3 4.3-4.4 6.8 0 1 .2 1.9.5 2.7-.6-.5-1.3-1.4-1.7-2.4C6.1 11 5.5 13 5.5 15.2c0 3.6 2.6 6.3 6.5 6.3Z"/>'),
-  clock: lineIcon('<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>'),
-  compass: lineIcon('<circle cx="12" cy="12" r="8.5"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/>'),
-  bookmark: lineIcon('<path d="M6.5 3.5h11V21L12 16.8 6.5 21Z"/>'),
-  search: lineIcon('<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/>'),
-  info: lineIcon('<circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.8h.01"/>'),
-  camera: lineIcon('<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>'),
-  plus: lineIcon('<path d="M12 5v14M5 12h14"/>'),
-  folder: lineIcon('<path d="M3 7.5A2.5 2.5 0 0 1 5.5 5h3.4L11 7.5h7.5A2.5 2.5 0 0 1 21 10v7a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17z"/>'),
-  link: lineIcon('<path d="M10 13.6a5 5 0 0 0 7.1.4l2.8-2.8a5 5 0 0 0-7-7.1L11.5 5.5"/><path d="M14 10.4a5 5 0 0 0-7.1-.4L4.1 12.8a5 5 0 0 0 7 7.1l1.4-1.4"/>'),
-  chevronRight: '<svg class="ic qa-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7"/></svg>',
+  heartFilled: fillIcon(HEART_PATH),
+  home: fillIcon(HOME_SOLID),
+  homeSm: fillIcon(HOME_SOLID, true),
+  user: fillIcon('<circle cx="12" cy="7.6" r="3.9"/><path d="M4.6 20.4c.8-3.8 3.8-5.9 7.4-5.9s6.6 2.1 7.4 5.9a1.5 1.5 0 0 1-1.5 1.8H6.1a1.5 1.5 0 0 1-1.5-1.8z"/>'),
+  userPlus: fillIcon('<circle cx="8.5" cy="7.4" r="3.8"/><path d="M1.8 20.2c.7-3.7 3.3-5.7 6.7-5.7s6 2 6.7 5.7a1.4 1.4 0 0 1-1.4 1.7H3.2a1.4 1.4 0 0 1-1.4-1.7z"/><path d="M18.2 13.8h1.7v2.4h2.4v1.7h-2.4v2.4h-1.7v-2.4h-2.4v-1.7h2.4z"/>'),
+  book: fillIcon('<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>'),
+  crown: fillIcon('<path d="M3 17.5 4.2 8.5 8.5 12 12 5.5 15.5 12 19.8 8.5 21 17.5Z"/><rect x="4.4" y="19.4" width="15.2" height="1.9" rx="0.95"/>'),
+  flame: fillIcon('<path d="M12 21.5c3.9 0 6.5-2.7 6.5-6.3 0-3-1.9-5-3.3-6.6C13.9 7.1 13 5.5 13 2.5c-2.8 2-4.3 4.3-4.4 6.8 0 1 .2 1.9.5 2.7-.6-.5-1.3-1.4-1.7-2.4C6.1 11 5.5 13 5.5 15.2c0 3.6 2.6 6.3 6.5 6.3Z"/>'),
+  clock: fillIcon('<path fill-rule="evenodd" d="M12 2.8a9.2 9.2 0 1 0 0 18.4 9.2 9.2 0 0 0 0-18.4zm-1.1 4.6h2.2v4.9l3.4 2-1.1 1.9-4.5-2.6z"/>'),
+  compass: fillIcon('<path fill-rule="evenodd" d="M12 3.3a8.7 8.7 0 1 0 0 17.4 8.7 8.7 0 0 0 0-17.4zm0 2.8a5.9 5.9 0 1 1 0 11.8 5.9 5.9 0 0 1 0-11.8z"/><path d="M15.5 8.5l-2.1 5-5 2.1 2.1-5z"/>'),
+  bookmark: fillIcon('<path d="M6.5 3.5h11V21L12 16.8 6.5 21Z"/>'),
+  search: fillIcon(SEARCH_SOLID),
+  info: fillIcon('<path fill-rule="evenodd" d="M12 2.8a9.2 9.2 0 1 0 0 18.4 9.2 9.2 0 0 0 0-18.4zM11 11h2.2v6H11zm.9-4.6a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2z"/>'),
+  camera: fillIcon('<path fill-rule="evenodd" d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2zm-11-10a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"/>'),
+  plus: fillIcon('<path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6z"/>'),
+  folder: fillIcon('<path d="M3 7.5A2.5 2.5 0 0 1 5.5 5h3.4L11 7.5h7.5A2.5 2.5 0 0 1 21 10v7a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17z"/>'),
+  link: lineIconThick('<path d="M10 13.6a5 5 0 0 0 7.1.4l2.8-2.8a5 5 0 0 0-7-7.1L11.5 5.5"/><path d="M14 10.4a5 5 0 0 0-7.1-.4L4.1 12.8a5 5 0 0 0 7 7.1l1.4-1.4"/>'),
+  chevronRight: '<svg class="ic qa-chev" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true" focusable="false"><path d="M8.2 4.6L15.9 12l-7.7 7.4-1.7-1.7L12.5 12 6.5 6.3z"/></svg>',
 };
 
 // Sidebar category icons: thin-line SVGs matched by (case-insensitive)
 // category name, in the same stroke style as ICONS above. Order matters:
 // the more specific names are tested first. Unknown names get a film-frame.
 const CATEGORY_ICONS = [
-  [/romantic\s+comedy/i, '<circle cx="12" cy="12" r="9"/><path d="M8.3 14.2c1 1.3 2.3 2 3.7 2s2.7-.7 3.7-2"/><path d="M9 9.6h.01"/><path d="M15 9.6h.01"/>'],
+  [/romantic\s+comedy/i, '<path fill-rule="evenodd" d="M12 2.8a9.2 9.2 0 1 0 0 18.4 9.2 9.2 0 0 0 0-18.4zM9 8.4a1.3 1.3 0 1 0 0 2.6 1.3 1.3 0 0 0 0-2.6zm6 0a1.3 1.3 0 1 0 0 2.6 1.3 1.3 0 0 0 0-2.6zM8.1 13.4a5.4 5.4 0 0 0 7.8 0l-1.2 1.5a4.1 4.1 0 0 1-5.4 0z"/>'],
   [/romance/i, HEART_PATH],
-  [/horror/i, '<path d="M12 3a7.5 7.5 0 0 0-7.5 7.5V21l2.5-1.9 2.5 1.9 2.5-1.9 2.5 1.9 2.5-1.9V10.5A7.5 7.5 0 0 0 12 3z"/><path d="M9.3 10.8h.01"/><path d="M14.7 10.8h.01"/>'],
+  [/horror/i, '<path fill-rule="evenodd" d="M12 3a7.5 7.5 0 0 0-7.5 7.5V21l2.5-1.9 2.5 1.9 2.5-1.9 2.5 1.9 2.5-1.9V10.5A7.5 7.5 0 0 0 12 3zM9.3 9.5a1.3 1.3 0 1 0 0 2.6 1.3 1.3 0 0 0 0-2.6zm5.4 0a1.3 1.3 0 1 0 0 2.6 1.3 1.3 0 0 0 0-2.6z"/>'],
   [/thriller/i, '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>'],
-  [/mystery/i, '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/>'],
+  [/mystery/i, SEARCH_SOLID],
   [/dark\s+fantasy/i, '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>'],
   [/fantasy/i, '<path d="M12 3l1.8 4.9 4.7 1.8-4.7 1.8L12 16.4l-1.8-4.9L5.5 9.7l4.7-1.8z"/><path d="M18.8 15.2l.9 2.3 2.3.9-2.3.9-.9 2.3-.9-2.3-2.3-.9 2.3-.9z"/>'],
-  [/series/i, '<path d="M12 3l9 4.9-9 4.9-9-4.9z"/><path d="M3.4 12.4L12 17l8.6-4.6"/><path d="M3.4 16.4L12 21l8.6-4.6"/>'],
+  [/series/i, LAYERS_SOLID],
 ];
 function catColor(name) {
   return ({ Romance: '#ff5da2', 'Romantic Comedy': '#ffb74d', Horror: '#f368e0', Thriller: '#b388ff', Mystery: '#f06292', Fantasy: '#6ec1ff', 'Dark Fantasy': '#9575cd', Series: '#ffd166' })[name] || '#c084fc';
 }
 function categoryIcon(name) {
   const hit = CATEGORY_ICONS.find(([re]) => re.test(String(name || '')));
-  return `<span class="cat-ic" style="color:${catColor(name)}">${lineIcon(hit ? hit[1] : '<rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10.6 9.7l4.6 2.3-4.6 2.3z"/>')}</span>`;
+  return `<span class="cat-ic" style="color:${catColor(name)}">${fillIcon(hit ? hit[1] : '<path fill-rule="evenodd" d="M6 5h12a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V8a3 3 0 0 1 3-3zm4.4 4.5v5c0 .5.55.85 1 .55l4.2-2.5c.4-.25.4-.85 0-1.1l-4.2-2.5c-.45-.3-1 .05-1 .55z"/>')}</span>`;
 }
 
 // Welcome-page button caption: the label when there is one; the plain
@@ -398,7 +404,7 @@ async function layout(req, { title, body, user }) {
 <link rel="icon" href="/brand/logo">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=65">
+<link rel="stylesheet" href="/styles.css?v=66">
 </head>
 <body class="pubui">
 <header class="topbar">
@@ -471,7 +477,7 @@ ${body}
   <p class="footer-copy">© ${new Date().getFullYear()} ${esc(name)} — All rights reserved.</p>
 </footer>
 ${followPanelHtml(ytLinks, fbLinks)}
-<script src="/app.js?v=65"></script>
+<script src="/app.js?v=66"></script>
 </body>
 </html>`;
 }
