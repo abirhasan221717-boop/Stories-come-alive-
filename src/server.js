@@ -392,7 +392,7 @@ async function layout(req, { title, body, user }) {
 <link rel="icon" href="/brand/logo">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=51">
+<link rel="stylesheet" href="/styles.css?v=52">
 </head>
 <body class="pubui">
 <header class="topbar">
@@ -465,7 +465,7 @@ ${body}
   <p class="footer-copy">© ${new Date().getFullYear()} ${esc(name)} — All rights reserved.</p>
 </footer>
 ${followPanelHtml(ytLinks, fbLinks)}
-<script src="/app.js?v=51"></script>
+<script src="/app.js?v=52"></script>
 </body>
 </html>`;
 }
@@ -800,8 +800,8 @@ app.get('/', async (req, res) => {
   </nav>`;
 
   let rows = '';
-  if (topPicks.length) rows += posterRow({ title: 'Top Picks', videos: topPicks, user, ranked: true, anchorId: 'top-picks', icon: '<span style="color:#ffc93f">' + ICONS.crown + '</span>' });
-  rows += posterRow({ title: 'Latest Stories', videos: latest, user, anchorId: 'latest', icon: ICONS.clock });
+  if (topPicks.length) rows += posterRow({ title: 'Top Picks', videos: topPicks, user, ranked: true, anchorId: 'top-picks', moreHref: '/top-picks', icon: '<span style="color:#ffc93f">' + ICONS.crown + '</span>' });
+  rows += posterRow({ title: 'Latest Stories', videos: latest, user, anchorId: 'latest', moreHref: '/latest', icon: ICONS.clock });
   for (const c of await allCategories()) {
     if (!c.video_count) continue;
     const vids = await queryAll(`SELECT v.*, c.name AS category_name FROM videos v
@@ -829,6 +829,39 @@ app.get('/category/:id', async (req, res) => {
     ${grid(videos, user)}
   </section>`;
   res.send(await layout(req, { title: cat.name, body, user }));
+});
+
+app.get('/top-picks', async (req, res) => {
+  const user = await currentUser(req);
+  const videos = await queryAll(`SELECT v.*, c.name AS category_name,
+      COALESCE(r.a, 0) AS rating_avg, COALESCE(r.c, 0) AS rating_count
+    FROM videos v
+    LEFT JOIN categories c ON c.id = v.category_id
+    LEFT JOIN (SELECT video_id, AVG(stars) AS a, COUNT(*) AS c FROM ratings GROUP BY video_id) r ON r.video_id = v.id
+    WHERE (v.views + v.yt_views) + COALESCE(r.a, 0) * 100 > 0
+    ORDER BY (v.views + v.yt_views) + COALESCE(r.a, 0) * 100 DESC, v.id DESC`);
+  await attachRatings(videos);
+  const body = `
+  <section class="section">
+    <h2 class="section-title">Top Picks</h2>
+    <p class="muted">${videos.length} video${videos.length === 1 ? '' : 's'}</p>
+    ${grid(videos, user)}
+  </section>`;
+  res.send(await layout(req, { title: 'Top Picks', body, user }));
+});
+
+app.get('/latest', async (req, res) => {
+  const user = await currentUser(req);
+  const videos = await queryAll(`SELECT v.*, c.name AS category_name FROM videos v
+    LEFT JOIN categories c ON c.id = v.category_id ORDER BY v.id DESC`);
+  await attachRatings(videos);
+  const body = `
+  <section class="section">
+    <h2 class="section-title">Latest Stories</h2>
+    <p class="muted">${videos.length} video${videos.length === 1 ? '' : 's'}</p>
+    ${grid(videos, user)}
+  </section>`;
+  res.send(await layout(req, { title: 'Latest Stories', body, user }));
 });
 
 app.get('/search', async (req, res) => {
