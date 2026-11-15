@@ -392,7 +392,7 @@ async function layout(req, { title, body, user }) {
 <link rel="icon" href="/brand/logo">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=61">
+<link rel="stylesheet" href="/styles.css?v=62">
 </head>
 <body class="pubui">
 <header class="topbar">
@@ -465,7 +465,7 @@ ${body}
   <p class="footer-copy">© ${new Date().getFullYear()} ${esc(name)} — All rights reserved.</p>
 </footer>
 ${followPanelHtml(ytLinks, fbLinks)}
-<script src="/app.js?v=61"></script>
+<script src="/app.js?v=62"></script>
 </body>
 </html>`;
 }
@@ -1360,11 +1360,13 @@ app.post('/favorites/toggle', async (req, res) => {
   const user = await currentUser(req);
   if (!user) return res.redirect('/login');
   const videoId = Number(req.body.video_id);
+  let nowFav = false;
   if (await videoRow(videoId)) {
     const fav = await queryOne('SELECT 1 AS x FROM favorites WHERE user_id = ? AND video_id = ?', [user.id, videoId]);
     if (fav) await run('DELETE FROM favorites WHERE user_id = ? AND video_id = ?', [user.id, videoId]);
-    else await run('INSERT INTO favorites(user_id, video_id) VALUES(?, ?)', [user.id, videoId]);
+    else { await run('INSERT INTO favorites(user_id, video_id) VALUES(?, ?)', [user.id, videoId]); nowFav = true; }
   }
+  if (isAjax(req)) return res.json({ ok: true, fav: nowFav });
   res.redirect(safeNext(req.body.next, '/favorites'));
 });
 
