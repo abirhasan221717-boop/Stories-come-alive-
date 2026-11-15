@@ -247,9 +247,12 @@ const CATEGORY_ICONS = [
   [/fantasy/i, '<path d="M12 3l1.8 4.9 4.7 1.8-4.7 1.8L12 16.4l-1.8-4.9L5.5 9.7l4.7-1.8z"/><path d="M18.8 15.2l.9 2.3 2.3.9-2.3.9-.9 2.3-.9-2.3-2.3-.9 2.3-.9z"/>'],
   [/series/i, '<path d="M12 3l9 4.9-9 4.9-9-4.9z"/><path d="M3.4 12.4L12 17l8.6-4.6"/><path d="M3.4 16.4L12 21l8.6-4.6"/>'],
 ];
+function catColor(name) {
+  return ({ Romance: '#ff5da2', 'Romantic Comedy': '#ffb74d', Horror: '#f368e0', Thriller: '#b388ff', Mystery: '#f06292', Fantasy: '#6ec1ff', 'Dark Fantasy': '#9575cd', Series: '#ffd166' })[name] || '#c084fc';
+}
 function categoryIcon(name) {
   const hit = CATEGORY_ICONS.find(([re]) => re.test(String(name || '')));
-  return lineIcon(hit ? hit[1] : '<rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10.6 9.7l4.6 2.3-4.6 2.3z"/>');
+  return `<span class="cat-ic" style="color:${catColor(name)}">${lineIcon(hit ? hit[1] : '<rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10.6 9.7l4.6 2.3-4.6 2.3z"/>')}</span>`;
 }
 
 // Welcome-page button caption: the label when there is one; the plain
@@ -389,7 +392,7 @@ async function layout(req, { title, body, user }) {
 <link rel="icon" href="/brand/logo">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=47">
+<link rel="stylesheet" href="/styles.css?v=49">
 </head>
 <body class="pubui">
 <header class="topbar">
@@ -429,7 +432,6 @@ async function layout(req, { title, body, user }) {
   </a>
   <nav class="sidenav">
     <a class="sidenav-item active" href="/">${ICONS.home}<span>Home</span></a>
-    <a class="sidenav-item" href="/#latest">${ICONS.compass}<span>Explore</span></a>
     <a class="sidenav-item" href="/#categories">${ICONS.grid}<span>Categories</span></a>
     <a class="sidenav-item" href="/#top-picks">${ICONS.flame}<span>Trending</span></a>
     <a class="sidenav-item" href="/favorites">${ICONS.bookmark}<span>My List</span></a>
@@ -437,7 +439,7 @@ async function layout(req, { title, body, user }) {
     <a class="sidenav-item" href="/profile">${ICONS.user}<span>Profile</span></a>
   </nav>
   <div class="side-quote">
-    <img src="/quote-art.jpg" alt="" aria-hidden="true">
+    <img src="/quote-art2.jpg" alt="" aria-hidden="true">
     <div class="side-quote-text"><p>"Good Stories Make<br>a Better You"</p>${ICONS.heart}</div>
   </div>
   ${(ytLinks.length || fbLinks.length) ? `<div class="side-socials">
@@ -463,7 +465,7 @@ ${body}
   <p class="footer-copy">© ${new Date().getFullYear()} ${esc(name)} — All rights reserved.</p>
 </footer>
 ${followPanelHtml(ytLinks, fbLinks)}
-<script src="/app.js?v=47"></script>
+<script src="/app.js?v=49"></script>
 </body>
 </html>`;
 }
@@ -798,7 +800,7 @@ app.get('/', async (req, res) => {
   </nav>`;
 
   let rows = '';
-  if (topPicks.length) rows += posterRow({ title: 'Top Picks', videos: topPicks, user, ranked: true, anchorId: 'top-picks', icon: ICONS.crown });
+  if (topPicks.length) rows += posterRow({ title: 'Top Picks', videos: topPicks, user, ranked: true, anchorId: 'top-picks', icon: '<span style="color:#ffc93f">' + ICONS.crown + '</span>' });
   rows += posterRow({ title: 'Latest Stories', videos: latest, user, anchorId: 'latest', icon: ICONS.clock });
   for (const c of await allCategories()) {
     if (!c.video_count) continue;
