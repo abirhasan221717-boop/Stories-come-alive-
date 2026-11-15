@@ -223,6 +223,7 @@ const ICONS = {
   crown: lineIcon('<path d="M3 17.5 4.2 8.5 8.5 12 12 5.5 15.5 12 19.8 8.5 21 17.5Z"/><path d="M4.5 20.5h15"/>'),
   flame: lineIcon('<path d="M12 21.5c3.9 0 6.5-2.7 6.5-6.3 0-3-1.9-5-3.3-6.6C13.9 7.1 13 5.5 13 2.5c-2.8 2-4.3 4.3-4.4 6.8 0 1 .2 1.9.5 2.7-.6-.5-1.3-1.4-1.7-2.4C6.1 11 5.5 13 5.5 15.2c0 3.6 2.6 6.3 6.5 6.3Z"/>'),
   clock: lineIcon('<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>'),
+  compass: lineIcon('<circle cx="12" cy="12" r="8.5"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/>'),
   bookmark: lineIcon('<path d="M6.5 3.5h11V21L12 16.8 6.5 21Z"/>'),
   search: lineIcon('<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/>'),
   info: lineIcon('<circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.8h.01"/>'),
@@ -388,7 +389,7 @@ async function layout(req, { title, body, user }) {
 <link rel="icon" href="/brand/logo">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=42">
+<link rel="stylesheet" href="/styles.css?v=43">
 </head>
 <body class="pubui">
 <header class="topbar">
@@ -428,6 +429,7 @@ async function layout(req, { title, body, user }) {
   </a>
   <nav class="sidenav">
     <a class="sidenav-item active" href="/">${ICONS.home}<span>Home</span></a>
+    <a class="sidenav-item" href="/#latest">${ICONS.compass}<span>Explore</span></a>
     <a class="sidenav-item" href="/#categories">${ICONS.grid}<span>Categories</span></a>
     <a class="sidenav-item" href="/#top-picks">${ICONS.flame}<span>Trending</span></a>
     <a class="sidenav-item" href="/favorites">${ICONS.bookmark}<span>My List</span></a>
@@ -436,7 +438,7 @@ async function layout(req, { title, body, user }) {
   </nav>
   <div class="side-quote">
     <img src="/hero-art.jpg" alt="" aria-hidden="true">
-    <div class="side-quote-text"><p>"Good Stories Make<br>a Better You"</p>${ICONS.heart}</div>
+    <div class="side-quote-text"><p>"Stories That Stay<br>Forever..."</p>${ICONS.heart}</div>
   </div>
   ${(ytLinks.length || fbLinks.length) ? `<div class="side-socials">
     ${ytLinks.length ? `<a href="${esc(ytLinks[0].url)}" target="_blank" rel="noopener" aria-label="YouTube">${ICONS.playSm}</a>` : ''}
@@ -461,7 +463,7 @@ ${body}
   <p class="footer-copy">© ${new Date().getFullYear()} ${esc(name)} — All rights reserved.</p>
 </footer>
 ${followPanelHtml(ytLinks, fbLinks)}
-<script src="/app.js?v=42"></script>
+<script src="/app.js?v=43"></script>
 </body>
 </html>`;
 }
@@ -777,15 +779,15 @@ app.get('/', async (req, res) => {
   const heroLogo = await logoSrc();
   const hero = `
   <section class="svhero">
-    <img class="svhero-art" src="/hero-art.jpg" alt="" aria-hidden="true">
+    <img class="svhero-art" src="/hero-art2.jpg" alt="" aria-hidden="true">
     <div class="svhero-shade"></div>
     <div class="svhero-content">
-      <p class="svhero-script">Welcome to ${esc(name)}</p>
+      <span class="svhero-chip">${ICONS.starSm} Featured Story</span>
       <h1 class="svhero-title">গল্প মানেই<br><span>মনে ছোঁয়া...</span></h1>
       <p class="svhero-sub">পড়ুন, দেখুন, অনুভব করুন অসাধারণ সব গল্পের জগৎ।</p>
       <div class="svhero-btns">
-        ${heroVideo ? `<a class="btn btn-main svhero-btn" href="/watch/${heroVideo.id}">${ICONS.playSm} Play Now</a>` : ''}
-        <a class="btn btn-outline svhero-btn" href="#categories">Explore More</a>
+        ${heroVideo ? `<a class="btn btn-main svhero-btn" href="/watch/${heroVideo.id}">${ICONS.playSm} Play Story</a><a class="btn btn-outline svhero-btn" href="/watch/${heroVideo.id}">${ICONS.info} Details</a>` : ''}
+        
       </div>
       ${user ? '' : '<p class="fhero-note">Sign in to watch — new here? Create a free account.</p>'}
     </div>
@@ -796,7 +798,7 @@ app.get('/', async (req, res) => {
   </nav>`;
 
   let rows = '';
-  if (topPicks.length) rows += posterRow({ title: 'Top Picks', videos: topPicks, user, ranked: true, anchorId: 'top-picks', icon: ICONS.crown });
+  if (topPicks.length) rows += posterRow({ title: 'Top Picks', videos: topPicks, user, ranked: true, anchorId: 'top-picks', icon: ICONS.flame });
   rows += posterRow({ title: 'Latest Stories', videos: latest, user, anchorId: 'latest', icon: ICONS.clock });
   for (const c of await allCategories()) {
     if (!c.video_count) continue;
