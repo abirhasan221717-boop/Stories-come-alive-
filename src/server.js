@@ -156,17 +156,20 @@ function getFacebookLinks() { return getLinkList('facebook_links', 'facebook_url
 // blank or the URL is not a usable http(s) link.
 function cleanLinkEntry(labelRaw, urlRaw) {
   let url = String(urlRaw || '').trim();
+  let label = String(labelRaw || '').trim();
+  // Rescue: the link was typed into the Name box and the link box left empty.
+  if (!url && label && /(:\/\/|www\.|youtube\.com|youtu\.be|facebook\.com|fb\.watch)/i.test(label)) { url = label; label = ''; }
   if (!url) return null;
   if (!/^[A-Za-z][A-Za-z0-9+.-]*:/.test(url)) url = 'https://' + url; // scheme missing
   if (url.length > 500) return null;
   let parsed;
   try { parsed = new URL(url); } catch { return null; }
   if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return null;
-  return { label: String(labelRaw || '').trim().slice(0, 60), url };
+  return { label: label.slice(0, 60), url };
 }
 // Repeated form fields arrive as an array, a single string (one row), or
 // undefined (no rows at all). Normalize, drop bad rows, dedupe by URL, cap.
-function linkListFromForm(labelField, urlField) {
+function linkListFromForm(labelField, urlField, stats) {
   const asArray = (v) => (Array.isArray(v) ? v : (v === undefined || v === null ? [] : [v]));
   const labels = asArray(labelField);
   const urls = asArray(urlField);
@@ -174,8 +177,10 @@ function linkListFromForm(labelField, urlField) {
   const seen = new Set();
   const count = Math.max(labels.length, urls.length);
   for (let i = 0; i < count && out.length < 20; i++) {
+    const hasContent = String(labels[i] || '').trim() !== '' || String(urls[i] || '').trim() !== '';
     const entry = cleanLinkEntry(labels[i], urls[i]);
-    if (!entry || seen.has(entry.url)) continue;
+    if (!entry) { if (hasContent && stats) stats.dropped = (stats.dropped || 0) + 1; continue; }
+    if (seen.has(entry.url)) continue;
     seen.add(entry.url);
     out.push(entry);
   }
@@ -392,7 +397,7 @@ async function layout(req, { title, body, user }) {
 <link rel="icon" href="/brand/logo">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=62">
+<link rel="stylesheet" href="/styles.css?v=63">
 </head>
 <body class="pubui">
 <header class="topbar">
@@ -465,7 +470,7 @@ ${body}
   <p class="footer-copy">© ${new Date().getFullYear()} ${esc(name)} — All rights reserved.</p>
 </footer>
 ${followPanelHtml(ytLinks, fbLinks)}
-<script src="/app.js?v=62"></script>
+<script src="/app.js?v=63"></script>
 </body>
 </html>`;
 }
@@ -1728,12 +1733,12 @@ app.post('/admin/comments/:id/delete', async (req, res) => {
 
 app.get('/admin/settings', async (req, res) => {
   if (!(await requireAdminPage(req, res))) return;
-  const msg = req.query.ok ? '<div class="alert alert-ok">Saved</div>' : '';
   const err = req.query.err ? `<div class="alert alert-error">${esc(req.query.err)}</div>` : '';
   const name = await siteName();
   const logo = await logoSrc();
   const ytLinks = await getYoutubeLinks();
   const fbLinks = await getFacebookLinks();
+  const msg = req.query.ok ? `<div class="alert alert-ok">Saved — YouTube: ${ytLinks.length} link(s), Facebook: ${fbLinks.length} link(s) now active on the site.</div>` : '';
   const linkRowHtml = (platform, item) => `
         <div class="linkrow" data-linkrow>
           <input type="text" class="linkrow-label" name="${platform}_label" value="${esc(item ? item.label : '')}" placeholder="Name (optional)" maxlength="60">
@@ -1744,7 +1749,7 @@ app.get('/admin/settings', async (req, res) => {
       <div class="linkgroup">
         <span class="linkgroup-title">${title}</span>
         <div class="linkrows" data-linkrows="${platform}">
-          ${links.map((l) => linkRowHtml(platform, l)).join('')}
+          ${links.length ? links.map((l) => linkRowHtml(platform, l)).join('') : linkRowHtml(platform, null)}
         </div>
         <template data-linktemplate="${platform}">${linkRowHtml(platform, null)}</template>
         <div><button type="button" class="btn btn-ghost btn-sm" data-add-link="${platform}">${addText}</button></div>
@@ -1784,13 +1789,16 @@ app.get('/admin/settings', async (req, res) => {
 app.post('/admin/settings', async (req, res) => {
   if (!(await requireAdminPage(req, res))) return;
   await setSetting('site_name', String(req.body.site_name || '').trim() || 'Stories Come Alive');
-  const ytLinks = linkListFromForm(req.body.youtube_label, req.body.youtube_url);
-  const fbLinks = linkListFromForm(req.body.facebook_label, req.body.facebook_url);
+  const ytStats = { dropped: 0 };
+  const fbStats = { dropped: 0 };
+  const ytLinks = linkListFromForm(req.body.youtube_label, req.body.youtube_url, ytStats);
+  const fbLinks = linkListFromForm(req.body.facebook_label, req.body.facebook_url, fbStats);
   await setSetting('youtube_links', JSON.stringify(ytLinks));
   await setSetting('facebook_links', JSON.stringify(fbLinks));
   // Keep the legacy single-link keys in sync (first link wins) for consistency.
   await setSetting('youtube_url', ytLinks.length ? ytLinks[0].url : '');
   await setSetting('facebook_url', fbLinks.length ? fbLinks[0].url : '');
+  if (ytStats.dropped || fbStats.dropped) return res.redirect('/admin/settings?err=' + encodeURIComponent('One link row was not saved. Put the full link (starting with https://) in the link box, then Save again.'));
   res.redirect('/admin/settings?ok=1');
 });
 
