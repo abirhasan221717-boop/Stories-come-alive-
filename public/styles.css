@@ -1101,3 +1101,10 @@ body.pubui {
 .side-brand .side-logo { width: 64px; height: 64px; }
 .side-brand-text { display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 0; }
 .side-brand .brand-name { font-size: 1.28rem; }
+
+/* --- See All: mockup style, readable pink text (2026-11-15) --- */
+.pubui .rowmore {
+  background: none; box-shadow: none; border-radius: 0;
+  color: #ff5da2; font-weight: 700; font-size: 1rem; padding: 6px 2px;
+}
+.pubui .rowmore:hover { color: #ff8fc0; text-decoration: none; filter: none; }
