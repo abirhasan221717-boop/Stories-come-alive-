@@ -392,7 +392,7 @@ async function layout(req, { title, body, user }) {
 <link rel="icon" href="/brand/logo">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=49">
+<link rel="stylesheet" href="/styles.css?v=51">
 </head>
 <body class="pubui">
 <header class="topbar">
@@ -439,7 +439,7 @@ async function layout(req, { title, body, user }) {
     <a class="sidenav-item" href="/profile">${ICONS.user}<span>Profile</span></a>
   </nav>
   <div class="side-quote">
-    <img src="/quote-art2.jpg" alt="" aria-hidden="true">
+    <img src="/quote-art3.jpg" alt="" aria-hidden="true">
     <div class="side-quote-text"><p>"Good Stories Make<br>a Better You"</p>${ICONS.heart}</div>
   </div>
   ${(ytLinks.length || fbLinks.length) ? `<div class="side-socials">
@@ -465,7 +465,7 @@ ${body}
   <p class="footer-copy">© ${new Date().getFullYear()} ${esc(name)} — All rights reserved.</p>
 </footer>
 ${followPanelHtml(ytLinks, fbLinks)}
-<script src="/app.js?v=49"></script>
+<script src="/app.js?v=51"></script>
 </body>
 </html>`;
 }
