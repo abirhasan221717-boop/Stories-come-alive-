@@ -1150,3 +1150,13 @@ body.pubui {
     radial-gradient(700px 160px at 88% -90px, rgba(247, 37, 133, 0.14), rgba(247, 37, 133, 0) 70%),
     linear-gradient(180deg, rgba(21, 11, 44, 0.96), rgba(13, 7, 32, 0.94));
 }
+
+/* --- full blend (2026-11-15): banner + sidebar rise into the top strip --- */
+.pubui .topbar {
+  background: linear-gradient(180deg, rgba(10, 6, 22, 0.62), rgba(10, 6, 22, 0.28) 70%, rgba(10, 6, 22, 0));
+  border-bottom: 0; border-image: none; box-shadow: none;
+}
+@media (min-width: 901px) {
+  .pubui .sidebar { top: 0; height: 100vh; margin-top: -57px; }
+  .pubui .svhero { margin-top: -57px; }
+}
