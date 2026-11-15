@@ -1108,3 +1108,6 @@ body.pubui {
   color: #ff5da2; font-weight: 700; font-size: 1rem; padding: 6px 2px;
 }
 .pubui .rowmore:hover { color: #ff8fc0; text-decoration: none; filter: none; }
+
+/* --- quote card: original portrait art framing (2026-11-15) --- */
+.side-quote img { object-position: 50% 32%; }
