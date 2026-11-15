@@ -392,7 +392,7 @@ async function layout(req, { title, body, user }) {
 <link rel="icon" href="/brand/logo">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=59">
+<link rel="stylesheet" href="/styles.css?v=60">
 </head>
 <body class="pubui">
 <header class="topbar">
@@ -465,7 +465,7 @@ ${body}
   <p class="footer-copy">© ${new Date().getFullYear()} ${esc(name)} — All rights reserved.</p>
 </footer>
 ${followPanelHtml(ytLinks, fbLinks)}
-<script src="/app.js?v=59"></script>
+<script src="/app.js?v=60"></script>
 </body>
 </html>`;
 }
@@ -637,6 +637,31 @@ function commentAvatarHtml(name, avatar) {
 function starIcon(filled, small) {
   return `<svg class="${small ? 'ic ic-sm' : 'ic'}" viewBox="0 0 24 24" fill="${filled ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${STAR_POINTS}</svg>`;
 }
+// True when the watch page calls an endpoint via fetch, so it can answer
+// with JSON and the video keeps playing instead of reloading the page.
+function isAjax(req) { return req.get('X-Requested-With') === 'XMLHttpRequest'; }
+
+// Renders one comment exactly like the watch page does, for AJAX inserts.
+function ajaxCommentHtml(cm, user, videoId) {
+  const isReply = !!cm.parent_id;
+  return `<div class="comment${isReply ? ' comment-reply' : ''}">
+        ${commentAvatarHtml(cm.user_name, cm.user_avatar)}
+        <div class="comment-main">
+          <p class="comment-head"><span class="comment-name">${esc(cm.user_name)}</span><span class="comment-time">${relTime(cm.created_at)}</span></p>
+          <p class="comment-body">${esc(cm.body).replace(/\r?\n/g, '<br>')}</p>
+          <div class="comment-actions">
+            ${isReply ? '' : `<button type="button" class="comment-act" data-reply-toggle="${cm.id}">Reply</button>`}
+            ${Number(cm.user_id) === Number(user.id) ? `<form method="POST" action="/comments/${cm.id}/delete" class="inlineform"><button class="comment-del" type="submit">Delete</button></form>` : ''}
+          </div>
+          ${isReply ? '' : `<form method="POST" action="/watch/${videoId}/comments" class="form reply-form" data-reply-form="${cm.id}" hidden>
+            <input type="hidden" name="parent_id" value="${cm.id}">
+            <textarea name="body" rows="2" maxlength="500" placeholder="Write a reply…" required></textarea>
+            <div><button class="btn btn-main btn-sm" type="submit">Post Reply</button></div>
+          </form>`}
+        </div>
+      </div>`;
+}
+
 // Bulk-load rating aggregates onto an array of video rows (cards render
 // synchronously, so routes attach rating_avg / rating_count beforehand).
 async function attachRatings(videos) {
@@ -1231,10 +1256,16 @@ app.post('/watch/:id/rate', async (req, res) => {
   if (!user) return res.redirect('/login?next=' + encodeURIComponent('/watch/' + v.id));
   const stars = Number(req.body.stars);
   if (!Number.isInteger(stars) || stars < 1 || stars > 5) {
+    if (isAjax(req)) return res.status(400).json({ ok: false, error: 'Please pick a rating from 1 to 5 stars.' });
     return res.redirect(`/watch/${v.id}?err=` + encodeURIComponent('Please pick a rating from 1 to 5 stars.'));
   }
   await run(`INSERT INTO ratings(video_id, user_id, stars) VALUES(?, ?, ?)
     ON CONFLICT(video_id, user_id) DO UPDATE SET stars = excluded.stars`, [v.id, user.id, stars]);
+  if (isAjax(req)) {
+    const row = await queryOne('SELECT AVG(stars) AS a, COUNT(*) AS c FROM ratings WHERE video_id = ?', [v.id]);
+    const count = Number(row.c);
+    return res.json({ ok: true, avg: count ? Number(row.a) : 0, count, mine: stars });
+  }
   res.redirect(`/watch/${v.id}`);
 });
 
@@ -1245,7 +1276,9 @@ app.post('/watch/:id/comments', async (req, res) => {
   if (!v) return res.redirect('/');
   if (!user) return res.redirect('/login?next=' + encodeURIComponent('/watch/' + v.id));
   const text = String(req.body.body || '').trim();
-  const back = (msg) => res.redirect(`/watch/${v.id}?err=` + encodeURIComponent(msg) + '#comments');
+  const back = (msg) => isAjax(req)
+    ? res.status(400).json({ ok: false, error: msg })
+    : res.redirect(`/watch/${v.id}?err=` + encodeURIComponent(msg) + '#comments');
   if (!text) return back('Please write a comment first.');
   if (text.length > 500) return back('Comments can be at most 500 characters long.');
   // A reply must point at a top-level comment on this same video.
@@ -1257,7 +1290,13 @@ app.post('/watch/:id/comments', async (req, res) => {
     }
     parentId = parent.id;
   }
-  await run('INSERT INTO comments(video_id, user_id, body, parent_id) VALUES(?, ?, ?, ?)', [v.id, user.id, text, parentId]);
+  const ins = await run('INSERT INTO comments(video_id, user_id, body, parent_id) VALUES(?, ?, ?, ?)', [v.id, user.id, text, parentId]);
+  if (isAjax(req)) {
+    const cm = await queryOne(`SELECT cm.*, u.name AS user_name, u.avatar AS user_avatar FROM comments cm
+      JOIN users u ON u.id = cm.user_id WHERE cm.id = ?`, [ins.lastInsertRowid]);
+    const countRow = await queryOne('SELECT COUNT(*) AS c FROM comments WHERE video_id = ?', [v.id]);
+    return res.json({ ok: true, html: ajaxCommentHtml(cm, user, v.id), parentId: parentId ? Number(parentId) : null, count: Number(countRow.c) });
+  }
   res.redirect(`/watch/${v.id}#comments`);
 });
 
@@ -1269,6 +1308,10 @@ app.post('/comments/:id/delete', async (req, res) => {
   if (!cm) return res.redirect('/');
   if (Number(cm.user_id) === Number(user.id)) {
     await run('DELETE FROM comments WHERE id = ? OR parent_id = ?', [cm.id, cm.id]);
+  }
+  if (isAjax(req)) {
+    const countRow = await queryOne('SELECT COUNT(*) AS c FROM comments WHERE video_id = ?', [cm.video_id]);
+    return res.json({ ok: true, count: Number(countRow.c) });
   }
   res.redirect(`/watch/${cm.video_id}#comments`);
 });
