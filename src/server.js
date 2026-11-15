@@ -389,7 +389,7 @@ async function layout(req, { title, body, user }) {
 <link rel="icon" href="/brand/logo">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=46">
+<link rel="stylesheet" href="/styles.css?v=47">
 </head>
 <body class="pubui">
 <header class="topbar">
@@ -463,7 +463,7 @@ ${body}
   <p class="footer-copy">© ${new Date().getFullYear()} ${esc(name)} — All rights reserved.</p>
 </footer>
 ${followPanelHtml(ytLinks, fbLinks)}
-<script src="/app.js?v=46"></script>
+<script src="/app.js?v=47"></script>
 </body>
 </html>`;
 }
@@ -779,7 +779,7 @@ app.get('/', async (req, res) => {
   const heroLogo = await logoSrc();
   const hero = `
   <section class="svhero">
-    <img class="svhero-art" src="/hero-art3.jpg" alt="" aria-hidden="true">
+    <img class="svhero-art" src="/hero-art4.jpg" alt="" aria-hidden="true">
     <div class="svhero-shade"></div>
     <div class="svhero-content">
       <p class="svhero-script">Welcome to ${esc(name)}</p>
