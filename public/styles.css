@@ -14,6 +14,7 @@
 html { scroll-behavior: smooth; }
 body {
   font-family: 'Hind Siliguri', 'Noto Sans Bengali', system-ui, sans-serif;
+  font-weight: 500;
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
