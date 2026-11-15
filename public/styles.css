@@ -1051,7 +1051,7 @@ body.pubui {
 .pubui .play-badge .ic { width: 16px; height: 16px; color: #ffffff; }
 .pubui .card-sub { color: var(--muted); font-size: 0.8rem; margin-top: 3px; }
 
-.svhero-art { object-position: 72% center; }
+.svhero-art { object-position: center; }
 .svhero-chip {
   display: inline-flex; align-items: center; gap: 7px;
   background: rgba(20, 10, 44, 0.66); border: 1px solid rgba(247, 37, 133, 0.55);
