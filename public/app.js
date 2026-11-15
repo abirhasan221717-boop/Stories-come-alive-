@@ -270,3 +270,25 @@ if (sideMenuBtn && sideMenu) {
     if (e.target && typeof e.target.closest === 'function' && e.target.closest('a')) closeSideMenu();
   });
 }
+
+// Highlight the sidebar item for the page being viewed
+function markNav() {
+  var path = window.location.pathname;
+  var hash = window.location.hash;
+  var items = Array.prototype.slice.call(document.querySelectorAll('.sidenav-item'));
+  if (!items.length) return;
+  function byPart(part) {
+    return items.filter(function (a) { return (a.getAttribute('href') || '').indexOf(part) > -1; })[0] || null;
+  }
+  var target = null;
+  if (path.indexOf('/category/') === 0) target = byPart('#categories');
+  else if (path === '/top-picks') target = byPart('#top-picks');
+  else if (path === '/' && hash === '#categories') target = byPart('#categories');
+  else if (path === '/' && hash === '#top-picks') target = byPart('#top-picks');
+  else if (path === '/') target = items[0];
+  else target = items.filter(function (a) { return a.getAttribute('href') === path; })[0] || null;
+  if (!target) return;
+  items.forEach(function (a) { a.classList.toggle('active', a === target); });
+}
+markNav();
+window.addEventListener('hashchange', markNav);
