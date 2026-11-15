@@ -392,7 +392,7 @@ async function layout(req, { title, body, user }) {
 <link rel="icon" href="/brand/logo">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=60">
+<link rel="stylesheet" href="/styles.css?v=61">
 </head>
 <body class="pubui">
 <header class="topbar">
@@ -465,7 +465,7 @@ ${body}
   <p class="footer-copy">© ${new Date().getFullYear()} ${esc(name)} — All rights reserved.</p>
 </footer>
 ${followPanelHtml(ytLinks, fbLinks)}
-<script src="/app.js?v=60"></script>
+<script src="/app.js?v=61"></script>
 </body>
 </html>`;
 }
@@ -1345,13 +1345,14 @@ app.get('/notifications', async (req, res) => {
       }).join('')}
     </div>` : `<div class="empty"><span class="empty-book">${ICONS.bell}</span>No notifications yet — new videos will appear here.</div>`}
   </section>`;
-  res.send(await layout(req, { title: 'Notifications', body, user }));
-  // Mark all as read only AFTER the page above was rendered from the old
-  // watermark, so the New pills show on this visit and the header badge
-  // clears from the next page load onwards.
+  // Mark all as read BEFORE the layout renders, so the bell badge is
+  // already cleared on this page too. The list above was built from the
+  // old watermark, so the New pills still show on this visit.
   if (Number(maxRow.m) > watermark) {
     await run('UPDATE users SET last_seen_notif = ? WHERE id = ?', [Number(maxRow.m), user.id]);
+    user.last_seen_notif = Number(maxRow.m);
   }
+  res.send(await layout(req, { title: 'Notifications', body, user }));
 });
 
 // ---------------- user pages ----------------
