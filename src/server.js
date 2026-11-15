@@ -389,7 +389,7 @@ async function layout(req, { title, body, user }) {
 <link rel="icon" href="/brand/logo">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=45">
+<link rel="stylesheet" href="/styles.css?v=46">
 </head>
 <body class="pubui">
 <header class="topbar">
@@ -437,8 +437,8 @@ async function layout(req, { title, body, user }) {
     <a class="sidenav-item" href="/profile">${ICONS.user}<span>Profile</span></a>
   </nav>
   <div class="side-quote">
-    <img src="/hero-art.jpg" alt="" aria-hidden="true">
-    <div class="side-quote-text"><p>"Stories That Stay<br>Forever..."</p>${ICONS.heart}</div>
+    <img src="/quote-art.jpg" alt="" aria-hidden="true">
+    <div class="side-quote-text"><p>"Good Stories Make<br>a Better You"</p>${ICONS.heart}</div>
   </div>
   ${(ytLinks.length || fbLinks.length) ? `<div class="side-socials">
     ${ytLinks.length ? `<a href="${esc(ytLinks[0].url)}" target="_blank" rel="noopener" aria-label="YouTube">${ICONS.playSm}</a>` : ''}
@@ -463,7 +463,7 @@ ${body}
   <p class="footer-copy">© ${new Date().getFullYear()} ${esc(name)} — All rights reserved.</p>
 </footer>
 ${followPanelHtml(ytLinks, fbLinks)}
-<script src="/app.js?v=45"></script>
+<script src="/app.js?v=46"></script>
 </body>
 </html>`;
 }
@@ -779,14 +779,14 @@ app.get('/', async (req, res) => {
   const heroLogo = await logoSrc();
   const hero = `
   <section class="svhero">
-    <img class="svhero-art" src="/hero-art2.jpg" alt="" aria-hidden="true">
+    <img class="svhero-art" src="/hero-art3.jpg" alt="" aria-hidden="true">
     <div class="svhero-shade"></div>
     <div class="svhero-content">
-      <span class="svhero-chip">${ICONS.starSm} Featured Story</span>
+      <p class="svhero-script">Welcome to ${esc(name)}</p>
       <h1 class="svhero-title">গল্প মানেই<br><span>মনে ছোঁয়া...</span></h1>
       <p class="svhero-sub">পড়ুন, দেখুন, অনুভব করুন অসাধারণ সব গল্পের জগৎ।</p>
       <div class="svhero-btns">
-        ${heroVideo ? `<a class="btn btn-main svhero-btn" href="/watch/${heroVideo.id}">${ICONS.playSm} Play Story</a><a class="btn btn-outline svhero-btn" href="/watch/${heroVideo.id}">${ICONS.info} Details</a>` : ''}
+        ${heroVideo ? `<a class="btn btn-main svhero-btn" href="/watch/${heroVideo.id}">${ICONS.playSm} Play Now</a>` : ''}<a class="btn btn-outline svhero-btn" href="#categories">Explore More</a>
         
       </div>
       ${user ? '' : '<p class="fhero-note">Sign in to watch — new here? Create a free account.</p>'}
@@ -798,7 +798,7 @@ app.get('/', async (req, res) => {
   </nav>`;
 
   let rows = '';
-  if (topPicks.length) rows += posterRow({ title: 'Top Picks', videos: topPicks, user, ranked: true, anchorId: 'top-picks', icon: ICONS.flame });
+  if (topPicks.length) rows += posterRow({ title: 'Top Picks', videos: topPicks, user, ranked: true, anchorId: 'top-picks', icon: ICONS.crown });
   rows += posterRow({ title: 'Latest Stories', videos: latest, user, anchorId: 'latest', icon: ICONS.clock });
   for (const c of await allCategories()) {
     if (!c.video_count) continue;
