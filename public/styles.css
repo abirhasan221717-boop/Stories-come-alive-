@@ -1141,3 +1141,12 @@ body.pubui {
 .side-socials a { border-radius: 10px; border: 0; color: #ffffff; }
 .side-socials a[aria-label="YouTube"] { background: #ff0033; }
 .side-socials a[aria-label="Facebook"] { background: #1877f2; }
+
+/* --- topbar blend (2026-11-15): no hard line, melts into the design --- */
+.pubui .topbar {
+  border-bottom: 0; border-image: none; box-shadow: none;
+  background:
+    radial-gradient(600px 120px at 8% -70px, rgba(147, 51, 234, 0.30), rgba(147, 51, 234, 0) 70%),
+    radial-gradient(700px 160px at 88% -90px, rgba(247, 37, 133, 0.14), rgba(247, 37, 133, 0) 70%),
+    linear-gradient(180deg, rgba(21, 11, 44, 0.96), rgba(13, 7, 32, 0.94));
+}
