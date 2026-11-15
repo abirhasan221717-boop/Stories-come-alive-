@@ -224,7 +224,8 @@ const ICONS = {
   star: lineIcon(STAR_POINTS),
   starSm: lineIcon(STAR_POINTS, true),
   starFilled: fillIcon(STAR_POINTS),
-  bell: fillIcon('<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9z"/><circle cx="12" cy="20.3" r="1.8"/>'),
+  bell: fillIcon('<path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5S10.5 3.17 10.5 4v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>'),
+  logout: fillIcon('<path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4z"/>'),
   heart: lineIcon(HEART_PATH),
   heartFilled: fillIcon(HEART_PATH),
   home: fillIcon(HOME_SOLID),
@@ -404,7 +405,7 @@ async function layout(req, { title, body, user }) {
 <link rel="icon" href="/brand/logo">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=66">
+<link rel="stylesheet" href="/styles.css?v=67">
 </head>
 <body class="pubui">
 <header class="topbar">
@@ -427,11 +428,11 @@ async function layout(req, { title, body, user }) {
     <span class="searchwrap">${ICONS.search}<input type="text" name="q" placeholder="Search for stories, videos..."></span>
   </form>
   <div class="userbox">
-    ${(ytLinks.length || fbLinks.length) ? '<button type="button" class="btn btn-main btn-follow" data-follow-open aria-haspopup="dialog" aria-controls="followPanel">' + ICONS.bell + 'Follow / Subscribe</button>' : ''}
+    ${(ytLinks.length || fbLinks.length) ? '<button type="button" class="btn btn-main btn-follow" data-follow-open aria-haspopup="dialog" aria-controls="followPanel">' + ICONS.userPlus + 'Follow / Subscribe</button>' : ''}
     ${user
       ? `<a class="navlink bell-link" href="/notifications" aria-label="Notifications">${ICONS.bell}${notifCount ? `<span class="bell-badge">${notifCount > 9 ? '9+' : notifCount}</span>` : ''}</a>
          <a class="navlink nav-avatar-link" href="/profile">${user.avatar ? `<img class="nav-avatar" src="${esc(user.avatar)}" alt="">` : ICONS.user}</a>
-         <form method="POST" action="/logout" class="inlineform"><button class="btn btn-ghost btn-sm" type="submit">Logout</button></form>`
+         <form method="POST" action="/logout" class="inlineform"><button class="btn btn-ghost btn-sm" type="submit">${ICONS.logout}Logout</button></form>`
       : `<a class="navlink" href="/register">Register</a>
          <a class="btn btn-main signin-pill" href="/login">${ICONS.user}Sign In</a>`}
   </div>
@@ -477,7 +478,7 @@ ${body}
   <p class="footer-copy">© ${new Date().getFullYear()} ${esc(name)} — All rights reserved.</p>
 </footer>
 ${followPanelHtml(ytLinks, fbLinks)}
-<script src="/app.js?v=66"></script>
+<script src="/app.js?v=67"></script>
 </body>
 </html>`;
 }
@@ -1422,7 +1423,7 @@ app.get('/profile', async (req, res) => {
         <tr><th>Favorite videos</th><td>${favCount}</td></tr>
       </table>
       <a class="btn btn-main btn-big" href="/favorites">${ICONS.heart}View Favorites</a>
-      <form method="POST" action="/logout" class="form"><button class="btn btn-ghost btn-big" type="submit">Logout</button></form>
+      <form method="POST" action="/logout" class="form"><button class="btn btn-ghost btn-big" type="submit">${ICONS.logout}Logout</button></form>
     </div>
   </section>`;
   res.send(await layout(req, { title: 'My Profile', body, user }));
