@@ -1169,14 +1169,17 @@ body.pubui {
   background: linear-gradient(180deg, rgba(10, 6, 22, 0.38), rgba(10, 6, 22, 0.12) 65%, rgba(10, 6, 22, 0));
 }
 
-/* --- search truly centered (2026-11-15): equal side columns on wide screens,
-   so the pill sits at the page center whatever the userbox width --- */
+/* --- topbar layout (2026-11-15, v68): buttons stay far right (as before);
+   the search pill is pinned to the exact center of the bar --- */
 @media (min-width: 1024px) {
-  .pubui .topbar {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
+  .pubui .topbar .userbox { margin-left: auto; }
+  .pubui .topbar .topsearch {
+    position: absolute; left: 50%; transform: translateX(-50%);
+    width: 440px; max-width: 42vw; margin: 0;
+    display: flex; justify-content: center;
   }
-  .pubui .topbar .sidemenu-wrap { justify-self: start; }
-  .pubui .topbar .topsearch { justify-self: center; }
-  .pubui .topbar .userbox { justify-self: end; }
 }
+/* topbar icons: bigger and brighter so they read at a glance */
+.pubui .bell-link .ic { width: 24px; height: 24px; }
+.pubui .bell-link { color: #ffffff; }
+.pubui .userbox .btn .ic { width: 19px; height: 19px; }
