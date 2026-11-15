@@ -292,3 +292,129 @@ function markNav() {
 }
 markNav();
 window.addEventListener('hashchange', markNav);
+
+// Watch page: comments, replies, deletes and star ratings happen in place
+// (no page reload), so the video keeps playing.
+(function () {
+  var commentsSection = document.getElementById('comments');
+  var rateForm = document.querySelector('.rate-form');
+  if (!commentsSection && !rateForm) return;
+
+  // Reply toggles for comments added after page load (capture phase, so it
+  // also serves the buttons rendered by the server without double-toggling).
+  document.addEventListener('click', function (e) {
+    var btn = e.target && e.target.closest ? e.target.closest('[data-reply-toggle]') : null;
+    if (!btn) return;
+    e.stopPropagation();
+    var form = document.querySelector('[data-reply-form="' + btn.getAttribute('data-reply-toggle') + '"]');
+    if (!form) return;
+    form.hidden = !form.hidden;
+    if (!form.hidden) {
+      var ta = form.querySelector('textarea');
+      if (ta) ta.focus();
+    }
+  }, true);
+
+  function setCount(n) {
+    if (!commentsSection || typeof n !== 'number') return;
+    var title = commentsSection.querySelector('.section-title');
+    if (title) title.textContent = 'Comments (' + n + ')';
+  }
+  function postForm(form) {
+    return fetch(form.action, {
+      method: 'POST',
+      body: new URLSearchParams(new FormData(form)),
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      credentials: 'same-origin'
+    }).then(function (r) { return r.json().catch(function () { return { ok: false }; }); });
+  }
+
+  document.addEventListener('submit', function (e) {
+    var form = e.target;
+    if (!form || !form.action) return;
+    var isComment = /\/watch\/\d+\/comments$/.test(form.action);
+    var isDelete = /\/comments\/\d+\/delete$/.test(form.action);
+    if (!isComment && !isDelete) return;
+    e.preventDefault();
+    if (isDelete) {
+      var node = form.closest('.comment');
+      postForm(form).then(function (data) {
+        if (data.ok) {
+          if (node) node.remove();
+          setCount(data.count);
+        }
+      });
+      return;
+    }
+    var ta = form.querySelector('textarea');
+    postForm(form).then(function (data) {
+      if (!data.ok) {
+        if (data.error) alert(data.error);
+        return;
+      }
+      var wrap = document.createElement('div');
+      wrap.innerHTML = data.html;
+      var newNode = wrap.firstElementChild;
+      if (data.parentId) {
+        var parent = form.closest('.comment');
+        if (parent) {
+          var replies = parent.querySelector('.replies');
+          if (!replies) {
+            replies = document.createElement('div');
+            replies.className = 'replies';
+            parent.querySelector('.comment-main').appendChild(replies);
+          }
+          replies.appendChild(newNode);
+        }
+        form.hidden = true;
+      } else if (commentsSection) {
+        var list = commentsSection.querySelector('.comments-list');
+        if (!list) {
+          list = document.createElement('div');
+          list.className = 'comments-list';
+          var muted = commentsSection.querySelector('.muted');
+          if (muted) muted.remove();
+          commentsSection.appendChild(list);
+        }
+        list.insertBefore(newNode, list.firstChild);
+      }
+      if (ta) ta.value = '';
+      setCount(data.count);
+    });
+  });
+
+  if (rateForm) {
+    var clicked = null;
+    rateForm.addEventListener('click', function (e) {
+      var btn = e.target.closest ? e.target.closest('.star-btn') : null;
+      if (btn) clicked = btn.value;
+    });
+    rateForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var stars = clicked;
+      if (!stars) return;
+      fetch(rateForm.action, {
+        method: 'POST',
+        body: new URLSearchParams({ stars: stars }),
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        credentials: 'same-origin'
+      }).then(function (r) { return r.json(); }).then(function (data) {
+        if (!data.ok) return;
+        var summary = document.querySelector('.rate-summary span');
+        if (summary) {
+          summary.textContent = data.count
+            ? data.avg.toFixed(1) + ' (' + data.count + ' rating' + (data.count === 1 ? '' : 's') + ')'
+            : 'No ratings yet';
+        }
+        rateForm.querySelectorAll('.star-btn').forEach(function (btn, i) {
+          var on = (i + 1) <= data.mine;
+          btn.classList.toggle('star-on', on);
+          var svg = btn.querySelector('svg');
+          if (svg) svg.setAttribute('fill', on ? 'currentColor' : 'none');
+        });
+        var hint = rateForm.querySelector('.rate-hint');
+        if (hint) hint.textContent = 'Your rating: ' + data.mine + '/5 — tap a star to change it';
+      });
+    });
+  }
+})();
