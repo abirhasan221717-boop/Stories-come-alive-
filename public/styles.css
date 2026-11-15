@@ -1140,6 +1140,7 @@ body.pubui {
 }
 .side-socials a { border-radius: 10px; border: 0; color: #ffffff; }
 .side-socials a[aria-label="YouTube"] { background: #ff0033; }
+.side-socials a svg { width: 19px; height: 19px; }
 .side-socials a[aria-label="Facebook"] { background: #1877f2; }
 
 /* --- topbar blend (2026-11-15): no hard line, melts into the design --- */
