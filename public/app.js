@@ -418,3 +418,29 @@ window.addEventListener('hashchange', markNav);
     });
   }
 })();
+
+// Favorites button: toggles in place, no page reload.
+document.addEventListener('submit', function (e) {
+  var form = e.target;
+  if (!form || !form.action || !/\/favorites\/toggle$/.test(form.action)) return;
+  e.preventDefault();
+  fetch(form.action, {
+    method: 'POST',
+    body: new URLSearchParams(new FormData(form)),
+    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+    credentials: 'same-origin'
+  }).then(function (r) { return r.json(); }).then(function (data) {
+    if (!data.ok) return;
+    var btn = form.querySelector('button');
+    if (!btn) return;
+    btn.classList.toggle('btn-main', data.fav);
+    btn.classList.toggle('btn-ghost', !data.fav);
+    var svg = btn.querySelector('svg');
+    if (svg) svg.setAttribute('fill', data.fav ? 'currentColor' : 'none');
+    for (var i = 0; i < btn.childNodes.length; i++) {
+      if (btn.childNodes[i].nodeType === 3 && btn.childNodes[i].textContent.trim()) {
+        btn.childNodes[i].textContent = data.fav ? 'Remove from Favorites' : 'Add to Favorites';
+      }
+    }
+  });
+});
