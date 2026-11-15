@@ -202,6 +202,7 @@ const ICONS = {
   playRect: lineIcon('<rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10.6 9.7l4.6 2.3-4.6 2.3z"/>'),
   play: lineIcon(PLAY_PATH),
   playSm: lineIcon(PLAY_PATH, true),
+  playSolid: `<svg class="ic" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true" focusable="false">${PLAY_PATH}</svg>`,
   plusCircle: lineIcon('<circle cx="12" cy="12" r="9"/><path d="M12 8.5v7M8.5 12h7"/>'),
   pencil: lineIcon('<path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>'),
   layers: lineIcon('<path d="M12 3l9 4.9-9 4.9-9-4.9z"/><path d="M3.4 12.4L12 17l8.6-4.6"/><path d="M3.4 16.4L12 21l8.6-4.6"/>'),
@@ -397,7 +398,7 @@ async function layout(req, { title, body, user }) {
 <link rel="icon" href="/brand/logo">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=64">
+<link rel="stylesheet" href="/styles.css?v=65">
 </head>
 <body class="pubui">
 <header class="topbar">
@@ -448,7 +449,7 @@ async function layout(req, { title, body, user }) {
     <div class="side-quote-text"><p>"Good Stories Make<br>a Better You"</p>${ICONS.heart}</div>
   </div>
   ${(ytLinks.length || fbLinks.length) ? `<div class="side-socials">
-    ${ytLinks.length ? `<a href="${esc(ytLinks[0].url)}" target="_blank" rel="noopener" aria-label="YouTube">${ICONS.playSm}</a>` : ''}
+    ${ytLinks.length ? `<a href="${esc(ytLinks[0].url)}" target="_blank" rel="noopener" aria-label="YouTube">${ICONS.playSolid}</a>` : ''}
     ${fbLinks.length ? `<a href="${esc(fbLinks[0].url)}" target="_blank" rel="noopener" aria-label="Facebook"><span style="font-weight:800;font-size:17px;line-height:1">f</span></a>` : ''}
   </div>` : ''}
   <p class="side-copy">© ${new Date().getFullYear()} ${esc(name)} — All rights reserved.</p>
@@ -470,7 +471,7 @@ ${body}
   <p class="footer-copy">© ${new Date().getFullYear()} ${esc(name)} — All rights reserved.</p>
 </footer>
 ${followPanelHtml(ytLinks, fbLinks)}
-<script src="/app.js?v=64"></script>
+<script src="/app.js?v=65"></script>
 </body>
 </html>`;
 }
@@ -1793,11 +1794,16 @@ app.post('/admin/settings', async (req, res) => {
   const fbStats = { dropped: 0 };
   const ytLinks = linkListFromForm(req.body.youtube_label, req.body.youtube_url, ytStats);
   const fbLinks = linkListFromForm(req.body.facebook_label, req.body.facebook_url, fbStats);
-  await setSetting('youtube_links', JSON.stringify(ytLinks));
-  await setSetting('facebook_links', JSON.stringify(fbLinks));
-  // Keep the legacy single-link keys in sync (first link wins) for consistency.
-  await setSetting('youtube_url', ytLinks.length ? ytLinks[0].url : '');
-  await setSetting('facebook_url', fbLinks.length ? fbLinks[0].url : '');
+  // A platform whose submitted rows contained an unsaveable link keeps its
+  // previously stored list — a typo must not wipe links that already worked.
+  if (!ytStats.dropped) {
+    await setSetting('youtube_links', JSON.stringify(ytLinks));
+    await setSetting('youtube_url', ytLinks.length ? ytLinks[0].url : '');
+  }
+  if (!fbStats.dropped) {
+    await setSetting('facebook_links', JSON.stringify(fbLinks));
+    await setSetting('facebook_url', fbLinks.length ? fbLinks[0].url : '');
+  }
   if (ytStats.dropped || fbStats.dropped) return res.redirect('/admin/settings?err=' + encodeURIComponent('One link row was not saved. Put the full link (starting with https://) in the link box, then Save again.'));
   res.redirect('/admin/settings?ok=1');
 });
