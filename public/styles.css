@@ -886,8 +886,10 @@ body.adminui .gearbtn { flex: 0 0 auto; }
    Bengali-headline hero, category chips, mockup-style cards.
    ============================================================ */
 body.pubui {
+  --gold: #a855f7;
+  --gold-2: #7c3aed;
   background:
-    radial-gradient(900px 480px at 85% -120px, rgba(247, 37, 133, 0.16), transparent 60%),
+    radial-gradient(900px 480px at 85% -120px, rgba(147, 51, 234, 0.16), transparent 60%),
     radial-gradient(1000px 620px at -10% 0%, rgba(110, 40, 190, 0.22), transparent 55%),
     #0a0716;
   background-attachment: fixed;
@@ -901,14 +903,14 @@ body.pubui {
 }
 .topsearch { flex: 1 1 auto; display: flex; justify-content: center; min-width: 0; }
 .topsearch .searchwrap {
-  width: min(620px, 100%);
+  width: min(440px, 100%);
   background: #171130;
   border: 1px solid rgba(160, 110, 230, 0.28);
   border-radius: 999px;
-  padding: 9px 18px;
+  padding: 7px 16px;
 }
-.topsearch .searchwrap input { font-size: 0.95rem; }
-.topsearch .searchwrap:focus-within { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(247, 37, 133, 0.18); }
+.topsearch .searchwrap input { font-size: 0.9rem; }
+.topsearch .searchwrap:focus-within { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.18); }
 .brand-mobile { display: none; }
 .nav-avatar-link { padding: 2px; }
 @media (max-width: 1023px) {
@@ -925,7 +927,7 @@ body.pubui {
   padding: 20px 14px 18px;
 }
 .side-brand { display: flex; align-items: center; gap: 11px; text-decoration: none; padding: 2px 6px 18px; }
-.side-logo { width: 46px; height: 46px; object-fit: contain; filter: drop-shadow(0 0 10px rgba(247, 37, 133, 0.45)); }
+.side-logo { width: 46px; height: 46px; object-fit: contain; filter: drop-shadow(0 0 10px rgba(147, 51, 234, 0.45)); }
 .side-brand-text { display: flex; flex-direction: column; line-height: 1.15; }
 .side-brand .brand-name { font-size: 1.22rem; }
 .side-tag { color: #b9a8dd; font-size: 0.74rem; letter-spacing: 0.14em; text-transform: uppercase; margin-top: 3px; }
@@ -939,9 +941,9 @@ body.pubui {
 .sidenav-item .ic { color: #a78bda; }
 .sidenav-item:hover { background: rgba(140, 80, 220, 0.14); color: #ffffff; }
 .sidenav-item.active {
-  background: linear-gradient(90deg, #f72585, #c2189e);
+  background: linear-gradient(90deg, #9333ea, #7c3aed);
   color: #ffffff;
-  box-shadow: 0 6px 18px rgba(247, 37, 133, 0.35);
+  box-shadow: 0 6px 18px rgba(147, 51, 234, 0.35);
 }
 .sidenav-item.active .ic { color: #ffffff; }
 .side-quote {
@@ -981,7 +983,7 @@ body.pubui {
 .svhero-content { position: relative; z-index: 1; padding: 40px 44px; max-width: 640px; }
 .svhero-script { font-family: 'Great Vibes', cursive; font-size: 2rem; color: #ffd7ea; margin: 0 0 2px; text-shadow: 0 2px 14px rgba(0, 0, 0, 0.6); }
 .svhero-title { font-size: 3rem; line-height: 1.18; font-weight: 700; color: #ffffff; margin: 0 0 10px; text-shadow: 0 3px 18px rgba(0, 0, 0, 0.65); }
-.svhero-title span { color: #ff5da2; font-style: italic; }
+.svhero-title span { color: #ffc93f; font-style: italic; }
 .svhero-sub { color: #e6dcf7; font-size: 1.05rem; margin: 0 0 20px; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7); }
 .svhero-btns { display: flex; gap: 12px; flex-wrap: wrap; }
 .svhero-btn { border-radius: 999px; padding: 11px 26px; font-size: 1rem; display: inline-flex; align-items: center; gap: 8px; }
@@ -1005,30 +1007,30 @@ body.pubui {
 .chiprow::-webkit-scrollbar { display: none; }
 .chip {
   flex: 0 0 auto; display: inline-flex; align-items: center; gap: 8px;
-  padding: 9px 18px; border-radius: 999px;
+  padding: 7px 16px; border-radius: 999px;
   background: #171130; border: 1px solid rgba(160, 110, 230, 0.3);
   color: #e6dcf7; text-decoration: none; font-weight: 600; font-size: 0.93rem;
 }
 .chip .ic { color: #c99cf5; width: 17px; height: 17px; }
 .chip:hover { border-color: var(--gold); color: #ffffff; }
-.chip.active { background: linear-gradient(90deg, #f72585, #c2189e); border-color: transparent; color: #ffffff; box-shadow: 0 6px 16px rgba(247, 37, 133, 0.32); }
+.chip.active { background: linear-gradient(90deg, #9333ea, #7c3aed); border-color: transparent; color: #ffffff; box-shadow: 0 6px 16px rgba(147, 51, 234, 0.32); }
 .chip.active .ic { color: #ffffff; }
 
 /* --- section headers with icon --- */
 .pubui .rowhead .section-title { display: inline-flex; align-items: center; gap: 10px; }
 .pubui .rowhead .section-title .ic { color: var(--gold); width: 24px; height: 24px; }
-.pubui .rowmore { color: #ff5da2; }
+.pubui .rowmore { color: #c084fc; }
 
 /* --- cards: mockup style --- */
 .pubui .card { background: #150e2c; border-color: rgba(150, 100, 220, 0.18); border-radius: 16px; }
-.pubui .card:hover { border-color: rgba(247, 37, 133, 0.55); box-shadow: 0 12px 30px rgba(80, 20, 140, 0.35); }
+.pubui .card:hover { border-color: rgba(147, 51, 234, 0.55); box-shadow: 0 12px 30px rgba(80, 20, 140, 0.35); }
 .pubui .cat-chip {
   top: 10px; left: 10px; right: auto;
   display: inline-flex; align-items: center; gap: 6px;
   background: rgba(24, 8, 44, 0.78); backdrop-filter: blur(4px);
-  border: 1px solid rgba(247, 37, 133, 0.35);
+  border: 1px solid rgba(147, 51, 234, 0.35);
 }
-.pubui .cat-chip .ic { width: 13px; height: 13px; color: #ff5da2; }
+.pubui .cat-chip .ic { width: 13px; height: 13px; color: #c084fc; }
 .pubui .new-chip { top: 10px; right: 10px; }
 .pubui .rate-badge, .pubui .rank-big { display: none; }
 .thumb-meta {
@@ -1043,8 +1045,17 @@ body.pubui {
 .tm-rate .ic { color: #ffc94d; }
 .pubui .play-badge {
   right: 10px; bottom: 10px; width: 36px; height: 36px;
-  background: linear-gradient(135deg, #f72585, #c2189e);
-  box-shadow: 0 6px 16px rgba(247, 37, 133, 0.5); font-size: 0;
+  background: linear-gradient(135deg, #9333ea, #7c3aed);
+  box-shadow: 0 6px 16px rgba(147, 51, 234, 0.5); font-size: 0;
 }
 .pubui .play-badge .ic { width: 16px; height: 16px; color: #ffffff; }
 .pubui .card-sub { color: var(--muted); font-size: 0.8rem; margin-top: 3px; }
+
+.svhero-art { object-position: 72% center; }
+.svhero-chip {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: rgba(20, 10, 44, 0.66); border: 1px solid rgba(255, 201, 63, 0.45);
+  color: #ffd76a; font-size: 0.82rem; font-weight: 700; letter-spacing: 0.04em;
+  padding: 6px 14px; border-radius: 999px; margin-bottom: 14px; backdrop-filter: blur(4px);
+}
+.svhero-chip .ic { color: #ffc93f; width: 14px; height: 14px; }
