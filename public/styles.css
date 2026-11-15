@@ -1160,3 +1160,9 @@ body.pubui {
   .pubui .sidebar { top: 0; height: 100vh; margin-top: -57px; }
   .pubui .svhero { margin-top: -57px; }
 }
+
+/* --- top strip clarity (2026-11-15): no blur haze over the art/logo --- */
+.pubui .topbar {
+  backdrop-filter: none; -webkit-backdrop-filter: none;
+  background: linear-gradient(180deg, rgba(10, 6, 22, 0.38), rgba(10, 6, 22, 0.12) 65%, rgba(10, 6, 22, 0));
+}
