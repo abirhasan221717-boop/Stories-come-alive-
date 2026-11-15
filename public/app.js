@@ -444,3 +444,22 @@ document.addEventListener('submit', function (e) {
     }
   });
 });
+
+// Sharper card art: cards now request YouTube's HD thumbnail. When a video
+// has no HD version, YouTube serves a tiny 120x90 placeholder instead —
+// detect that (or a load error) and fall back to the standard thumbnail.
+document.addEventListener('load', function (e) {
+  var img = e.target;
+  if (!img || img.tagName !== 'IMG') return;
+  if (img.src.indexOf('maxresdefault.jpg') === -1) return;
+  if (img.naturalWidth && img.naturalWidth <= 120) {
+    img.src = img.src.replace('maxresdefault.jpg', 'hqdefault.jpg');
+  }
+}, true);
+document.addEventListener('error', function (e) {
+  var img = e.target;
+  if (!img || img.tagName !== 'IMG') return;
+  if (img.src.indexOf('maxresdefault.jpg') !== -1) {
+    img.src = img.src.replace('maxresdefault.jpg', 'hqdefault.jpg');
+  }
+}, true);
